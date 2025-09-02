@@ -58,12 +58,12 @@ functions:
       - httpApi:
           path: /product/delete/{id}
           method: delete
-    car:
-      handler: handler/handler
-      events:
-        -httpApi:
-          path: /car/view/{User_id}
-          method: post
+    # car:
+    #   handler: handler/handler
+    #   events:
+    #     -httpApi:
+    #       path: /car/view/{User_id}
+    #       method: post
 
 
 
