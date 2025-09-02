@@ -1,5 +1,6 @@
 
-org: lude1627
+# org: lude1627
+# app: fastapi-sls
 
 service: fastapi-sls
 
@@ -57,7 +58,16 @@ functions:
       - httpApi:
           path: /product/delete/{id}
           method: delete
+<<<<<<< HEAD
 
+=======
+    # car:
+    #   handler: handler/handler
+    #   events:
+    #     -httpApi:
+    #       path: /car/view/{User_id}
+    #       method: post
+>>>>>>> 7ecab891f2fd8ddbdc2c002bde903de2492407a0
 
 
 
