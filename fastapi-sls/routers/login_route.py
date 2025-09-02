@@ -15,7 +15,8 @@ login=Login()
 
 
 @login_router.post("/sign_in")
-def login(data: LoginModel):
+
+def log(data: LoginModel):
     user = login.login_user(data.username, data.password)
 
 
