@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel
-from models.producto.product_class  import (create_product, all_categories, all_products, delete_product, update_product, view_product)
+from models.producto.product_entity import ProductCreate, ProductUpdate
+from models.producto.product_class  import Porductos
 
 Product_router = APIRouter(
     prefix="/product",
@@ -9,27 +9,12 @@ Product_router = APIRouter(
     include_in_schema=True
 )
 
-
-class ProductCreate(BaseModel):
-    name: str
-    description: str
-    cant: int
-    price: float
-    category_id: int
-
-class ProductUpdate(BaseModel):
-    id: int
-    name: str
-    description: str
-    category_id: int
-    cant: int
-    price: float
-
+productos = Porductos()
 
 
 @Product_router.post("/create")
 def create_product_route(data: ProductCreate):
-    if create_product(data.name, data.description, data.cant, data.price, data.category_id):
+    if productos.create_product(data.name, data.description, data.cant, data.price, data.category_id):
         return JSONResponse(content={
             "success": True,
             "message": "Producto creado exitosamente"
@@ -43,7 +28,7 @@ def create_product_route(data: ProductCreate):
 
 @Product_router.get("/view/data")
 def get_products():
-    products = all_products()
+    products = productos.all_products()
     productos_json = [
         {
             "id": p[0],
@@ -60,13 +45,13 @@ def get_products():
 
 @Product_router.delete("/delete/{id}")
 def deleteP(id: int):
-    delete_product(id)
+    productos.delete_product(id)
     return JSONResponse(content={"message": "Producto eliminado con éxito"})
 
 
 @Product_router.get("/get_product/{id}")
 def get_product(id: int):
-    product = view_product(id)
+    product = productos.view_product(id)
     if not product:
         return JSONResponse(content={"error": "Producto no encontrado"}, status_code=404)
     return JSONResponse(content={
@@ -81,7 +66,7 @@ def get_product(id: int):
 
 @Product_router.put("/edit")
 def edit_product(data: ProductUpdate):
-    if update_product(data.id, data.name, data.description, data.category_id, data.cant, data.price):
+    if productos.update_product(data.id, data.name, data.description, data.category_id, data.cant, data.price):
         return JSONResponse(content={
             "success": True,
             "message": "Producto actualizado exitosamente"
@@ -95,7 +80,7 @@ def edit_product(data: ProductUpdate):
 
 @Product_router.get("/all_categories")
 def get_all_categories():
-    categorias = all_categories()
+    categorias = productos.all_categories()
     if not categorias:
         return JSONResponse({"message: " "no hay datos"}, 404)
     return JSONResponse(content=[{"id": c[0], "name": c[1]} for c in categorias])
