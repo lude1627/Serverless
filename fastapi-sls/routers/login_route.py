@@ -8,30 +8,11 @@ login_router = APIRouter(
     tags=["login"],
     include_in_schema=True
 )
-
 login=Login()
 
 
-
-
 @login_router.post("/sign_in")
-
 def log(data: LoginModel):
-    user = login.login_user(data.username, data.password)
-
-
-    print(user)
-    if user:
-        user_id = user[0]
-        return JSONResponse(content={
-            "success": True,
-            "message": f"Bienvenid@ {data.username}",
-            "user_id": user_id
-        })
-    else:
-        return JSONResponse(content={
-            "success": False,
-            "message": "Usuario o contraseña incorrectos"
-        })
-
+ 
+    return Login.login_user(data.username, data.password)
 
