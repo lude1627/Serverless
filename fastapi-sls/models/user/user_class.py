@@ -2,7 +2,7 @@ from db import execute_query
 
 
 class Usuario:
-    def register_user(id: int, username: str, phone: int, email: str, password: str):
+    def register_user(self, id: int, username: str, phone: int, email: str, password: str):
         query = """
             INSERT INTO usuarios (User_id, User_name, User_phone, User_mail, User_password) 
             VALUES (%s, %s, %s, %s, %s)
@@ -15,7 +15,7 @@ class Usuario:
             return False
 
 
-    def update_user(id: int, username: str, phone: int, email: str, password: str):
+    def update_user(self, id: int, username: str, phone: int, email: str, password: str):
         query = """
             UPDATE usuarios 
             SET User_name = %s, User_phone = %s, User_mail = %s, User_password = %s 
@@ -29,7 +29,7 @@ class Usuario:
             return False
 
 
-    def view_user(id: int):
+    def view_user(self, id: int):
         query = "SELECT * FROM usuarios WHERE User_id = %s"
         try:
             result = execute_query(query, (id,), fetchone=True)
