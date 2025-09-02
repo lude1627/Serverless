@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
-from models.producto.logic.product_consl import (create_product, all_categories, all_products, delete_product, update_product, view_product)
+from models.producto.product_class  import (create_product, all_categories, all_products, delete_product, update_product, view_product)
 
 Product_router = APIRouter(
     prefix="/product",

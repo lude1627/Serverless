@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
-from models.login.logic.login_consl import login
+from models.login.login_class import login
 login_router = APIRouter(
     prefix="/login",
     tags=["login"],

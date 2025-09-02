@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
-from models.carrito.logic.car_consl import view_cart
+from models.carrito.car_class import view_cart
 
 carrito_router = APIRouter(
     prefix="/carrito",

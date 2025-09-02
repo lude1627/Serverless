@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
-from models.categoria.logic.category_sonsl import create_cat, all_categories, delete_cat
+from models.categoria.category_class import create_cat, all_categories, delete_cat
 
 category_router = APIRouter(
     prefix="/category",
