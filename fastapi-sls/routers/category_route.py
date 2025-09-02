@@ -1,22 +1,19 @@
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel
-from models.categoria.category_class import create_cat, all_categories, delete_cat
+from models.categoria.categry_entity import CategoryCreate
+from models.categoria.category_class import Categoria
 
 category_router = APIRouter(
     prefix="/category",
     tags=["category"],
     include_in_schema=True)
 
-
-class CategoryCreate(BaseModel):
-    id: int
-    name: str
+categorias = Categoria()
 
 
 @category_router.post("/create")
 def create_category(data: CategoryCreate):
-    if create_cat(data.id, data.name):
+    if categorias.create_cat(data.id, data.name):
         return JSONResponse(content={
             "success": True,
             "message": "Categoría creada exitosamente"
@@ -30,7 +27,7 @@ def create_category(data: CategoryCreate):
 
 @category_router.get("/view/data")
 def get_category():
-    categoria = all_categories()
+    categoria = categorias.all_categories()
     if not categoria:  
         return JSONResponse(content=[])
     category_json = [
@@ -45,7 +42,7 @@ def get_category():
 
 @category_router.delete("/delete/{id}")
 def delete_category(id: int):
-    if delete_cat(id):
+    if categorias.delete_cat(id):
         return JSONResponse(content={
             "success": True,
             "message": "Categoría eliminada exitosamente"
