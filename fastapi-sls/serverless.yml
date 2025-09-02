@@ -1,0 +1,74 @@
+
+org: lude1627
+
+service: fastapi-sls
+
+plugins:
+  - serverless-offline
+
+  
+provider:
+  name: aws
+  runtime: python3.12
+
+functions:
+  login:
+    handler: handler.handler
+    events:
+      - httpApi:
+          path: /login/sign_in
+          method: post
+  user:
+    handler: handler.handler
+    events:
+      - httpApi:
+          path: /user/register
+          method: post
+      - httpApi:
+          path: /user/view/{id}
+          method: get
+      - httpApi:
+          path: /user/update
+          method: put
+  category:
+    handler: handler.handler
+    events:
+      - httpApi:
+          path: /category/create
+          method: post
+      - httpApi:
+          path: /category/view/data
+          method: get
+      - httpApi:
+          path: /category/delete/{id}
+          method: delete
+  product:
+    handler: handler.handler
+    events:
+      - httpApi:
+          path: /product/create
+          method: post
+      - httpApi:
+          path: /product/view/data
+          method: get
+      - httpApi:
+          path: /product/edit/{id}
+          method: put 
+      - httpApi:
+          path: /product/delete/{id}
+          method: delete
+  car:
+    handler: handler/handler
+    events:
+      -httpApi:
+        path: /car/view/{User_id}
+        method: post
+
+
+
+
+
+
+
+   
+      
