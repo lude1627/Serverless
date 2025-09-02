@@ -1,7 +1,7 @@
 from db import execute_query
 
-class login:
-    
+class Login:
+    @staticmethod
     def login_user(username: str, password: str):
         query = "SELECT * FROM usuarios WHERE User_name = %s AND User_password = %s"
         try:
