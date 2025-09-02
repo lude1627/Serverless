@@ -1,33 +1,20 @@
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel
-from models.user.user_class import  register_user, update_user, view_user
+from models.user.user_entity import RegisterModel, UpdateUserModel
+from models.user.user_class import Usuario
 
 user_router = APIRouter(
     prefix="/user",
-    tags=["u"],
+    tags=["usuario"],
     include_in_schema=True
 )
 
-class RegisterModel(BaseModel):
-    id: int
-    username: str
-    phone: int
-    email: str
-    password: str
-
-class UpdateUserModel(BaseModel):
-    id: int
-    username: str
-    phone: int
-    email: str
-    password: str
-
+usuario = Usuario()
 
 
 @user_router.post("/register")
 def register(data: RegisterModel):
-    if register_user(data.id, data.username, data.phone, data.email, data.password):
+    if usuario.register_user(data.id, data.username, data.phone, data.email, data.password):
         return JSONResponse(content={
             "success": True,
             "message": "Usuario registrado exitosamente"
@@ -41,7 +28,7 @@ def register(data: RegisterModel):
 
 @user_router.get("/view/{id}")
 def get_user_json(id: int):
-    user = view_user(id)
+    user =usuario.view_user(id)
     if not user:
         return JSONResponse(content={"error": "Usuario no encontrado"}, status_code=404)
     return JSONResponse(content={
@@ -55,7 +42,7 @@ def get_user_json(id: int):
 
 @user_router.put("/update")
 def updateP(data: UpdateUserModel):
-    if update_user(data.id, data.username, data.phone, data.email, data.password):
+    if usuario.update_user(data.id, data.username, data.phone, data.email, data.password):
         return JSONResponse(content={
             "success": True,
             "message": "Usuario actualizado exitosamente"
