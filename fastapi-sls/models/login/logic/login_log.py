@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
-from models.login.logic.login_consl import Login
+from models.login.logic.login_consl import login
 login_router = APIRouter(
     prefix="/login",
     tags=["login"],
@@ -16,8 +16,8 @@ class LoginModel(BaseModel):
 
 
 @login_router.post("/sign_in")
-def sign_in(data: LoginModel):
-    user = Login.login_user(data.username, data.password)
+def login(data: LoginModel):
+    user = login.login_user(data.username, data.password)
 
 
     print(user)
