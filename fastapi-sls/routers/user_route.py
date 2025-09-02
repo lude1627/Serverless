@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
-from models.user.logic.user_consl import  register_user, update_user, view_user
+from models.user.user_class import  register_user, update_user, view_user
 
 user_router = APIRouter(
     prefix="/user",
