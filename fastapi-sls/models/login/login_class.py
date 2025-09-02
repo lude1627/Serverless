@@ -1,9 +1,7 @@
 from db import execute_query
 
 class Login:
-    
     def login_user(self, username: str, password: str):
-
         query = "SELECT * FROM usuarios WHERE User_name = %s AND User_password = %s"
         try:
             result = execute_query(query, (username, password), fetchone=True)
