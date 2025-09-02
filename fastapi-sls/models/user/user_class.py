@@ -3,7 +3,7 @@ from fastapi.responses import JSONResponse
 
 
 class Usuario:
-    def register_user( self, id: int, username: str, phone: int, email: str, password: str):
+    def register_user(self, id: int, username: str, phone: int, email: str, password: str):
         query = """
             INSERT INTO usuarios (User_id, User_name, User_phone, User_mail, User_password) 
             VALUES (%s, %s, %s, %s, %s)
