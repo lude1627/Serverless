@@ -1,6 +1,6 @@
 from db import execute_query
 class Porductos:
-    def add_to_cart(product_id: int, user_id: int, cantidad: int):
+    def add_to_cart(self, product_id: int, user_id: int, cantidad: int):
         query = """
             INSERT INTO carrito (User_id, Product_id, Car_Cantidad)
             VALUES (%s, %s, %s)
@@ -15,7 +15,7 @@ class Porductos:
             print("Error al guardar las compras: {e}")
             return False 
             
-    def view_product(id: int):
+    def view_product(self, id: int):
         query = " SELECT Product_id, Product_name, Product_description,  Product_cant, Product_price, Cat_id FROM productos WHERE Product_id = %s "
         try:
             product = execute_query(query,(id),fechnone=True)
@@ -37,7 +37,7 @@ class Porductos:
             return []   
 
 
-    def update_product(id: int, name: str, description: str, cant: int, price: float, cat_id: int) -> bool:
+    def update_product(self,id: int, name: str, description: str, cant: int, price: float, cat_id: int) -> bool:
         query = " UPDATE productos  SET Product_name = %s,  Product_description = %s,  Product_cant = %s,   Product_price = %s, Cat_id = %s WHERE Product_id = %s "
         try:
             execute_query(query,(id,name,description,cant,price,cat_id),commit=True)
@@ -48,7 +48,7 @@ class Porductos:
 
 
 
-    def delete_product(id: int):
+    def delete_product(self, id: int):
     
         query = "DELETE FROM productos WHERE Product_id = %s"
 
@@ -86,7 +86,7 @@ class Porductos:
 
 
 
-    def create_product(name, description, cant, price, category_id):
+    def create_product(self, name, description, cant, price, category_id):
         query = " INSERT INTO productos (Product_name, Product_description, Product_cant, Product_price, Cat_id) VALUES (%s, %s, %s, %s, %s)"
         try:
             execute_query(query, (name, description, cant, price, category_id), commit=True)
