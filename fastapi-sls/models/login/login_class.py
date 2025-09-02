@@ -1,7 +1,6 @@
 from db import execute_query
 
 class Login:
-
     
     def login_user(self, username: str, password: str):
 
