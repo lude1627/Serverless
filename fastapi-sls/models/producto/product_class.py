@@ -26,29 +26,39 @@ class Productos:
             return []   
 
 
-    def update_product(self,data: ProductUpdate):
+    def update_product(self, data: ProductUpdate):
 
         description = data.description
+        id = data.id
         name = data.name
         cant = data.cant
         price = data.price
         category_id = data.category_id
+        
         query = " UPDATE productos  SET Product_name = %s,  Product_description = %s,  Product_cant = %s,   Product_price = %s, Cat_id = %s WHERE Product_id = %s "
+      
         try:
-            update = execute_query(query,(id,name,description,cant,price,category_id),commit=True)
-            if update:
-                return JSONResponse(content={
+           
+            execute_query(query,(name,description,cant,price,category_id,id),commit=True)
+           
+            return JSONResponse(content={
                 "success": True,
                 "message": "Producto actualizado exitosamente"
                 })
-            else:
+        
+               
+        except Exception as e:
+                print(f"Error al actualizar producto: {e}")
                 return JSONResponse(content={
                     "success": False,
                     "message": "Error al actualizar producto"
                 })
+<<<<<<< HEAD
         except Exception as e:
                 print(f"Error al actualizar producto: {e}")
                 return False
+=======
+>>>>>>> aa41a391bd153f4c8aafa702c7730ea8461fe3f0
 
 
 
@@ -103,17 +113,16 @@ class Productos:
 
         query = " INSERT INTO productos (Product_name, Product_description, Product_cant, Product_price, Cat_id) VALUES (%s, %s, %s, %s, %s)"
         try:
-            execute_query(query, (name, description, cant, price, category_id), commit=True) 
+            execute_query(query, (name, description, cant, price, category_id), commit=True)
+    
             return JSONResponse(content={
-                        "success": True,
-                        "message": "Producto creado exitosamente"
-                    }, status_code=201)
-            
-                
+                    "success": True,
+                    "message": "Producto creado exitosamente"
+                }, status_code=201)
 
         except Exception as e:
-                print(f"Error al crear un producto: {e}")
-                return JSONResponse(content={
-                        "success": False,
-                        "message": "Error al crear el producto"
-                    }, status_code=500)
+            print(f"Error al crear un producto: {e}")
+            return JSONResponse(content={
+                    "success": False,
+                    "message": "Error al crear el producto"
+                }, status_code=500)
