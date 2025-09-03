@@ -53,12 +53,7 @@ class Productos:
                     "success": False,
                     "message": "Error al actualizar producto"
                 })
-<<<<<<< HEAD
-        except Exception as e:
-                print(f"Error al actualizar producto: {e}")
-                return False
-=======
->>>>>>> aa41a391bd153f4c8aafa702c7730ea8461fe3f0
+
 
 
 
