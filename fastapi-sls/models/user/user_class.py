@@ -9,17 +9,19 @@ class Usuario:
             VALUES (%s, %s, %s, %s, %s)
         """
         try:
-                    registro=execute_query(query, (id, username, phone, email, password), commit=True)
-                    if registro:
-                        return JSONResponse(content={
-                        "success": True,
-                        "message": "Usuario registrado exitosamente"
-                })
-                    else:
-                        return JSONResponse(content={
+                registro=execute_query(query, (id, username, phone, email, password), commit=True)
+                if not registro:
+                         return JSONResponse(content={
                         "success": False,
                         "message": "Error al registrar usuario"
-                })
+                        
+                    })
+                else:
+                    return JSONResponse(content={
+                        "success": True,
+                        "message": "Usuario registrado exitosamente"
+                       
+                    })
         except Exception as e:
                     print(f"Error en register_user: {e}")
                     return False
