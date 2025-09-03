@@ -55,8 +55,8 @@ def get_product(id: int):
     })
 
 
-@Product_router.put("/edit")
-def edit_product(data: ProductUpdate):
+@Product_router.put("/edit/{id}")
+def edit_product( data: ProductUpdate):
     return productos.update_product(data)
        
 

@@ -8,7 +8,7 @@ class ProductCreate(BaseModel):
     category_id: int
 
 class ProductUpdate(BaseModel):
-    id: int
+    id:int
     name: str
     description: str
     category_id: int
