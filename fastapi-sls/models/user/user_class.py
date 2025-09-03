@@ -3,28 +3,24 @@ from fastapi.responses import JSONResponse
 
 
 class Usuario:
+    
     def register_user(self, id: int, username: str, phone: int, email: str, password: str):
         query = """
             INSERT INTO usuarios (User_id, User_name, User_phone, User_mail, User_password) 
             VALUES (%s, %s, %s, %s, %s)
         """
         try:
-                registro=execute_query(query, (id, username, phone, email, password), commit=True)
-                if not registro:
-                         return JSONResponse(content={
-                        "success": False,
-                        "message": "Error al registrar usuario"
-                        
-                    })
-                else:
-                    return JSONResponse(content={
-                        "success": True,
-                        "message": "Usuario registrado exitosamente"
-                       
-                    })
+            execute_query(query, (id, username, phone, email, password), commit=True)
+            return JSONResponse(content={
+                "success": True,
+                "message": "Usuario registrado exitosamente"
+            })
         except Exception as e:
-                    print(f"Error en register_user: {e}")
-                    return False
+            print(f"Error en register_user: {e}")
+            return JSONResponse(content={
+                "success": False,
+                "message": f"Error al registrar usuario: {e}"
+            })
 
 
     def update_user( id: int, username: str, phone: int, email: str, password: str):

@@ -6,7 +6,8 @@ from models.categoria.category_class import Categoria
 category_router = APIRouter(
     prefix="/category",
     tags=["category"],
-    include_in_schema=True)
+    include_in_schema=True
+)
 
 categorias = Categoria()
 
@@ -27,17 +28,31 @@ def create_category(data: CategoryCreate):
 
 @category_router.get("/view/data")
 def get_category():
-    categoria = categorias.all_categories()
-    if not categoria:  
-        return JSONResponse(content=[])
-    category_json = [
-        {
-            "Cat_id": cat[0],
-            "Cat_name": cat[1]
-        }
-        for cat in categoria
-    ]
-    return JSONResponse(content=category_json)
+    try:
+        categoria = categorias.all_categories()
+        if not categoria:
+            return JSONResponse(content={
+                "success": True,
+                "message": "No hay categorías registradas",
+                "data": []
+            }, status_code=200)
+
+        category_json = [
+            {"Cat_id": cat[0], "Cat_name": cat[1]}
+            for cat in categoria
+        ]
+        return JSONResponse(content={
+            "success": True,
+            "message": "Categorías obtenidas exitosamente",
+            "data": category_json
+        }, status_code=200)
+
+    except Exception as e:
+        return JSONResponse(content={
+            "success": False,
+            "message": f"Error al obtener categorías: {e}",
+            "data": []
+        }, status_code=500)
 
 
 @category_router.delete("/delete/{id}")
@@ -46,7 +61,7 @@ def delete_category(id: int):
         return JSONResponse(content={
             "success": True,
             "message": "Categoría eliminada exitosamente"
-        })
+        }, status_code=200)
     else:
         return JSONResponse(content={
             "success": False,
