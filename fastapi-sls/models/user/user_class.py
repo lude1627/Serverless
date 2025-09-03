@@ -23,7 +23,7 @@ class Usuario:
             })
 
 
-    def update_user( id: int, username: str, phone: int, email: str, password: str):
+    def update_user(self, id: int, username: str, phone: int, email: str, password: str):
         query = """
             UPDATE usuarios 
             SET User_name = %s, User_phone = %s, User_mail = %s, User_password = %s 
@@ -31,7 +31,7 @@ class Usuario:
         """
         try:
             usuario = execute_query(query, (username, phone, email, password, id), commit=True)
-            if usuario:
+            if not usuario:
                     return JSONResponse(content={
                         "success": True,
                         "message": "Usuario actualizado exitosamente"
@@ -47,7 +47,7 @@ class Usuario:
             return False
 
 
-    def view_user( id: int):
+    def view_user(self, id: int):
         query = "SELECT * FROM usuarios WHERE User_id = %s"
         try:
             user= execute_query(query, (id,), fetchone=True)

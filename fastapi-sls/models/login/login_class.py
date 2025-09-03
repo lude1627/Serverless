@@ -3,7 +3,7 @@ from fastapi.responses import JSONResponse
 
 class Login:
 
-    def login_user(self, username: str, password: str):
+    def login_user(username: str, password: str):
         query = "SELECT * FROM usuarios WHERE User_name = %s AND User_password = %s"
         try:
             user = execute_query(query, (username, password), fetchone=True)
