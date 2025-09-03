@@ -11,8 +11,9 @@ class Categoria:
             return JSONResponse(content={
                 "success": True,
                 "message": "Categoría creada exitosamente",
-                "data": {"Cat_id": id, 
-                         "Cat_name": name
+                "data": {
+                            "Cat_id": id, 
+                            "Cat_name": name
                          }
             }, status_code=200)
             
@@ -22,11 +23,6 @@ class Categoria:
                 return JSONResponse(content={
                     "success": False,
                     "message": f"El ID {id} ya existe, por favor use otro."
-            }, status_code=400)
-            else:
-                return JSONResponse(content={
-                    "success": False,
-                    "message": f"Error de integridad: {str(e)}"
             }, status_code=400)
 
         except Exception as e:
@@ -54,6 +50,7 @@ class Categoria:
                     "message": f"No hay categorías registradas: {e}",
                     "data": []
                 }, status_code=200)
+                
         except Exception as e:
             print(f"Error al obtener las categorias: {e}")
             return JSONResponse(content={
