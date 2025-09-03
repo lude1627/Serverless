@@ -36,7 +36,6 @@ def get_products():
 
 @Product_router.delete("/delete/{id}")
 def deleteP(id: int):
-   
     return productos.delete_product(id)
 
 

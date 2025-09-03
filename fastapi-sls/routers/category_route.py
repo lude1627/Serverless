@@ -30,13 +30,3 @@ def delete_category(id: int):
     
     
     
-    # if categorias.delete_cat(id):
-    #     return JSONResponse(content={
-    #         "success": True,
-    #         "message": "Categoría eliminada exitosamente"
-    #     }, status_code=200)
-    # else:
-    #     return JSONResponse(content={
-    #         "success": False,
-    #         "message": "Error al eliminar categoría"
-    #     }, status_code=500)

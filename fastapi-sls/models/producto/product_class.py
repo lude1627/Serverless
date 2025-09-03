@@ -62,14 +62,14 @@ class Productos:
         query = "DELETE FROM productos WHERE Product_id = %s"
 
         try:
-            borrar = execute_query(query,(id),commit=True)
-            if borrar:
-                return JSONResponse(content={"message": "Producto eliminado con éxito"})
-            else:
-                return JSONResponse(content={"message": "No se puede eliminar el producto"})
+            execute_query(query,(id,),commit=True)
+            
+            return JSONResponse(content={"message": "Producto eliminado con éxito"})
+           
+                
         except Exception as e:
-            print("Error al eliminar el producto: {e}")
-            return 
+            print(f"Error al eliminar el producto: {e}")
+            return JSONResponse(content={"message": "No se puede eliminar el producto"})
         
 
     
