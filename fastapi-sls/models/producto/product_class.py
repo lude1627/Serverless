@@ -47,7 +47,7 @@ class Productos:
                     "message": "Error al actualizar producto"
                 })
         except Exception as e:
-                print("Error al actualizar producto: {e}")
+                print(f"Error al actualizar producto: {e}")
                 return False
 
 
