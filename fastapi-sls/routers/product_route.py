@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 from models.producto.product_entity import ProductCreate, ProductUpdate
-from models.producto.product_class  import Porductos
+from models.producto.product_class  import Productos
 
 Product_router = APIRouter(
     prefix="/product",
@@ -9,22 +9,13 @@ Product_router = APIRouter(
     include_in_schema=True
 )
 
-productos = Porductos()
+productos = Productos()
 
 
 @Product_router.post("/create")
 def create_product_route(data: ProductCreate):
-    if productos.create_product(data.name, data.description, data.cant, data.price, data.category_id):
-        return JSONResponse(content={
-            "success": True,
-            "message": "Producto creado exitosamente"
-        }, status_code=201)
-    else:
-        return JSONResponse(content={
-            "success": False,
-            "message": "Error al crear el producto"
-        }, status_code=500)
-
+    return productos.create_product(data)
+       
 
 @Product_router.get("/view/data")
 def get_products():
@@ -45,8 +36,8 @@ def get_products():
 
 @Product_router.delete("/delete/{id}")
 def deleteP(id: int):
-    productos.delete_product(id)
-    return JSONResponse(content={"message": "Producto eliminado con éxito"})
+   
+    return productos.delete_product(id)
 
 
 @Product_router.get("/get_product/{id}")
@@ -66,16 +57,8 @@ def get_product(id: int):
 
 @Product_router.put("/edit")
 def edit_product(data: ProductUpdate):
-    if productos.update_product(data.id, data.name, data.description, data.category_id, data.cant, data.price):
-        return JSONResponse(content={
-            "success": True,
-            "message": "Producto actualizado exitosamente"
-        })
-    else:
-        return JSONResponse(content={
-            "success": False,
-            "message": "Error al actualizar producto"
-        })
+    return productos.update_product(data)
+       
 
 
 @Product_router.get("/all_categories")

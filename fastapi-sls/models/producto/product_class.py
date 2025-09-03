@@ -1,19 +1,8 @@
 from db import execute_query
-class Porductos:
-    def add_to_cart(self, product_id: int, user_id: int, cantidad: int):
-        query = """
-            INSERT INTO carrito (User_id, Product_id, Car_Cantidad)
-            VALUES (%s, %s, %s)
-            ON DUPLICATE KEY UPDATE Car_Cantidad = Car_Cantidad + VALUES(Car_Cantidad);
-        """
-        try:
+from fastapi.responses import JSONResponse
+from models.producto.product_entity import ProductCreate, ProductUpdate
 
-             carrito = execute_query(query, (user_id, product_id, cantidad), fetchall=True)
-    
-             return carrito
-        except Exception as e:
-            print("Error al guardar las compras: {e}")
-            return False 
+class Productos:
             
     def view_product(self, id: int):
         query = " SELECT Product_id, Product_name, Product_description,  Product_cant, Product_price, Cat_id FROM productos WHERE Product_id = %s "
@@ -25,7 +14,7 @@ class Porductos:
 
 
 
-    def all_products():
+    def all_products(self):
         
         query = """ SELECT p.Product_id, p.Product_name, p.Product_description,  p.Product_cant, p.Product_price, c.Cat_name FROM productos p INNER JOIN categorias c ON p.Cat_id = c.Cat_id ORDER BY p.Product_name
         """
@@ -37,14 +26,29 @@ class Porductos:
             return []   
 
 
-    def update_product(self,id: int, name: str, description: str, cant: int, price: float, cat_id: int) -> bool:
+    def update_product(self,data: ProductUpdate):
+
+        description = data.description
+        name = data.name
+        cant = data.cant
+        price = data.price
+        category_id = data.category_id
         query = " UPDATE productos  SET Product_name = %s,  Product_description = %s,  Product_cant = %s,   Product_price = %s, Cat_id = %s WHERE Product_id = %s "
         try:
-            execute_query(query,(id,name,description,cant,price,cat_id),commit=True)
-            return True
+            update = execute_query(query,(id,name,description,cant,price,category_id),commit=True)
+            if update:
+                return JSONResponse(content={
+                "success": True,
+                "message": "Producto actualizado exitosamente"
+                })
+            else:
+                return JSONResponse(content={
+                    "success": False,
+                    "message": "Error al actualizar producto"
+                })
         except Exception as e:
-            print("Error al actualizar producto: {e}")
-            return False
+                print("Error al actualizar producto: {e}")
+                return False
 
 
 
@@ -53,14 +57,17 @@ class Porductos:
         query = "DELETE FROM productos WHERE Product_id = %s"
 
         try:
-            execute_query(query,(id),commit=True)
-            return True
+            borrar = execute_query(query,(id),commit=True)
+            if borrar:
+                return JSONResponse(content={"message": "Producto eliminado con éxito"})
+            else:
+                return JSONResponse(content={"message": "No se puede eliminar el producto"})
         except Exception as e:
             print("Error al eliminar el producto: {e}")
             return 
         
 
-
+    
     def get_category():
     
         query = "SELECT * FROM categorias"
@@ -86,11 +93,28 @@ class Porductos:
 
 
 
-    def create_product(self, name, description, cant, price, category_id):
+    def create_product(self, data: ProductCreate):
+
+        description = data.description
+        name = data.name
+        cant = data.cant
+        price = data.price
+        category_id = data.category_id
+
         query = " INSERT INTO productos (Product_name, Product_description, Product_cant, Product_price, Cat_id) VALUES (%s, %s, %s, %s, %s)"
         try:
-            execute_query(query, (name, description, cant, price, category_id), commit=True)
-            return True
+            pro = execute_query(query, (name, description, cant, price, category_id), commit=True)
+            if pro:
+                return JSONResponse(content={
+                    "success": True,
+                    "message": "Producto creado exitosamente"
+                }, status_code=201)
+            else:
+                return JSONResponse(content={
+                    "success": False,
+                    "message": "Error al crear el producto"
+                }, status_code=500)
+
         except Exception as e:
             print("Error al crear un producto: {e}")
             return False
