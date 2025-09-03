@@ -103,18 +103,17 @@ class Productos:
 
         query = " INSERT INTO productos (Product_name, Product_description, Product_cant, Product_price, Cat_id) VALUES (%s, %s, %s, %s, %s)"
         try:
-            pro = execute_query(query, (name, description, cant, price, category_id), commit=True)
-            if pro:
-                return JSONResponse(content={
-                    "success": True,
-                    "message": "Producto creado exitosamente"
-                }, status_code=201)
-            else:
-                return JSONResponse(content={
-                    "success": False,
-                    "message": "Error al crear el producto"
-                }, status_code=500)
+            execute_query(query, (name, description, cant, price, category_id), commit=True) 
+            return JSONResponse(content={
+                        "success": True,
+                        "message": "Producto creado exitosamente"
+                    }, status_code=201)
+            
+                
 
         except Exception as e:
-            print("Error al crear un producto: {e}")
-            return False
+                print(f"Error al crear un producto: {e}")
+                return JSONResponse(content={
+                        "success": False,
+                        "message": "Error al crear el producto"
+                    }, status_code=500)
