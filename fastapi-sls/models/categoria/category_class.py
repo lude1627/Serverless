@@ -51,7 +51,7 @@ class Categoria:
             else:
                 return JSONResponse(content={
                     "success": True,
-                    "message": "No hay categorías registradas",
+                    "message": f"No hay categorías registradas: {e}",
                     "data": []
                 }, status_code=200)
         except Exception as e:
@@ -68,21 +68,15 @@ class Categoria:
         try:
             execute_query(query, (id,), commit=True)
 
-            if execute_query("SELECT * FROM categorias WHERE Cat_id = %s", (id,), fetchone=True):
-                return JSONResponse(content={
-                    "success": False,
-                    "message": "Categoría no encontrada"
-                }, status_code=404)
-
             return JSONResponse(content={
                 "success": True,
-                "message": "Categoría eliminada exitosamente"
+                "message": f"Categoría eliminada exitosamente : {e}"
             }, status_code=200)
 
         except Exception as e:
             print(f"Error al borrar una categoria: {e}")
             return JSONResponse(content={
                 "success": False,
-                "message": "Error al eliminar categoría"
+                "message": f"Error al eliminar categoría: {e}"
             }, status_code=500)
 
