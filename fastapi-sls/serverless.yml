@@ -58,6 +58,19 @@ functions:
       - httpApi:
           path: /product/delete/{id}
           method: delete
+  carro:
+    handler: handler.handler
+    events:
+      - httpApi:
+          path: /carro/create
+          method: post
+      - httpApi:
+          path: /carro/get/{id}
+          method: get
+      - httpApi:
+          path: /carro/delete/{id}
+          method: delete
+
 
 
 
