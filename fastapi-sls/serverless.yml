@@ -62,13 +62,16 @@ functions:
     handler: handler.handler
     events:
       - httpApi:
-          path: /carro/create
+          path: /carro/agregar
           method: post
       - httpApi:
-          path: /carro/get/{id}
+          path: /carro/actualizar/{id}
+          method: put
+      - httpApi:
+          path: /carro/usuario/{user_id}
           method: get
       - httpApi:
-          path: /carro/delete/{id}
+          path: /carro/eliminar/{id}
           method: delete
 
 
