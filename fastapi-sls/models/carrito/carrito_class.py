@@ -1,4 +1,4 @@
-from models.carrito.carrito_entity import CarritoEntity
+from models.carrito.carrito_entity import CarritoEntity, CarritoUpdate
 from db import execute_query
 
 class CarritoClass:
@@ -51,7 +51,17 @@ class CarritoClass:
         return {"success": True, "message": "Producto eliminado del carrito"}
 
 
-    def actualizar_cantidad(self, Car_id: int, cantidad: int):
+    def actualizar_cantidad(self, Car_id, Car_cantidad: int):
         query = "UPDATE carrito SET Car_cantidad = %s WHERE Car_id = %s"
-        execute_query(query, (cantidad, Car_id), commit=True)
+    
+        try: 
+            result = execute_query(query, (Car_id, Car_cantidad), commit=True)
+        except Exception as e:
+            print(f"Error al actualizar cantidad: {e}")
+            return {"success": False, "message": "Error al actualizar la cantidad"}
+        
+        if result == 0:  # Si no se afectó ninguna fila
+            return {"success": False, "message": "Producto no encontrado en el carrito"}
+        
         return {"success": True, "message": "Cantidad actualizada"}
+
