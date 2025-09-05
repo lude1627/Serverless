@@ -3,8 +3,9 @@ from pydantic import BaseModel
 class CarritoEntity(BaseModel):
     user_id: int
     product_id: int
-    Car_cantidad: int
+    car_cantidad: int
     
-class CarritoUpdate(BaseModel):
-    Car_cantidad: int
+    
+class ActualizarCarrito(BaseModel):
+    nueva_cantidad: int
     

@@ -1,15 +1,56 @@
-from models.carrito.carrito_entity import CarritoEntity, CarritoUpdate
+from models.carrito.carrito_entity import CarritoEntity, ActualizarCarrito
 from db import execute_query
 
 class CarritoClass:
     def agregar_producto(self, carrito: CarritoEntity):
         try:
-            query = """
-                INSERT INTO carrito (User_id, Product_id, Car_cantidad)
-                VALUES (%s, %s, %s)
+            # 1. Revisar si el usuario ya tiene un carrito activo
+            query_carrito = """
+                SELECT Car_id 
+                FROM carrito 
+                WHERE User_id = %s AND estado = 'activo'
+                LIMIT 1
             """
-            params = (carrito.user_id, carrito.product_id, carrito.Car_cantidad)
-            execute_query(query, params, commit=True)
+            result = execute_query(query_carrito, (carrito.user_id,), fetchone=True)
+
+            if result:
+                car_id = result[0]  #validamos que el carrito existe
+            else:
+                # 2. Crear un carrito nuevo
+                insert_carrito = """
+                    INSERT INTO carrito (User_id, estado) VALUES (%s, 'activo')
+                """
+                car_id = execute_query(
+                    insert_carrito,
+                    (carrito.user_id,),
+                    commit=True,
+                    return_id=True
+                )
+
+            # 3. Consultar precio del producto desde la tabla productos
+            query_precio = "SELECT Product_price FROM productos WHERE Product_id = %s"
+            result_precio = execute_query(query_precio, (carrito.product_id,), fetchone=True)
+
+            if not result_precio:
+                return {
+                    "success": False,
+                    "message": "El producto no existe"
+                }
+
+            precio_unitario = result_precio[0]
+
+            # 4. Insertar producto en carrito_detalle
+            insert_detalle = """
+                INSERT INTO carrito_detalle (Car_id, Product_id, Detalle_cantidad, precio_unitario)
+                VALUES (%s, %s, %s, %s)
+            """
+            params_detalle = (
+                car_id,
+                carrito.product_id,
+                carrito.car_cantidad,
+                precio_unitario
+            )
+            execute_query(insert_detalle, params_detalle, commit=True)
 
             return {
                 "success": True,
@@ -27,30 +68,57 @@ class CarritoClass:
     def obtener_carrito_usuario(self, User_id: int):
         query = """
             SELECT 
-                c.Car_id, p.product_name AS nombre_producto, c.Car_cantidad AS cantidad, p.product_price AS precio_unitario, (c.Car_cantidad * p.product_price) AS subtotal
+                u.User_name,
+                c.Car_id,
+                c.fecha_creacion,
+                c.estado,
+                p.product_name AS nombre_producto,
+                cd.Detalle_cantidad AS cantidad,
+                cd.precio_unitario AS precio_unitario,
+                (cd.Detalle_cantidad * cd.precio_unitario) AS subtotal
             FROM carrito c
-            INNER JOIN productos p ON c.Product_id = p.Product_id
-            WHERE c.User_id = %s
+            INNER JOIN usuarios u ON u.User_id = c.User_id
+            INNER JOIN carrito_detalle cd ON cd.Car_id = c.Car_id
+            INNER JOIN productos p ON cd.Product_id = p.Product_id
+            WHERE c.User_id = %s AND c.estado = 'activo'
         """
         try:
             result = execute_query(query, (User_id,), fetchall=True)
 
-            if not result:  
+            if not result:
                 return {"success": False, "message": "El carrito está vacío"}
 
-            
-            data = [
+            # Datos generales del carrito (tomamos del primer registro)
+            user_name = result[0][0]
+            car_id = result[0][1]
+            fecha_creacion = result[0][2]
+            estado = result[0][3]
+
+            # Lista de productos
+            productos = [
                 {
-                    "Car_id": row[0],
-                    "nombre_producto": row[1],
-                    "cantidad": row[2],
-                    "precio_unitario": f"${row[3]:,.0f}".replace(",", "."),
-                    "subtotal": f"${row[4]:,.0f}".replace(",", ".")
+                    "nombre_producto": row[4],
+                    "cantidad": row[5],
+                    "precio_unitario": f"${row[6]:,.0f}".replace(",", "."),
+                    "subtotal": f"${row[7]:,.0f}".replace(",", ".")
                 }
                 for row in result
             ]
 
-            return {"success": True, "data": data}
+            # Total a pagar
+            total_pagar = sum(row[7] for row in result)
+
+            return {
+                "success": True,
+                "usuario": user_name,
+                "carrito": {
+                    "Car_id": car_id,
+                    "fecha_creacion": str(fecha_creacion),
+                    "estado": estado
+                },
+                "productos": productos,
+                "total_pagar": f"${total_pagar:,.0f}".replace(",", ".")
+            }
 
         except Exception as e:
             print(f"Error al obtener carrito: {e}")
@@ -58,23 +126,72 @@ class CarritoClass:
 
 
 
-    def eliminar_producto(self, Car_id: int):
-        query = "DELETE FROM carrito WHERE Car_id = %s"
-        execute_query(query, (Car_id,), commit=True)
-        return {"success": True, "message": "Producto eliminado del carrito"}
+    def eliminar_producto(self, detalle_id: int):
+        try:
+            query = """
+                DELETE FROM carrito_detalle
+                WHERE Detalle_id = %s
+            """
+            rows_affected = execute_query(query, (detalle_id,), commit=True)
+
+            if rows_affected == 0:
+                return {
+                    "success": False,
+                    "message": "El producto no fue encontrado en el carrito"
+                }
+
+            return {
+                "success": True,
+                "message": "Producto eliminado del carrito"
+            }
+
+        except Exception as e:
+            print(f"Error al eliminar producto: {e}")
+            return {
+                "success": False,
+                "message": f"Error al eliminar el producto del carrito: {str(e)}"
+            }
 
 
-    def actualizar_cantidad(self, Car_id, Car_cantidad: int):
-        query = "UPDATE carrito SET Car_cantidad = %s WHERE Car_id = %s"
-    
-        try: 
-            result = execute_query(query, (Car_id, Car_cantidad), commit=True)
+    def actualizar_cantidad_producto(self, detalle_id: int, nueva_cantidad: int):
+        try:
+            # 1. Verificar si existe el detalle en el carrito
+            query_check = "SELECT 1 FROM carrito_detalle WHERE Detalle_id = %s LIMIT 1"
+            existe = execute_query(query_check, (detalle_id,), fetchone=True)
+
+            if not existe:
+                return {
+                    "success": False,
+                    "message": "Producto no encontrado, no se puede actualizar"
+                }
+
+            # 2. Si existe, actualizamos
+            query_update = """
+                UPDATE carrito_detalle
+                SET Detalle_cantidad = %s
+                WHERE Detalle_id = %s
+            """
+            rows_affected = execute_query(query_update, (nueva_cantidad, detalle_id), commit=True)
+
+            if rows_affected == 0:
+                return {
+                    "success": False,
+                    "message": "No se pudo actualizar la cantidad"
+                }
+
+            return {
+                "success": True,
+                "message": f"Cantidad actualizada a {nueva_cantidad}"
+            }
+
         except Exception as e:
             print(f"Error al actualizar cantidad: {e}")
-            return {"success": False, "message": "Error al actualizar la cantidad"}
-        
-        if result == 0:  # Si no se afectó ninguna fila
-            return {"success": False, "message": "Producto no encontrado en el carrito"}
-        
-        return {"success": True, "message": "Cantidad actualizada"}
+            return {
+                "success": False,
+                "message": f"Error al actualizar la cantidad: {str(e)}"
+            }
+
+            
+
+
 
