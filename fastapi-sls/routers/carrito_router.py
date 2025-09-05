@@ -2,21 +2,28 @@ from fastapi import APIRouter
 from models.carrito.carrito_entity import CarritoEntity
 from models.carrito.carrito_class import CarritoClass
 
-carrito_router = APIRouter(prefix="/Carro", tags=["Caritro"], include_in_schema=True)
-carrito = Carrito()
+carrito_router = APIRouter(
+    prefix="/carro", 
+    tags=["Carrito"], 
+    include_in_schema=True
+)
 
 @carrito_router.post("/agregar")
-def agregar(carrito_data: CarritoEntity):
-    return carrito.agregar_producto(carrito_data)
+def agregar(carrito: CarritoEntity):
+    carro = CarritoClass()
+    return carro.agregar_producto(carrito)
 
-@carrito_router.put("/actualizar/{id}")
-def actualizar(id: int, cantidad: int):
-    return carrito.actualizar_cantidad(id, cantidad)
+@carrito_router.get("/usuario/{User_id}")
+def obtener_carrito(User_id: int):
+    carro = CarritoClass()
+    return carro.obtener_carrito_usuario(User_id)
 
-@carrito_router.delete("/eliminar/{id}")
-def eliminar(id: int):
-    return carrito.eliminar_producto(id)
+@carrito_router.delete("/eliminar/{Car_id}")
+def eliminar(Car_id: int):
+    carro = CarritoClass()
+    return carro.eliminar_producto(Car_id)
 
-@carrito_router.get("/usuario/{user_id}")
-def obtener(user_id: int):
-    return carrito.obtener_carrito_usuario(user_id)
+@carrito_router.put("/actualizar/{Car_id}")
+def actualizar(Car_id: int, Car_cantidad: int):
+    carro = CarritoClass()
+    return carro.actualizar_cantidad(Car_id, Car_cantidad)

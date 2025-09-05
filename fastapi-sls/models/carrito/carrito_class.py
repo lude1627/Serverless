@@ -1,35 +1,57 @@
-from fastapi.responses import JSONResponse
-from db import execute_query
 from models.carrito.carrito_entity import CarritoEntity
+from db import execute_query
 
-class Carrito:
-
+class CarritoClass:
     def agregar_producto(self, carrito: CarritoEntity):
+        query = """
+            INSERT INTO carrito (User_id, Product_id, Car_cantidad)
+            VALUES (%s, %s, %s)
+        """
+        params = (carrito.user_id, carrito.product_id, carrito.cantidad)
+        execute_query(query, params, commit=True)
+        return {"success": True, "message": "Producto agregado al carrito"}
+
+    def obtener_carrito_usuario(self, User_id: int):
+        query = """
+            SELECT 
+                c.Car_id, p.product_name AS nombre_producto, c.Car_cantidad AS cantidad, p.product_price AS precio_unitario, (c.Car_cantidad * p.product_price) AS subtotal
+            FROM carrito c
+            INNER JOIN productos p ON c.Product_id = p.Product_id
+            WHERE c.User_id = %s
+        """
         try:
-            # Verificar si ya existe ese producto en el carrito del usuario
-            query_check = "SELECT id, cantidad FROM carrito WHERE user_id = %s AND product_id = %s"
-            existente = execute_query(query_check, (carrito.user_id, carrito.product_id), fetchone=True)
+            result = execute_query(query, (User_id,), fetchall=True)
 
-            if existente:
-                # Si existe, solo actualizamos cantidad
-                query_update = "UPDATE carrito SET cantidad = cantidad + %s WHERE id = %s"
-                execute_query(query_update, (carrito.cantidad, existente[0]), commit=True)
-                return JSONResponse(content={
-                    "success": True,
-                    "message": "Cantidad actualizada en el carrito"
-                }, status_code=200)
+            if not result:  
+                return {"success": False, "message": "El carrito está vacío"}
 
-            # Si no existe, insertamos nuevo registro
-            query_insert = "INSERT INTO carrito (user_id, product_id, cantidad) VALUES (%s, %s, %s)"
-            execute_query(query_insert, (carrito.user_id, carrito.product_id, carrito.cantidad), commit=True)
+            
+            data = [
+                {
+                    "Car_id": row[0],
+                    "nombre_producto": row[1],
+                    "cantidad": row[2],
+                    "precio_unitario": f"${row[3]:,.0f}".replace(",", "."),
+                    "subtotal": f"${row[4]:,.0f}".replace(",", ".")
+                }
+                for row in result
+            ]
 
-            return JSONResponse(content={
-                "success": True,
-                "message": "Producto agregado al carrito"
-            }, status_code=201)
+            return {"success": True, "data": data}
 
         except Exception as e:
-            return JSONResponse(content={
-                "success": False,
-                "message": f"Error: {str(e)}"
-            }, status_code=400)
+            print(f"Error al obtener carrito: {e}")
+            return {"success": False, "message": "Error al obtener los productos del carrito"}
+
+
+
+    def eliminar_producto(self, Car_id: int):
+        query = "DELETE FROM carrito WHERE Car_id = %s"
+        execute_query(query, (Car_id,), commit=True)
+        return {"success": True, "message": "Producto eliminado del carrito"}
+
+
+    def actualizar_cantidad(self, Car_id: int, cantidad: int):
+        query = "UPDATE carrito SET Car_cantidad = %s WHERE Car_id = %s"
+        execute_query(query, (cantidad, Car_id), commit=True)
+        return {"success": True, "message": "Cantidad actualizada"}
