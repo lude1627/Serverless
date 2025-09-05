@@ -3,13 +3,26 @@ from db import execute_query
 
 class CarritoClass:
     def agregar_producto(self, carrito: CarritoEntity):
-        query = """
-            INSERT INTO carrito (User_id, Product_id, Car_cantidad)
-            VALUES (%s, %s, %s)
-        """
-        params = (carrito.user_id, carrito.product_id, carrito.cantidad)
-        execute_query(query, params, commit=True)
-        return {"success": True, "message": "Producto agregado al carrito"}
+        try:
+            query = """
+                INSERT INTO carrito (User_id, Product_id, Car_cantidad)
+                VALUES (%s, %s, %s)
+            """
+            params = (carrito.user_id, carrito.product_id, carrito.Car_cantidad)
+            execute_query(query, params, commit=True)
+
+            return {
+                "success": True,
+                "message": "Producto agregado al carrito",
+            }
+
+        except Exception as e:
+            print(f"Error al agregar producto: {e}")
+            return {
+                "success": False,
+                "message": f"Error al agregar el producto al carrito: {str(e)}"
+            }
+
 
     def obtener_carrito_usuario(self, User_id: int):
         query = """
