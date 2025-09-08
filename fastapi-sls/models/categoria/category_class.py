@@ -32,17 +32,19 @@ class Categoria:
             "message": "Ocurrió un error inesperado al crear la categoría."
         }, status_code=500)
         
-        
     def all_categories(self):
-        query = "SELECT * FROM categorias"
+        query = "SELECT Cat_id, Cat_name FROM categorias"
         try:
-            categorias = execute_query(query, fetchall=True)  
+            categorias = execute_query(query, fetchall=True)
 
             if categorias:
+              
+                 
+
                 response = {
                     "success": True,
                     "message": "Categorías obtenidas exitosamente",
-                    "data": categorias
+                    "data" : [{ "Cat_id": cat[0],"Cat_name": cat[1] }for cat in categorias]
                 }
                 return JSONResponse(content=response, status_code=200)
 
@@ -63,7 +65,7 @@ class Categoria:
             }
             return JSONResponse(content=response, status_code=500)
 
-        
+
         
     def delete_cat(self, id: int):
         query = "DELETE FROM categorias WHERE Cat_id = %s"
@@ -72,13 +74,13 @@ class Categoria:
 
             return JSONResponse(content={
                 "success": True,
-                "message": f"Categoría eliminada exitosamente : {e}"
+                "message": "Categoría eliminada exitosamente "
             }, status_code=200)
 
         except Exception as e:
             print(f"Error al borrar una categoria: {e}")
             return JSONResponse(content={
                 "success": False,
-                "message": f"Error al eliminar categoría: {e}"
+                "message":"Error al eliminar categoría: "
             }, status_code=500)
 
