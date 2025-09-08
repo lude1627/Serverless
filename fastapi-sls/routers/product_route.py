@@ -65,4 +65,4 @@ def get_all_categories():
     categorias = productos.all_categories()
     if not categorias:
         return JSONResponse({"message: " "no hay datos"}, 404)
-    return JSONResponse(content=[{"id": c[0], "name": c[1]} for c in categorias])
+    return JSONResponse(content= categorias)

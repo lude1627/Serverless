@@ -85,18 +85,36 @@ class Productos:
 
 
 
-    def all_categories():
-    
-        query="SELECT Cat_id, Cat_name FROM categorias"
+    def all_categories(self):
+        query = "SELECT Cat_id, Cat_name FROM categorias"
         try:
-            categorias = execute_query(query,fetchall=True)  
-            return categorias
+            categorias = execute_query(query, fetchall=True)
+            if categorias:
+                 
+                
+                response = {
+                    "success": True,
+                    "message": "Categorías obtenidas exitosamente",
+                    "data":{str(cat[0]): cat[1] for cat in categorias}
+
+                }
+                return JSONResponse(content=response, status_code=200)
+
+            else:
+                response = {
+                    "success": True,
+                    "message": "No hay categorías registradas",
+                    "data": []
+                }
+                return JSONResponse(content=response, status_code=200)
+
         except Exception as e:
-
-            print("Error al mostrar las categorias : {e}")
-
-
-
+            response = {
+                "success": False,
+                "message": f"Error al obtener categorías: {str(e)}",
+                "data": []
+            }
+            return JSONResponse(content=response, status_code=500)
 
     def create_product(self, data: ProductCreate):
 
