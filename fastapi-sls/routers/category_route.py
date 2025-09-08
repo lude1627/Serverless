@@ -1,5 +1,4 @@
 from fastapi import APIRouter
-from fastapi.responses import JSONResponse
 from models.categoria.categry_entity import CategoryCreate
 from models.categoria.category_class import Categoria
 
