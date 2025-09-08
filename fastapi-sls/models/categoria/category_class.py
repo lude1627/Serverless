@@ -34,30 +34,35 @@ class Categoria:
         
         
     def all_categories(self):
-        query="SELECT * FROM categorias"
+        query = "SELECT * FROM categorias"
         try:
-            categorias = execute_query(query,fetchall=True)  
+            categorias = execute_query(query, fetchall=True)  
+
             if categorias:
-                return JSONResponse(content={
+                response = {
                     "success": True,
                     "message": "Categorías obtenidas exitosamente",
                     "data": categorias
-                }, status_code=200)
-                
+                }
+                return JSONResponse(content=response, status_code=200)
+
             else:
-                return JSONResponse(content={
+                response = {
                     "success": True,
-                    "message": f"No hay categorías registradas: {e}",
+                    "message": "No hay categorías registradas",
                     "data": []
-                }, status_code=200)
-                
+                }
+                return JSONResponse(content=response, status_code=200)
+
         except Exception as e:
             print(f"Error al obtener las categorias: {e}")
-            return JSONResponse(content={
+            response = {
                 "success": False,
                 "message": f"Error al obtener categorías: {e}",
                 "data": []
-            }, status_code=500)
+            }
+            return JSONResponse(content=response, status_code=500)
+
         
         
     def delete_cat(self, id: int):
