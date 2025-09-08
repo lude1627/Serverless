@@ -4,6 +4,22 @@ from db import execute_query
 class CarritoClass:
     def agregar_producto(self, carrito: CarritoEntity):
         try:
+            #Verificar si el usuario existe
+            query_usuario = """
+            SELECT User_id
+            FROM usuarios
+            WHERE User_id = %s
+            LIMIT 1
+            """
+            
+            usuario = execute_query(query_usuario, (carrito.user_id,), fetchone=True)
+            
+            if not usuario:
+                return {
+                    "success": False,
+                    "message": f"El usuario con ID {carrito.user_id} no existe"
+                }
+            
             # 1. Revisar si el usuario ya tiene un carrito activo
             query_carrito = """
                 SELECT Car_id 
