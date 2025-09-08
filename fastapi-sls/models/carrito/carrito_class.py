@@ -11,7 +11,6 @@ class CarritoClass:
             WHERE User_id = %s
             LIMIT 1
             """
-            
             usuario = execute_query(query_usuario, (carrito.user_id,), fetchone=True)
             
             if not usuario:
@@ -28,7 +27,7 @@ class CarritoClass:
                 LIMIT 1
             """
             result = execute_query(query_carrito, (carrito.user_id,), fetchone=True)
-
+            
             if result:
                 car_id = result[0]  #validamos que el carrito existe
             else:
@@ -43,36 +42,72 @@ class CarritoClass:
                     return_id=True
                 )
 
-            # 3. Consultar precio del producto desde la tabla productos
-            query_precio = "SELECT Product_price FROM productos WHERE Product_id = %s"
-            result_precio = execute_query(query_precio, (carrito.product_id,), fetchone=True)
+            # 3. Consultar detalles del producto
+            query_producto = """
+            
+            SELECT Product_price, Product_cant
+            FROM productos 
+            WHERE Product_id = %s
+            LIMIT 1
+            
+            """
+            result_producto = execute_query(query_producto, (carrito.product_id,), fetchone=True)
 
-            if not result_precio:
+            if not result_producto:
                 return {
                     "success": False,
                     "message": "El producto no existe"
                 }
+                
+            precio_unitario = result_producto[0]
+            product_cant = result_producto[1]
+            
+                
+            if carrito.car_cantidad > result_producto[1]:
+                return {
+                    "success": False,
+                    "message": f"Producto agotado o no hay suficientes unidades. cantidad disponible: {result_producto[1]}, intentaste agregar {carrito.car_cantidad}"
+                } 
 
-            precio_unitario = result_precio[0]
-
-            # 4. Insertar producto en carrito_detalle
-            insert_detalle = """
-                INSERT INTO carrito_detalle (Car_id, Product_id, Detalle_cantidad, precio_unitario)
-                VALUES (%s, %s, %s, %s)
+                
+            query_detalle = """
+            INSERT INTO carrito_detalle (Car_id, Product_id, Detalle_cantidad, precio_unitario)
+            VALUES (%s, %s, %s, %s)
             """
-            params_detalle = (
-                car_id,
-                carrito.product_id,
+            
+            params = (
+                car_id, 
+                carrito.product_id, 
                 carrito.car_cantidad,
                 precio_unitario
             )
-            execute_query(insert_detalle, params_detalle, commit=True)
-
-            return {
+            execute_query(query_detalle, params, commit=True)
+            
+            update_cantidad = """
+                UPDATE productos
+                SET Product_cant = Product_cant - %s
+                WHERE Product_id = %s
+                """
+                
+            update = execute_query(update_cantidad, (carrito.car_cantidad, carrito.product_id), commit=True)
+            
+            if update:
+                return {
+                    "success": False,
+                    "message": "No se pudo actualizar la cantidad"
+                }
+            
+            return{
                 "success": True,
-                "message": "Producto agregado al carrito",
+                "message": f"Producto agregado correctamente aun quedan: {result_producto[1] - carrito.car_cantidad}",
+                "carrito_id": car_id
+               
             }
-
+            
+            
+                
+                
+            
         except Exception as e:
             print(f"Error al agregar producto: {e}")
             return {
