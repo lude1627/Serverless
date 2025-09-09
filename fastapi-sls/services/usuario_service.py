@@ -1,13 +1,13 @@
 from db import execute_query
 
-def verificar_usuario_existe(user_id: int, user_name: str):
+def verificar_usuario_existe(user_id: int):
     query = """
-        SELECT User_id, User_name
+        SELECT User_id
         FROM usuarios
         WHERE User_id = %s
         LIMIT 1
     """
-    usuario = execute_query(query, (user_id, user_name,), fetchone=True)
+    usuario = execute_query(query, (user_id), fetchone=True)
 
     if not usuario:
         return {
@@ -17,5 +17,5 @@ def verificar_usuario_existe(user_id: int, user_name: str):
     
     return {
         "success": True,
-        "message": f"✅ Usuario {user_id, user_name} encontrado"
+        "message": f"✅ Usuario {user_id} encontrado"
     }

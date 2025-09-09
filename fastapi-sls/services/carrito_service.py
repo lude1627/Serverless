@@ -1,6 +1,5 @@
 from db import execute_query
-from services.usuario_service import verificar_usuario_existe 
-from services.carrito_service import  obtener_carrito_usuario
+from services.producto_service import  verificar_cantidad
 
 
 def verificar_carrito_activo(user_id: int):
@@ -93,6 +92,16 @@ def obtener_carrito_usuario(user_id: int):
             "message": "❌ Error al obtener los productos del carrito"
         }
         
+        
+def insertar_producto(car_id: int, product_id: int, cantidad: int, precio_unitario: float):
+    query = """
+        INSERT INTO carrito_detalle (Car_id, Product_id, Detalle_cantidad, precio_unitario)
+        VALUES (%s, %s, %s, %s)
+    """
+    execute_query(query, (car_id, product_id, cantidad, precio_unitario), commit=True)
+    return {"success": True, "message": "Producto agregado al carrito"}
+       
+        
 def eliminar_producto(detalle_id: int, user_id: int):
     """
     Elimina un producto del carrito de un usuario.
@@ -125,5 +134,24 @@ def eliminar_producto(detalle_id: int, user_id: int):
             "success": False,
             "message": f"Error al eliminar el producto del carrito: {str(e)}"
         }
+        
+        
+def actualizar_cantidad(detalle_id: int, car_id: int, nueva_cantidad: int, product_id: int):
+    # validar stock
+    validacion = verificar_cantidad(product_id, nueva_cantidad)
+    if not validacion["success"]:
+        return validacion
+
+    query_update = """
+        UPDATE carrito_detalle
+        SET Detalle_cantidad = %s
+        WHERE Detalle_id = %s AND Car_id = %s
+    """
+    rows_affected = execute_query(query_update, (nueva_cantidad, detalle_id, car_id), commit=True)
+
+    if rows_affected == 0:
+        return {"success": False, "message": "No se pudo actualizar la cantidad"}
+
+    return {"success": True, "message": f"Cantidad actualizada a {nueva_cantidad}"}
  
 
