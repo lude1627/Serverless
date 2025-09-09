@@ -49,11 +49,11 @@ class CarritoClass:
                 
                 #obtener carrito actualizado
                 carrito_actualizado = obtener_carrito_usuario(carrito.user_id)
-                print("llego aqui1")
+                
                 return {
                     "success": True,
                     "message": f"✅ Producto {carrito.product_id} agregado al carrito",
-                    "carrito": carrito_actualizado
+                    # "carrito": carrito_actualizado
                 }
                     
             except Exception as e:
@@ -63,20 +63,19 @@ class CarritoClass:
                 }
                 
         def eliminar_producto(self, user_id: int, detalle_id: int):
-            
             try:
                 resultado_usuario = verificar_usuario_existe(user_id)
                 if not resultado_usuario["success"]:
                     return resultado_usuario
-                
+
                 resultado_carrito = verificar_carrito_activo(user_id)
                 if not resultado_carrito["success"]:
                     return resultado_carrito
-                
+
                 resultado_eliminar = eliminar_producto(detalle_id, resultado_carrito["car_id"])
                 if not resultado_eliminar["success"]:
                     return resultado_eliminar
-                
+
                 carrito_actualizado = obtener_carrito_usuario(user_id)
                 return {
                     "success": True,
@@ -88,7 +87,7 @@ class CarritoClass:
                     "success": False,
                     "message": f"Error al eliminar producto: {e}"
                 }
-                
+
                 
         def actualizar_cantidad_producto(self, user_id: int, detalle_id: int, nueva_cantidad: int):
             try:

@@ -18,7 +18,8 @@ def verificar_producto_existe(product_id: int):
     listar_product = {
         "Product_id": producto[0],
         "Product_name": producto[1],
-        "Product_price": producto[2],
+        "Product_cant": producto[2],
+        "Product_price": producto[3],
     }
     
     return {

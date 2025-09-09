@@ -23,6 +23,7 @@ def verificar_carrito_activo(user_id: int):
         "car_id": carrito[0]
     }
 
+
 def obtener_carrito_usuario(user_id: int):
     query = """
         SELECT 
@@ -31,9 +32,9 @@ def obtener_carrito_usuario(user_id: int):
             c.fecha_creacion,
             c.estado,
             p.Product_name AS nombre_producto,
-            cd.Detalle_cantidad,
-            cd.precio_unitario,
-            (cd.Detalle_cantidad * cd.precio_unitario) AS subtotal
+            cd.Detalle_cantidad AS cantidad,
+            p.Product_price AS precio_unitario,
+            (cd.Detalle_cantidad * p.Product_price) AS subtotal
         FROM carrito c
         INNER JOIN usuarios u ON u.User_id = c.User_id
         INNER JOIN carrito_detalle cd ON cd.Car_id = c.Car_id
@@ -88,22 +89,22 @@ def obtener_carrito_usuario(user_id: int):
             "success": False,
             "message": "❌ Error al obtener los productos del carrito"
         }
-
         
         
-def insertar_producto(car_id, product_id, cantidad, precio_unitario):
+def insertar_producto(car_id, product_id, cantidad, producto):
+    
     try:
         query = """
             INSERT INTO carrito_detalle (Car_id, Product_id, Detalle_cantidad, precio_unitario)
             VALUES (%s, %s, %s, %s)
         """
-        params = (car_id, product_id, cantidad, precio_unitario)
+        params = (car_id, product_id, cantidad, producto[3])
 
         detalle_id = execute_query(query, params, commit=True, return_id=True)
 
         return {
             "success": True,
-            "message": f"✅ Producto {product_id} agregado al carrito",
+            "message": f"✅ Producto {product_id} agregado al carrito (filas afectadas: {detalle_id})",
             "detalle_id": detalle_id
         }
     except Exception as e:
@@ -112,37 +113,36 @@ def insertar_producto(car_id, product_id, cantidad, precio_unitario):
             "message": f"❌ Error al insertar producto: {e}"
         } 
         
-def eliminar_producto(detalle_id: int, user_id: int):
+        
+def eliminar_producto(car_id: int, product_id: int):
     """
-    Elimina un producto del carrito de un usuario.
+    Elimina un producto del carrito de compras.
+    :param car_id: ID del carrito
+    :param product_id: ID del producto a eliminar
     """
     try:
         query = """
             DELETE FROM carrito_detalle
-            WHERE Detalle_id = %s
+            WHERE Car_id = %s AND Product_id = %s
         """
-        rows_affected = execute_query(query, (detalle_id,), commit=True)
+        params = (car_id, product_id)
+        rows_deleted = execute_query(query, params, commit=True)
 
-        if rows_affected == 0:
+        if rows_deleted > 0:
+            return {
+                "success": True,
+                "message": f"🗑️ Producto {product_id} eliminado del carrito"
+            }
+        else:
             return {
                 "success": False,
-                "message": "❌ El producto no fue encontrado en el carrito"
+                "message": f"⚠️ El producto {product_id} no existe en el carrito"
             }
 
-        # 🔥 Carrito actualizado después de eliminar
-        carrito_actualizado = obtener_carrito_usuario(user_id)
-
-        return {
-            "success": True,
-            "message": "✅ Producto eliminado del carrito",
-            "carrito": carrito_actualizado
-        }
-
     except Exception as e:
-        print(f"Error al eliminar producto: {e}")
         return {
             "success": False,
-            "message": f"Error al eliminar el producto del carrito: {str(e)}"
+            "message": f"❌ Error al eliminar producto: {e}"
         }
         
         
