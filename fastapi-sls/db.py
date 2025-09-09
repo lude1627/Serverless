@@ -22,6 +22,7 @@ def execute_query(query: str, params: tuple = (), fetchone=False, fetchall=False
     
     if commit:
         conexion.commit()
+        return cursor.rowcount
         
     if return_id:   
         result = cursor.lastrowid

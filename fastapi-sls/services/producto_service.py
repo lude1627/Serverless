@@ -1,0 +1,57 @@
+from db import execute_query
+
+def verificar_producto_existe(product_id: int):
+    """
+    Verifica si el producto existe en la base de datos.
+    """
+    query = """
+        SELECT Product_id, Product_name, Product_cant
+        FROM productos
+        WHERE Product_id = %s
+        LIMIT 1
+    """
+    producto = execute_query(query, (product_id,), fetchone=True)
+
+    if not producto:
+        return {
+            "success": False,
+            "message": f"❌ El producto con ID {product_id} no existe"
+        }
+    
+    return {
+        "success": True,
+        "message": "✅ Producto encontrado",
+        "producto": producto
+    }
+
+def verificar_cantidad(product_id: int, product_cant: int):
+    """
+    Verifica si el producto tiene suficiente cantidad disponible.
+    """
+    query = """
+        SELECT Product_cant
+        FROM productos
+        WHERE Product_id = %s
+        LIMIT 1
+    """
+    producto = execute_query(query, (product_id, product_cant,), fetchone=True)
+
+    if not producto:
+        return {
+            "success": False,
+            "message": f"❌ El producto con ID {product_id} no existe"
+        }
+
+    stock = producto["Product_cant"]
+
+    if stock < product_cant:
+        return {
+            "success": False,
+            "message": f"⚠️ Producto agotado o insuficiente. Stock disponible: {stock}, intentaste agregar {product_cant}"
+        }
+
+    return {
+        "success": True,
+        "message": f"✅ Stock suficiente: {product_cant} unidades reservadas",
+        "stock_restante": stock - product_cant
+    }
