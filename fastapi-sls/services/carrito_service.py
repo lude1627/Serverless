@@ -93,12 +93,12 @@ def obtener_carrito_usuario(user_id: int):
         }
         
         
-def insertar_producto(car_id: int, product_id: int, cantidad: int, precio_unitario: float):
+def insertar_producto(car_id: int, product_id: int, detalle_cantidad: int, precio_unitario: float):
     query = """
         INSERT INTO carrito_detalle (Car_id, Product_id, Detalle_cantidad, precio_unitario)
         VALUES (%s, %s, %s, %s)
     """
-    execute_query(query, (car_id, product_id, cantidad, precio_unitario), commit=True)
+    execute_query(query, (car_id, product_id, detalle_cantidad, precio_unitario), commit=True)
     return {"success": True, "message": "Producto agregado al carrito"}
        
         

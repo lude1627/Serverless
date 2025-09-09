@@ -2,7 +2,7 @@ from db import execute_query
 
 def verificar_usuario_existe(user_id: int):
     query = """
-        SELECT User_id
+        SELECT User_id 
         FROM usuarios
         WHERE User_id = %s
         LIMIT 1

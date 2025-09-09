@@ -10,10 +10,12 @@ conexion = mysql.connector.connect(
 
 
 
-def execute_query(query: str, params: tuple = (), fetchone=False, fetchall=False, commit=False, return_id=False):
+def execute_query(query: str, params=None, fetchone=False, fetchall=False, commit=False, return_id=False):
     cursor = conexion.cursor()
-    cursor.execute(query, params)
+
     
+    cursor.execute(query, params or ())
+
     result = None
     if fetchone:
         result = cursor.fetchone()
@@ -23,7 +25,7 @@ def execute_query(query: str, params: tuple = (), fetchone=False, fetchall=False
     if commit:
         conexion.commit()
         return cursor.rowcount
-        
+
     if return_id:   
         result = cursor.lastrowid
     
