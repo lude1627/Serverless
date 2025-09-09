@@ -11,7 +11,7 @@ conexion = mysql.connector.connect(
 
 
 def execute_query(query: str, params=None, fetchone=False, fetchall=False, commit=False, return_id=False):
-    cursor = conexion.cursor()
+    cursor = conexion.cursor(dictionary=True)
 
     
     cursor.execute(query, params or ())

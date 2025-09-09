@@ -1,9 +1,6 @@
 from db import execute_query
 
 def verificar_producto_existe(product_id: int):
-    """
-    Verifica si el producto existe en la base de datos.
-    """
     query = """
         SELECT Product_id, Product_name, Product_cant, Product_price
         FROM productos
@@ -17,11 +14,17 @@ def verificar_producto_existe(product_id: int):
             "success": False,
             "message": f"❌ El producto con ID {product_id} no existe"
         }
+        
+    listar_product = {
+        "Product_id": producto[0],
+        "Product_name": producto[1],
+        "Product_price": producto[2],
+    }
     
     return {
         "success": True,
         "message": "✅ Producto encontrado",
-        "producto": producto
+        "producto": listar_product
     }
 
 def verificar_cantidad(product_id: int, product_cant: int):

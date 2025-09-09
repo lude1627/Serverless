@@ -24,9 +24,7 @@ def verificar_carrito_activo(user_id: int):
     }
 
 def obtener_carrito_usuario(user_id: int):
-    """
-    Devuelve el carrito activo de un usuario con todos sus productos.
-    """
+    
     query = """
         SELECT 
             u.User_name,
@@ -52,8 +50,8 @@ def obtener_carrito_usuario(user_id: int):
                 "success": False,
                 "message": f"⚠️ El usuario {user_id} no tiene productos en el carrito"
             }
-
-        # Datos generales del carrito (primer registro)
+            
+            # Datos generales del carrito (primer registro)
         user_name = result[0]["User_name"]
         car_id = result[0]["Car_id"]
         fecha_creacion = result[0]["fecha_creacion"]
@@ -93,14 +91,26 @@ def obtener_carrito_usuario(user_id: int):
         }
         
         
-def insertar_producto(car_id: int, product_id: int, detalle_cantidad: int, precio_unitario: float):
-    query = """
-        INSERT INTO carrito_detalle (Car_id, Product_id, Detalle_cantidad, precio_unitario)
-        VALUES (%s, %s, %s, %s)
-    """
-    execute_query(query, (car_id, product_id, detalle_cantidad, precio_unitario), commit=True)
-    return {"success": True, "message": "Producto agregado al carrito"}
-       
+def insertar_producto(car_id, product_id, cantidad, precio_unitario):
+    try:
+        query = """
+            INSERT INTO carrito_detalle (Car_id, Product_id, Detalle_cantidad, precio_unitario)
+            VALUES (%s, %s, %s, %s)
+        """
+        params = (car_id, product_id, cantidad, precio_unitario)
+
+        detalle_id = execute_query(query, params, commit=True, return_id=True)
+
+        return {
+            "success": True,
+            "message": f"✅ Producto {product_id} agregado al carrito",
+            "detalle_id": detalle_id
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "message": f"❌ Error al insertar producto: {e}"
+        } 
         
 def eliminar_producto(detalle_id: int, user_id: int):
     """
