@@ -72,19 +72,6 @@ class Productos:
             return JSONResponse(content={"message": "No se puede eliminar el producto"})
         
 
-    
-    def get_category():
-    
-        query = "SELECT * FROM categorias"
-        try:
-            execute_query(query,(id),commit=True)
-            return True
-        except Exception as e:
-            print("Error al traer las categorias: {e}")
-            return False
-
-
-
     def all_categories(self):
         query = "SELECT Cat_id, Cat_name FROM categorias"
         try:
