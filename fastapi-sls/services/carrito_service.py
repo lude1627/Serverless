@@ -24,7 +24,6 @@ def verificar_carrito_activo(user_id: int):
     }
 
 def obtener_carrito_usuario(user_id: int):
-    
     query = """
         SELECT 
             u.User_name,
@@ -32,8 +31,8 @@ def obtener_carrito_usuario(user_id: int):
             c.fecha_creacion,
             c.estado,
             p.Product_name AS nombre_producto,
-            cd.Detalle_cantidad AS cantidad,
-            cd.precio_unitario AS precio_unitario,
+            cd.Detalle_cantidad,
+            cd.precio_unitario,
             (cd.Detalle_cantidad * cd.precio_unitario) AS subtotal
         FROM carrito c
         INNER JOIN usuarios u ON u.User_id = c.User_id
@@ -50,26 +49,26 @@ def obtener_carrito_usuario(user_id: int):
                 "success": False,
                 "message": f"⚠️ El usuario {user_id} no tiene productos en el carrito"
             }
-            
-            # Datos generales del carrito (primer registro)
-        user_name = result[0]["User_name"]
-        car_id = result[0]["Car_id"]
-        fecha_creacion = result[0]["fecha_creacion"]
-        estado = result[0]["estado"]
+
+        # Datos generales del carrito (primer registro)
+        user_name = result[0][0]        
+        car_id = result[0][1]           
+        fecha_creacion = result[0][2]   
+        estado = result[0][3]           
 
         # Lista de productos
         productos = [
             {
-                "nombre_producto": row["nombre_producto"],
-                "cantidad": row["cantidad"],
-                "precio_unitario": f"${row['precio_unitario']:,.0f}".replace(",", "."),
-                "subtotal": f"${row['subtotal']:,.0f}".replace(",", ".")
+                "nombre_producto": row[4],  
+                "cantidad": row[5],         
+                "precio_unitario": f"${row[6]:,.0f}".replace(",", "."),
+                "subtotal": f"${row[7]:,.0f}".replace(",", ".")
             }
             for row in result
         ]
 
         # Total a pagar
-        total_pagar = sum(row["subtotal"] for row in result)
+        total_pagar = sum(row[7] for row in result)
 
         return {
             "success": True,
@@ -89,6 +88,7 @@ def obtener_carrito_usuario(user_id: int):
             "success": False,
             "message": "❌ Error al obtener los productos del carrito"
         }
+
         
         
 def insertar_producto(car_id, product_id, cantidad, precio_unitario):
