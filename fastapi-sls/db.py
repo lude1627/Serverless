@@ -12,9 +12,8 @@ conexion = mysql.connector.connect(
 
 def execute_query(query: str, params = (), fetchone=False, fetchall=False, commit=False, return_id=False):
     cursor = conexion.cursor()
-
-    
     cursor.execute(query, params or ())
+    
 
     result = None
     if fetchone:

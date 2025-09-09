@@ -23,7 +23,7 @@ def obtener_carrito(user_id: int):
 def eliminar(detalle_id: int):
     return eliminar_producto(detalle_id)
 
-@carrito_router.put("/actualizar/{detalle_id}/{nueva_cantidad}")
+@carrito_router.put("/actualizar/{detalle_id}")
 def actualizar(detalle_id: int, nueva_cantidad: int):
     return actualizar_cantidad(detalle_id, nueva_cantidad)
 
