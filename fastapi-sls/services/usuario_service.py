@@ -7,7 +7,7 @@ def verificar_usuario_existe(user_id: int):
         WHERE User_id = %s
         LIMIT 1
     """
-    usuario = execute_query(query, (user_id), fetchone=True)
+    usuario = execute_query(query, (user_id,), fetchone=True)
 
     if not usuario:
         return {
