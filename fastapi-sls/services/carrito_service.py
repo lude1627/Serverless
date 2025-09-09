@@ -20,7 +20,7 @@ def verificar_carrito_activo(user_id: int):
     return {
         "success": True,
         "message": "✅ Carrito activo encontrado",
-        "car_id": carrito["Car_id"]
+        "car_id": carrito[0]
     }
 
 def obtener_carrito_usuario(user_id: int):

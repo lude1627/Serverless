@@ -25,21 +25,21 @@ class CarritoClass:
                 resultado_carrito = verificar_carrito_activo(carrito.user_id)
                 if not resultado_carrito["success"]:
                     return resultado_carrito
-                
+               
                 #validar producto
                 resultado_producto = verificar_producto_existe(carrito.product_id)
                 if not resultado_producto["success"]:
                     return resultado_producto
-            
+               
                 #validar cantidad
                 resultado_cantidad = verificar_cantidad(carrito.product_id, carrito.car_cantidad)
                 if not resultado_cantidad["success"]:
                     return resultado_cantidad
-                
+               
                 #insertar producto al carrito
                 precio_unitario = resultado_producto["producto"]["Product_price"]
                 insertar_producto(resultado_carrito["car_id"], carrito.product_id, carrito.car_cantidad, precio_unitario)
-                
+                print("llego aqui")
                 #obtener carrito actualizado
                 carrito_actualizado = obtener_carrito_usuario(carrito.user_id)
                 

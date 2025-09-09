@@ -5,7 +5,7 @@ def verificar_producto_existe(product_id: int):
     Verifica si el producto existe en la base de datos.
     """
     query = """
-        SELECT Product_id, Product_name, Product_cant
+        SELECT Product_id, Product_name, Product_cant, Product_price
         FROM productos
         WHERE Product_id = %s
         LIMIT 1
@@ -34,7 +34,7 @@ def verificar_cantidad(product_id: int, product_cant: int):
         WHERE Product_id = %s
         LIMIT 1
     """
-    producto = execute_query(query, (product_id, product_cant,), fetchone=True)
+    producto = execute_query(query, (product_id,), fetchone=True)
 
     if not producto:
         return {
@@ -42,7 +42,7 @@ def verificar_cantidad(product_id: int, product_cant: int):
             "message": f"❌ El producto con ID {product_id} no existe"
         }
 
-    stock = producto["Product_cant"]
+    stock = producto[0]
 
     if stock < product_cant:
         return {
