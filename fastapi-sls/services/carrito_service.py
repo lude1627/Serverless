@@ -3,26 +3,23 @@ from services.producto_service import  verificar_cantidad
 
 
 def verificar_carrito_activo(user_id: int):
-    query = """
-        SELECT Car_id
-        FROM carrito
-        WHERE User_id = %s AND estado = 'activo'
-        LIMIT 1
-    """
-    carrito = execute_query(query, (user_id,), fetchone=True)
-
-    if not carrito:
-        return {
-            "success": False,
-            "message": f"⚠️ El usuario {user_id} no tiene un carrito activo"
-        }
-    
-    return {
-        "success": True,
-        "message": "✅ Carrito activo encontrado",
-        "car_id": carrito[0]
-    }
-
+        query_carrito = """
+                SELECT Car_id 
+                FROM carrito 
+                WHERE User_id = %s AND estado = 'activo'
+                LIMIT 1
+            """
+        result = execute_query(query_carrito, (user_id,), fetchone=True)
+            
+        if result:
+            car_id = result[0]  #validamos que el carrito existe
+        else:
+            # 2. Crear un carrito nuevo
+            insert_carrito = """
+                INSERT INTO carrito (User_id, estado) VALUES (%s, 'activo')
+            """
+            car_id = execute_query( insert_carrito,(user_id,), commit=True,return_id=True)   
+        return car_id
 
 def obtener_carrito_usuario(user_id: int):
     query = """
