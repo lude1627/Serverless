@@ -18,13 +18,19 @@ class CarritoClass:
             try:
                 #validar usuario
                 resultado_usuario = verificar_usuario_existe(carrito.user_id)
-                if not resultado_usuario["success"]:
-                    return resultado_usuario
+                if not resultado_usuario["existe"]:
+                    # return resultado_usuario
+                    return {
+                        "success": False,
+                        "message": f"❌ No se puede crear carrito porque el usuario {carrito.user_id} no existe"
+                    }
                 
                 #validar carrito
                 resultado_carrito = verificar_carrito_activo(carrito.user_id)
                 if not resultado_carrito["success"]:
                     return resultado_carrito
+                
+                car_id = resultado_carrito["car_id"]
                
                 #validar producto
                 resultado_producto = verificar_producto_existe(carrito.product_id)
@@ -53,7 +59,7 @@ class CarritoClass:
                 return {
                     "success": True,
                     "message": f"✅ Producto {carrito.product_id} agregado al carrito",
-                    # "carrito": carrito_actualizado
+                    "carrito": carrito_actualizado
                 }
                     
             except Exception as e:
@@ -76,11 +82,11 @@ class CarritoClass:
                 if not resultado_eliminar["success"]:
                     return resultado_eliminar
 
-                carrito_actualizado = obtener_carrito_usuario(user_id)
+                # carrito_actualizado = obtener_carrito_usuario(user_id)
                 return {
                     "success": True,
                     "message": resultado_eliminar["message"],
-                    "carrito": carrito_actualizado
+                    # "carrito": carrito_actualizado
                 }
             except Exception as e:
                 return {
@@ -88,44 +94,53 @@ class CarritoClass:
                     "message": f"Error al eliminar producto: {e}"
                 }
 
-                
-        def actualizar_cantidad_producto(self, user_id: int, detalle_id: int, nueva_cantidad: int):
+
+        def actualizar_producto(self, user_id: int, product_id: int, nueva_cantidad: int):
             try:
+                # 1️⃣ Verificar usuario
                 resultado_usuario = verificar_usuario_existe(user_id)
-                if not resultado_usuario["success"]:
+                if not resultado_usuario["existe"]:
                     return resultado_usuario
 
+                # 2️⃣ Verificar carrito activo
                 resultado_carrito = verificar_carrito_activo(user_id)
                 if not resultado_carrito["success"]:
                     return resultado_carrito
 
-                # obtener product_id del detalle
-                query_check = """
-                    SELECT Product_id 
-                    FROM carrito_detalle
-                    WHERE Detalle_id = %s AND Car_id = %s
-                    LIMIT 1
-                """
-                detalle = execute_query(query_check, (detalle_id, resultado_carrito["car_id"]), fetchone=True)
+                car_id = resultado_carrito["car_id"]
 
-                if not detalle:
-                    return {"success": False, "message": "❌ El producto no fue encontrado en el carrito"}
+                # 3️⃣ Verificar producto
+                resultado_producto = verificar_producto_existe(product_id)
+                if not resultado_producto["success"]:
+                    return resultado_producto
 
-                product_id = detalle[0]
+                stock = resultado_producto["producto"]["Product_stock"]
+                if nueva_cantidad > stock:
+                    return {
+                        "success": False,
+                        "message": f"⚠️ Stock insuficiente. Disponible: {stock}, solicitado: {nueva_cantidad}"
+                    }
 
-                resultado_update = actualizar_cantidad(detalle_id, resultado_carrito["car_id"], nueva_cantidad, product_id)
-                if not resultado_update["success"]:
-                    return resultado_update
+                # 4️⃣ Llamar al service para actualizar
+                resultado_actualizar = actualizar_cantidad(car_id, product_id, nueva_cantidad)
+                if not resultado_actualizar["success"]:
+                    return resultado_actualizar
 
+                # 5️⃣ Retornar carrito actualizado
                 carrito_actualizado = obtener_carrito_usuario(user_id)
+
                 return {
                     "success": True,
-                    "message": resultado_update["message"],
+                    "message": f"♻️ Cantidad actualizada para producto {product_id}",
                     "carrito": carrito_actualizado
                 }
 
             except Exception as e:
-                return {"success": False, "message": f"❌ Error al actualizar cantidad: {e}"}
+                return {
+                    "success": False,
+                    "message": f"❌ Error al actualizar producto: {e}"
+                }
+
 
         
         
