@@ -25,7 +25,7 @@ class CarritoClass:
                         "message": f"❌ No se puede crear carrito porque el usuario {carrito.user_id} no existe"
                     }
                 
-                #validar carrito
+                #validar carrito 
                 resultado_carrito = verificar_carrito_activo(carrito.user_id)
                 if not resultado_carrito["success"]:
                     return resultado_carrito
