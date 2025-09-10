@@ -14,4 +14,3 @@ login=Login()
 def log(data: LoginModel):
  
     return Login.login_user(data.username, data.password)
-

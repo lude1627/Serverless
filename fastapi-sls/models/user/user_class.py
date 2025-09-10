@@ -1,8 +1,9 @@
 from db import execute_query
 from fastapi.responses import JSONResponse
+from services.user_service.servicesU import validaU
 import re
 
-
+val = validaU()
 class Usuario:
     
     def register_user(self, id: int, username: str, phone: int, email: str, password: str):
@@ -18,38 +19,25 @@ class Usuario:
         if not password or len(password) < 6:
             return JSONResponse(content={"success": False, "message": "La contraseña debe tener al menos 6 caracteres"}, status_code=400)
 
-   
-        check_query = "SELECT User_id FROM usuarios WHERE User_id = %s"
-        try:
-            existing_user = execute_query(check_query, (id,), fetchone=True)
-            if existing_user:
+        if val.user_exist:
+       
+            query = """
+                INSERT INTO usuarios (User_id, User_name, User_phone, User_mail, User_password) 
+                VALUES (%s, %s, %s, %s, %s)
+            """
+            try:
+                execute_query(query, (id, username, phone, email, password), commit=True)
+                return JSONResponse(content={
+                    "success": True,
+                    "message": "Usuario registrado exitosamente"
+                }, status_code=201)
+            except Exception as e:
+                print(f"Error en register_user: {e}")
                 return JSONResponse(content={
                     "success": False,
-                    "message": "El ID ya está registrado"
-                }, status_code=409)  
-        except Exception as e:
-            print(f"Error al verificar usuario existente: {e}")
-            return JSONResponse(content={
-                "success": False,
-                "message": "Error interno al verificar usuario existente"
-            }, status_code=500)
-
-        query = """
-            INSERT INTO usuarios (User_id, User_name, User_phone, User_mail, User_password) 
-            VALUES (%s, %s, %s, %s, %s)
-        """
-        try:
-            execute_query(query, (id, username, phone, email, password), commit=True)
-            return JSONResponse(content={
-                "success": True,
-                "message": "Usuario registrado exitosamente"
-            }, status_code=201)
-        except Exception as e:
-            print(f"Error en register_user: {e}")
-            return JSONResponse(content={
-                "success": False,
-                "message": f"Error al registrar usuario: {e}"
-            }, status_code=500)
+                    "message": f"Error al registrar usuario: {e}"
+                }, status_code=500)
+        
 
 
 
