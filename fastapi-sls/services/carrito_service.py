@@ -28,12 +28,23 @@ def verificar_carrito_activo(user_id: int):
                 INSERT INTO carrito (User_id, fecha_creacion, estado)
                 VALUES (%s, NOW(), 'activo')
             """
-            car_id = execute_query(query_insert, (user_id,), commit=True, return_id=True)
+            execute_query(query_insert, (user_id,), commit=True, return_id=True)
+
+
+
+            car_id = execute_query(query, (user_id,), fetchone=True)
+
+            query = """
+            SELECT Car_id
+            FROM carrito
+            WHERE User_id = %s AND estado = 'activo'
+            LIMIT 1
+        """
 
             return {
                 "success": True,
                 "message": f"🛒 Carrito creado para el usuario {user_id}",
-                "car_id": car_id
+                "car_id": car_id[0]
             }
 
         # Si ya existe, devolver el ID

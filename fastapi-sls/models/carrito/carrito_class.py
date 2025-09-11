@@ -54,10 +54,7 @@ class CarritoClass:
                 detalle = execute_query(query, params, commit=True, return_id=True)
                 print("llego4.6")
                 
-                verificar_query = "SELECT * FROM carrito_detalle WHERE Car_id = %s"
-                resultado = execute_query(verificar_query, (car_id,), commit=False)
-
-                print("DEBUG - Registro insertado:", resultado)
+              
                 
                 
                 print("llego5")
