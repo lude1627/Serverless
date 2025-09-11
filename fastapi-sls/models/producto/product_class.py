@@ -24,7 +24,11 @@ class Productos:
             }, status_code=500)
 
 
+
     def all_products(self):
+        """
+        Retorna un JSONResponse con todos los productos o un mensaje si no hay.
+        """
         query = """
             SELECT p.Product_id, p.Product_name, p.Product_description,  
                    p.Product_cant, p.Product_price, c.Cat_name 
@@ -32,21 +36,52 @@ class Productos:
             INNER JOIN categorias c ON p.Cat_id = c.Cat_id 
             ORDER BY p.Product_name
         """
-        try: 
+        try:
             products = execute_query(query, fetchall=True)
+
+           
             if not products:
-                return JSONResponse(content={
+                return JSONResponse(
+                    content={
+                        "success": True,
+                        "message": "No hay productos registrados",
+                        "data": []
+                    },
+                    status_code=200
+                )
+
+         
+            productos_json = [
+                {
+                    "id": p[0],
+                    "nombre": p[1],
+                    "descripcion": p[2],
+                    "cantidad": p[3],
+                    "precio": p[4],
+                    "categoria": p[5]
+                }
+                for p in products
+            ]
+
+            return JSONResponse(
+                content={
                     "success": True,
-                    "message": "No hay productos registrados",
-                    "data": []
-                }, status_code=200)
-            return products
+                    "message": "Productos obtenidos correctamente",
+                    "data": productos_json
+                },
+                status_code=200
+            )
+
         except Exception as e:
-            print(f"Error al mostrar productos: {e}") 
-            return JSONResponse(content={
-                "success": False,
-                "message": "Error interno al obtener productos"
-            }, status_code=500)
+            print(f"Error al mostrar productos: {e}")
+            return JSONResponse(
+                content={
+                    "success": False,
+                    "message": "Error interno al obtener productos"
+                },
+                status_code=500
+            )
+
 
 
     def update_product(self, data: ProductUpdate):

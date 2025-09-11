@@ -16,22 +16,9 @@ productos = Productos()
 def create_product_route(data: ProductCreate):
     return productos.create_product(data)
        
-
 @Product_router.get("/view/data")
 def get_products():
-    products = productos.all_products()
-    productos_json = [
-        {
-            "id": p[0],
-            "nombre": p[1],
-            "descripcion": p[2],
-            "cantidad": p[3],
-            "precio": p[4],
-            "categoria": p[5]
-        }
-        for p in products
-    ]
-    return JSONResponse(content=productos_json)
+    return  productos.all_products()  
 
 
 @Product_router.delete("/delete/{id}")
