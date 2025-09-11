@@ -5,7 +5,7 @@ from services.usuario_service import  verificar_usuario_existe
 
 def verificar_carrito_activo(user_id: int):
     try:
-        # Verificar si el usuario existe antes de crear o consultar carrito
+        # 1. Verificar si el usuario existe antes de crear o consultar carrito
         usuario = verificar_usuario_existe(user_id)
         if not usuario["existe"]:
             return {
@@ -13,39 +13,30 @@ def verificar_carrito_activo(user_id: int):
                 "message": f"❌ No se puede crear carrito porque el usuario {user_id} no existe"
             }
 
-        # Buscar carrito activo
+        # 2. Buscar carrito activo
         query = """
-            SELECT Car_id
+            SELECT Car_id, estado
             FROM carrito
-            WHERE User_id = %s AND estado = 'activo'
+            WHERE User_id = %s AND estado = %s
             LIMIT 1
         """
-        carrito = execute_query(query, (user_id,), fetchone=True)
+        carrito = execute_query(query, (user_id, "1"), fetchone=True)
 
         if not carrito:
-            # Si no existe carrito, lo creamos
+            # 3. Crear carrito en estado ACTIVO (1)
             query_insert = """
                 INSERT INTO carrito (User_id, fecha_creacion, estado)
-                VALUES (%s, NOW(), 'activo')
+                VALUES (%s, NOW(), %s)
             """
-            execute_query(query_insert, (user_id,), commit=True, return_id=True)
-
-            car_id = execute_query(query, (user_id,), fetchone=True)
-
-            query = """
-            SELECT Car_id
-            FROM carrito
-            WHERE User_id = %s AND estado = 'activo'
-            LIMIT 1
-        """
+            nuevo_id = execute_query(query_insert, (user_id, "1"), commit=True, return_id=True)
 
             return {
                 "success": True,
                 "message": f"🛒 Carrito creado para el usuario {user_id}",
-                "car_id": car_id[0]
+                "car_id": nuevo_id
             }
 
-        # Si ya existe, devolver el ID
+        # 4. Si ya existe, devolver el ID
         return {
             "success": True,
             "message": "✅ Carrito activo encontrado",
@@ -181,3 +172,36 @@ def eliminar_producto(detalle_id: int, car_id: int):
             "message": f"❌ Error al eliminar producto: {e}"
         }
 
+
+def finalizar_compra(car_id: int):
+    # 1. Verificar el carrito
+    query_carrito = """
+        SELECT Car_id, estado
+        FROM carrito
+        WHERE Car_id = %s
+    """
+    carrito = execute_query(query_carrito, (car_id,), fetchone=True)
+
+    if not carrito:
+        return {"success": False, "message": f"❌ Carrito {car_id} no encontrado"}
+
+    estado = carrito[1]
+    if estado != 1:
+        return {"success": False, "message": "⚠️ Este carrito ya fue cerrado o cancelado"}
+
+
+    # 2. Actualizar estado del carrito
+    query_update = """
+        UPDATE carrito
+        SET estado = %s
+        WHERE Car_id = %s
+    """
+    estado_update = execute_query(query_update, (0, car_id,), commit=True)
+    
+    if estado_update == 0:
+        
+        return {"success": False, "message": "⚠️ No se actualizó ningún registro."}
+
+    return {"success": True, "message": f"✅ Compra finalizada. Carrito {car_id} cerrado."}
+    
+    

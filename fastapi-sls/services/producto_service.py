@@ -29,9 +29,7 @@ def verificar_producto_existe(product_id: int):
     }
 
 def verificar_cantidad(product_id: int, product_cant: int):
-    """
-    Verifica si el producto tiene suficiente cantidad disponible.
-    """
+   
     query = """
         SELECT Product_cant
         FROM productos
@@ -51,11 +49,20 @@ def verificar_cantidad(product_id: int, product_cant: int):
     if stock < product_cant:
         return {
             "success": False,
-            "message": f"⚠️ Producto agotado o insuficiente. Cantidad disponible: {stock}, intentaste agregar {product_cant}"
+            "message": f"⚠️ Producto agotado. Cantidad disponible: {stock}, intentaste agregar {product_cant}"
         }
+        
+    query_update = """
+        UPDATE productos
+        SET Product_cant = %s
+        WHERE Product_id = %s
+    """
+    
+    stock_update = stock - product_cant
+    execute_query(query_update, (stock_update, product_id))
 
     return {
         "success": True,
         "message": f"✅ Cantidad suficiente: {product_cant} unidades reservadas",
-        "stock_restante": stock - product_cant
+        "stock_restante": stock_update
     }

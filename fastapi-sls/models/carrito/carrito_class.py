@@ -4,9 +4,9 @@ from services.producto_service import verificar_producto_existe, verificar_canti
 from services.carrito_service import (
     verificar_carrito_activo, 
     obtener_carrito_usuario,
-    # insertar_producto,
     eliminar_producto,
-    actualizar_cantidad
+    actualizar_cantidad, 
+    finalizar_compra
 )
 
 from db import execute_query
@@ -18,50 +18,42 @@ class CarritoClass:
             try:
                 car_id = None
                 
-                print("llego1")
-                #validar carrito
-                #validar carrito 
+                # validar carrito
                 resultado_carrito = verificar_carrito_activo(carrito.user_id)
                 if not resultado_carrito["success"]:
                     return resultado_carrito
                 
                 car_id = resultado_carrito["car_id"]
                 
-                print("llego2")
-                #validar producto
+                # validar producto
                 resultado_producto = verificar_producto_existe(carrito.product_id)
                 if not resultado_producto["success"]:
                     return resultado_producto
                 
-                print("llego3")
-                #validar cantidad
+          
+                # validar cantidad
                 resultado_cantidad = verificar_cantidad(carrito.product_id, carrito.car_cantidad)
                 if not resultado_cantidad["success"]:
                     return resultado_cantidad
                 
-                print("llego4")
+                
                 # obtener precio del producto
                 precio_unitario = resultado_producto["producto"]["Product_price"]
                 
-                print("llego4.5")
                 
-                # 5️⃣ insertar producto directamente aquí (antes estaba en el service)
+                # insertar producto directamente aquí (antes estaba en el service)
                 query = """
                     INSERT INTO carrito_detalle (Car_id, Product_id, Detalle_cantidad, precio_unitario)
                     VALUES (%s, %s, %s, %s)
                 """
                 params = (car_id, carrito.product_id, carrito.car_cantidad, precio_unitario)
-                detalle = execute_query(query, params, commit=True, return_id=True)
-                print("llego4.6")
+                execute_query(query, params, commit=True, return_id=True)
+
                 
-              
-                
-                
-                print("llego5")
                 return {
                     "success": True,
                     "message": f"✅ Producto {carrito.product_id} agregado al carrito {car_id}",
-                    "detalle": detalle
+                    # "detalle": detalle
                 }
 
                    
