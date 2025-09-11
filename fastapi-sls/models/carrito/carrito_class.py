@@ -18,8 +18,12 @@ class CarritoClass:
             try:
                 car_id = None
                 
+<<<<<<< HEAD
                 print("llego1")
                 #validar carrito
+=======
+                #validar carrito 
+>>>>>>> a9584f2a57b26ba0ae4b45f1b6c3253ad16a7672
                 resultado_carrito = verificar_carrito_activo(carrito.user_id)
                 if not resultado_carrito["success"]:
                     return resultado_carrito
