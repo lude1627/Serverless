@@ -64,7 +64,7 @@ functions:
           path: /carro/agregar
           method: post
       - httpApi:
-          path: /carro/actualizar/{detalle_id}
+          path: /carro/actualizar/{detalle_id}/{car_id}
           method: put
       - httpApi:
           path: /carro/usuario/{user_id}
