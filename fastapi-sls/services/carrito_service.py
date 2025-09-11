@@ -1,29 +1,53 @@
 from db import execute_query
-from services.producto_service import  verificar_cantidad
 from services.usuario_service import  verificar_usuario_existe
 
 
 
 def verificar_carrito_activo(user_id: int):
-    query = """
-        SELECT Car_id
-        FROM carrito
-        WHERE User_id = %s AND estado = 'activo'
-        LIMIT 1
-    """
-    carrito = execute_query(query, (user_id,), fetchone=True)
+    try:
+        # Verificar si el usuario existe antes de crear o consultar carrito
+        usuario = verificar_usuario_existe(user_id)
+        if not usuario["existe"]:
+            return {
+                "success": False,
+                "message": f"❌ No se puede crear carrito porque el usuario {user_id} no existe"
+            }
 
-    if not carrito:
+        # Buscar carrito activo
+        query = """
+            SELECT Car_id
+            FROM carrito
+            WHERE User_id = %s AND estado = 'activo'
+            LIMIT 1
+        """
+        carrito = execute_query(query, (user_id,), fetchone=True)
+
+        if not carrito:
+            # Si no existe carrito, lo creamos
+            query_insert = """
+                INSERT INTO carrito (User_id, fecha_creacion, estado)
+                VALUES (%s, NOW(), 'activo')
+            """
+            car_id = execute_query(query_insert, (user_id,), commit=True, return_id=True)
+
+            return {
+                "success": True,
+                "message": f"🛒 Carrito creado para el usuario {user_id}",
+                "car_id": car_id
+            }
+
+        # Si ya existe, devolver el ID
+        return {
+            "success": True,
+            "message": "✅ Carrito activo encontrado",
+            "car_id": carrito[0]
+        }
+
+    except Exception as e:
         return {
             "success": False,
-            "message": f"⚠️ El usuario {user_id} no tiene un carrito activo"
+            "message": f"❌ Error al verificar/crear carrito: {str(e)}"
         }
-    
-    return {
-        "success": True,
-        "message": "✅ Carrito activo encontrado",
-        "car_id": carrito[0]
-    }
 
 
 def obtener_carrito_usuario(user_id: int):
@@ -90,59 +114,7 @@ def obtener_carrito_usuario(user_id: int):
         return {
             "success": False,
             "message": "❌ Error al obtener los productos del carrito"
-        }
-        
-        
-def insertar_producto(car_id, product_id, cantidad, producto):
-    
-    try:
-        query = """
-            INSERT INTO carrito_detalle (Car_id, Product_id, Detalle_cantidad, precio_unitario)
-            VALUES (%s, %s, %s, %s)
-        """
-        params = (car_id, product_id, cantidad, producto)
-
-        detalle_id = execute_query(query, params, commit=True, return_id=True)
-
-        return {
-            "success": True,
-            "message": f"✅ Producto {product_id} agregado al carrito)",
-            "detalle_id": detalle_id
-        }
-    except Exception as e:
-        return {
-            "success": False,
-            "message": f"❌ Error al insertar producto: {e}"
-        } 
-        
-        
-def eliminar_producto(detalle_id: int):
-    
-    try:
-        query = """
-            DELETE FROM carrito_detalle
-            WHERE Detalle_id = %s
-        """
-        params = (detalle_id,)
-        rows_deleted = execute_query(query, params, commit=True)
-
-        if rows_deleted:
-            return {
-                "success": True,
-                "message": f"🗑️ Producto {detalle_id} eliminado del carrito"
-            }
-        else:
-            return {
-                "success": False,
-                "message": f"⚠️ El producto {detalle_id} no existe en el carrito"
-            }
-
-    except Exception as e:
-        print(f"❌ Error en eliminar_producto: {e}")
-        return {
-            "success": False,
-            "message": f"❌ Error al eliminar producto: {e}"
-        }
+        }    
         
         
 def actualizar_cantidad(car_id: int, product_id: int, nueva_cantidad: int):
@@ -172,4 +144,31 @@ def actualizar_cantidad(car_id: int, product_id: int, nueva_cantidad: int):
         }
 
  
+def eliminar_producto(detalle_id: int, car_id: int):
+    
+    try:
+        query = """
+            DELETE FROM carrito_detalle
+            WHERE Detalle_id = %s AND Car_id = %s
+        """
+        params = (detalle_id, car_id)
+        rows_deleted = execute_query(query, params, commit=True)
+
+        if rows_deleted:
+            return {
+                "success": True,
+                "message": f"🗑️ Producto {detalle_id} eliminado del carrito"
+            }
+        else:
+            return {
+                "success": False,
+                "message": f"⚠️ El producto {detalle_id} no existe en el carrito {car_id}"
+            }
+
+    except Exception as e:
+        print(f"❌ Error en eliminar_producto: {e}")
+        return {
+            "success": False,
+            "message": f"❌ Error al eliminar producto: {e}"
+        }
 

@@ -51,11 +51,11 @@ def verificar_cantidad(product_id: int, product_cant: int):
     if stock < product_cant:
         return {
             "success": False,
-            "message": f"⚠️ Producto agotado o insuficiente. Stock disponible: {stock}, intentaste agregar {product_cant}"
+            "message": f"⚠️ Producto agotado o insuficiente. Cantidad disponible: {stock}, intentaste agregar {product_cant}"
         }
 
     return {
         "success": True,
-        "message": f"✅ Stock suficiente: {product_cant} unidades reservadas",
+        "message": f"✅ Cantidad suficiente: {product_cant} unidades reservadas",
         "stock_restante": stock - product_cant
     }

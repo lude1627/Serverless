@@ -70,7 +70,7 @@ functions:
           path: /carro/usuario/{user_id}
           method: get
       - httpApi:
-          path: /carro/eliminar/{id}
+          path: /carro/eliminar
           method: delete
 
 

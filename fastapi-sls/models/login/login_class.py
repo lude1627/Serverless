@@ -7,6 +7,7 @@ class Login:
         query = "SELECT * FROM usuarios WHERE User_name = %s AND User_password = %s"
         try:
             user = execute_query(query, (username, password), fetchone=True)
+            print(user)
             user_id = user[0]
             return JSONResponse(content={
                     "success": True,
@@ -14,11 +15,9 @@ class Login:
                     "data": {"user_id": user_id}
                 })
  
-              
         except Exception as e:
             print(f"Error en login_user: {e}")
             return JSONResponse(content={
                     "success": False,
                     "message": "Usuario o contraseña incorrectos"
                 })
-

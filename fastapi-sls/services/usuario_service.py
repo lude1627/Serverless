@@ -14,10 +14,12 @@ def verificar_usuario_existe(user_id: int):
         
         print("DEBUG resultado consulta:", usuario)
 
+        existe = usuario is not None and (usuario.get("User_id") if isinstance(usuario, dict) else usuario[0])
+
         return {
             "success": True,
-            "existe": bool(usuario),
-            "message": f"✅ Usuario {user_id} encontrado" if usuario else f"⚠️ Usuario {user_id} no existe"
+            "existe": bool(existe),
+            "message": f"✅ Usuario {user_id} encontrado" if existe else f"⚠️ Usuario {user_id} no existe"
         }
     except Exception as e:
         print("ERROR verificar_usuario_existe:", e)
@@ -26,5 +28,6 @@ def verificar_usuario_existe(user_id: int):
             "existe": False,
             "message": f"❌ Error al verificar usuario: {e}"
         }
+
 
 

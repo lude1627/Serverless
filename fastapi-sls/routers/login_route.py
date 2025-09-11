@@ -1,5 +1,4 @@
 from fastapi import APIRouter
-from fastapi.responses import JSONResponse
 from models.login.login_entity import LoginModel
 from models.login.login_class import Login
 
@@ -15,4 +14,3 @@ login=Login()
 def log(data: LoginModel):
  
     return Login.login_user(data.username, data.password)
-
