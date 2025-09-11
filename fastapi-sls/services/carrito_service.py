@@ -3,6 +3,7 @@ from services.usuario_service import  verificar_usuario_existe
 
 
 
+
 def verificar_carrito_activo(user_id: int):
     try:
         # 1. Verificar si el usuario existe antes de crear o consultar carrito
@@ -117,31 +118,32 @@ def obtener_carrito_usuario(user_id: int):
         }    
         
         
-def actualizar_cantidad(car_id: int, product_id: int, nueva_cantidad: int):
-    try:
-        query = """
-            UPDATE carrito_detalle
-            SET Detalle_cantidad = %s
-            WHERE Car_id = %s AND Product_id = %s
-        """
-        params = (nueva_cantidad, car_id, product_id)
-        rows = execute_query(query, params, commit=True)
+# def actualizar_cantidad(car_id: int, product_id: int, up:Ac):
+#     try:
+#         query = """
+#             UPDATE carrito_detalle
+#             SET Detalle_cantidad = %s
+#             WHERE Car_id = %s AND Product_id = %s
+#         """
+#         print("llego aca")
+#         params = (nueva_cantidad, car_id, product_id)
+#         rows = execute_query(query, params, commit=True)
 
-        if rows == 0:
-            return {
-                "success": False,
-                "message": f"⚠️ No se encontró el producto {product_id} en el carrito {car_id}"
-            }
+#         if rows == 0:
+#             return {
+#                 "success": False,
+#                 "message": f"⚠️ No se encontró el producto {product_id} en el carrito {car_id}"
+#             }
 
-        return {
-            "success": True,
-            "message": f"✅ Producto {product_id} actualizado a {nueva_cantidad} unidades"
-        }
-    except Exception as e:
-        return {
-            "success": False,
-            "message": f"❌ Error al actualizar producto: {e}"
-        }
+#         return {
+#             "success": True,
+#             "message": f"✅ Producto {product_id} actualizado a {nueva_cantidad} unidades"
+#         }
+#     except Exception as e:
+#         return {
+#             "success": False,
+#             "message": f"❌ Error al actualizar producto: {e}"
+#         }
 
  
 def eliminar_producto(detalle_id: int, car_id: int):

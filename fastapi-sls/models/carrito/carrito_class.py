@@ -1,12 +1,10 @@
-from models.carrito.carrito_entity import CarritoEntity
+from models.carrito.carrito_entity import CarritoEntity,Updatecantidad
+from fastapi.responses import JSONResponse
 from services.usuario_service import verificar_usuario_existe
 from services.producto_service import verificar_producto_existe, verificar_cantidad
 from services.carrito_service import (
-    verificar_carrito_activo, 
-    obtener_carrito_usuario,
-    eliminar_producto,
-    actualizar_cantidad, 
-    finalizar_compra
+    verificar_carrito_activo,
+    eliminar_producto
 )
 
 from db import execute_query
@@ -90,48 +88,31 @@ class CarritoClass:
                     "message": f"Error al eliminar producto: {e}"
                 }
 
-
-        def actualizar_producto(self, user_id: int, product_id: int, nueva_cantidad: int):
+        def actualizar_producto(self, detalle_id: int,car_id:int,up:Updatecantidad):
+            query = """
+                UPDATE carrito_detalle
+                SET Detalle_cantidad = %s
+                WHERE Detalle_id = %s and Car_id = %s
+            """
             try:
+                rows = execute_query(query, (up.detalle_cantidad,detalle_id,car_id ), commit=True)
 
-                resultado_usuario = verificar_usuario_existe(user_id)
-                if not resultado_usuario["existe"]:
-                    return resultado_usuario
+                if rows == 0:
+                    return JSONResponse(
+                        content={"success": False, "message": "Carrito no encontrado"},
+                        status_code=404
+                    )
 
-                resultado_carrito = verificar_carrito_activo(user_id)
-                if not resultado_carrito["success"]:
-                    return resultado_carrito
-
-                car_id = resultado_carrito["car_id"]
-
-                resultado_producto = verificar_producto_existe(product_id)
-                if not resultado_producto["success"]:
-                    return resultado_producto
-
-                stock = resultado_producto["producto"]["Product_stock"]
-                if nueva_cantidad > stock:
-                    return {
-                        "success": False,
-                        "message": f"⚠️ Stock insuficiente. Disponible: {stock}, solicitado: {nueva_cantidad}"
-                    }
-
-                resultado_actualizar = actualizar_cantidad(car_id, product_id, nueva_cantidad)
-                if not resultado_actualizar["success"]:
-                    return resultado_actualizar
-
-                carrito_actualizado = obtener_carrito_usuario(user_id)
-
-                return {
-                    "success": True,
-                    "message": f"♻️ Cantidad actualizada para producto {product_id}",
-                    "carrito": carrito_actualizado
-                }
+                return JSONResponse(
+                    content={"success": True, "message": "Carrito actualizado exitosamente"}
+                )
 
             except Exception as e:
                 return {
                     "success": False,
                     "message": f"❌ Error al actualizar producto: {e}"
                 }
+
 
 
         
