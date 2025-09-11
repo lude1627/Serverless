@@ -30,8 +30,6 @@ def verificar_carrito_activo(user_id: int):
             """
             execute_query(query_insert, (user_id,), commit=True, return_id=True)
 
-
-
             car_id = execute_query(query, (user_id,), fetchone=True)
 
             query = """
