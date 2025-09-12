@@ -11,41 +11,41 @@ def verificar_carrito_activo(user_cc: int):
                 "success": False,
                 "message": f"❌ No se puede crear carrito porque el usuario {user_cc} no existe"
             }
-
+        print("1")
         # Buscar carrito activo
         query = """
             SELECT Car_id
             FROM carrito
-            WHERE User_cc = %s AND estado = 'activo'
+            WHERE User_cc = %s AND estado = '1'
             LIMIT 1
         """
         carrito = execute_query(query, (user_cc,), fetchone=True)
-
+        print("2")
         if not carrito:
             # Si no existe carrito, lo creamos
             query_insert = """
                 INSERT INTO carrito (User_cc, fecha_creacion, estado)
-                VALUES (%s, NOW(), 'activo')
+                VALUES (%s, NOW(), '1')
             """
             execute_query(query_insert, (user_cc,), commit=True, return_id=True)
 
 
-
+            print("3")
             car_id = execute_query(query, (user_cc,), fetchone=True)
 
             query = """
             SELECT Car_id
             FROM carrito
-            WHERE User_cc = %s AND estado = 'activo'
+            WHERE User_cc = %s AND estado = '1'
             LIMIT 1
         """
-
+            print("4")
             return {
                 "success": True,
                 "message": f"🛒 Carrito creado para el usuario {user_cc}",
                 "car_id": car_id[0]
             }
-
+        print("5")
         # Si ya existe, devolver el ID
         return {
             "success": True,
@@ -54,6 +54,7 @@ def verificar_carrito_activo(user_cc: int):
         }
 
     except Exception as e:
+        print("lolololololololololol")
         return {
             "success": False,
             "message": f"❌ Error al verificar/crear carrito: {str(e)}"
@@ -75,7 +76,7 @@ def obtener_carrito_usuario(user_cc: int):
         INNER JOIN usuarios u ON u.User_cc = c.User_cc
         INNER JOIN carrito_detalle cd ON cd.Car_id = c.Car_id
         INNER JOIN productos p ON cd.Product_id = p.Product_id
-        WHERE c.User_cc = %s AND c.estado = 'activo'
+        WHERE c.User_cc = %s AND c.estado = '1'
     """
 
     try:

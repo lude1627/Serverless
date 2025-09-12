@@ -102,7 +102,7 @@ class CarritoClass:
                         content={"success": False, "message": "Carrito no encontrado"},
                         status_code=404
                     )
-
+    
                 return JSONResponse(
                     content={"success": True, "message": "Carrito actualizado exitosamente"}
                 )
