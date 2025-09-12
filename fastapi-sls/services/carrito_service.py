@@ -16,7 +16,7 @@ def verificar_carrito_activo(user_cc: int):
         query = """
             SELECT Car_id
             FROM carrito
-            WHERE User_id = %s AND estado = 'activo'
+            WHERE User_cc = %s AND estado = 'activo'
             LIMIT 1
         """
         carrito = execute_query(query, (user_cc,), fetchone=True)
@@ -24,7 +24,7 @@ def verificar_carrito_activo(user_cc: int):
         if not carrito:
             # Si no existe carrito, lo creamos
             query_insert = """
-                INSERT INTO carrito (User_id, fecha_creacion, estado)
+                INSERT INTO carrito (User_cc, fecha_creacion, estado)
                 VALUES (%s, NOW(), 'activo')
             """
             execute_query(query_insert, (user_cc,), commit=True, return_id=True)
@@ -36,7 +36,7 @@ def verificar_carrito_activo(user_cc: int):
             query = """
             SELECT Car_id
             FROM carrito
-            WHERE User_id = %s AND estado = 'activo'
+            WHERE User_cc = %s AND estado = 'activo'
             LIMIT 1
         """
 
@@ -75,7 +75,7 @@ def obtener_carrito_usuario(user_cc: int):
         INNER JOIN usuarios u ON u.User_cc = c.User_cc
         INNER JOIN carrito_detalle cd ON cd.Car_id = c.Car_id
         INNER JOIN productos p ON cd.Product_id = p.Product_id
-        WHERE c.User_id = %s AND c.estado = 'activo'
+        WHERE c.User_cc = %s AND c.estado = 'activo'
     """
 
     try:

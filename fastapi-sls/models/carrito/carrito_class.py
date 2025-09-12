@@ -76,7 +76,7 @@ class CarritoClass:
                 if not resultado_eliminar["success"]:
                     return resultado_eliminar
 
-                # carrito_actualizado = obtener_carrito_usuario(user_id)
+               
                 return {
                     "success": True,
                     "message": resultado_eliminar["message"],
