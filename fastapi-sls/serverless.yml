@@ -72,9 +72,9 @@ functions:
       - httpApi:
           path: /carro/eliminar/{detalle_id}/{car_id}
           method: delete
-      - httpApi:
-          path: /carro/finalizar/{car_id}
-          method: put
+      # - httpApi:
+      #     path: /carro/finalizar/{car_id}
+      #     method: put
 
 
 

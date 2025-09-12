@@ -2,8 +2,6 @@ from db import execute_query
 from services.usuario_service import  verificar_usuario_existe
 
 
-
-
 def verificar_carrito_activo(user_id: int):
     try:
         # Verificar si el usuario existe antes de crear o consultar carrito
@@ -18,7 +16,7 @@ def verificar_carrito_activo(user_id: int):
         query = """
             SELECT Car_id
             FROM carrito
-            WHERE User_id = %s AND estado = 'activo'
+            WHERE User_id = %s AND estado = '1'
             LIMIT 1
         """
         carrito = execute_query(query, (user_id,), fetchone=True)
@@ -27,7 +25,7 @@ def verificar_carrito_activo(user_id: int):
             # Si no existe carrito, lo creamos
             query_insert = """
                 INSERT INTO carrito (User_id, fecha_creacion, estado)
-                VALUES (%s, NOW(), 'activo')
+                VALUES (%s, NOW(), '1')
             """
             execute_query(query_insert, (user_id,), commit=True, return_id=True)
 
@@ -38,7 +36,7 @@ def verificar_carrito_activo(user_id: int):
             query = """
             SELECT Car_id
             FROM carrito
-            WHERE User_id = %s AND estado = 'activo'
+            WHERE User_id = %s AND estado = '1'
             LIMIT 1
         """
 
@@ -77,7 +75,7 @@ def obtener_carrito_usuario(user_id: int):
         INNER JOIN usuarios u ON u.User_id = c.User_id
         INNER JOIN carrito_detalle cd ON cd.Car_id = c.Car_id
         INNER JOIN productos p ON cd.Product_id = p.Product_id
-        WHERE c.User_id = %s AND c.estado = 'activo'
+        WHERE c.User_id = %s AND c.estado = '1'
     """
 
     try:
@@ -127,34 +125,6 @@ def obtener_carrito_usuario(user_id: int):
             "success": False,
             "message": "❌ Error al obtener los productos del carrito"
         }    
-        
-        
-# def actualizar_cantidad(car_id: int, product_id: int, up:Ac):
-#     try:
-#         query = """
-#             UPDATE carrito_detalle
-#             SET Detalle_cantidad = %s
-#             WHERE Car_id = %s AND Product_id = %s
-#         """
-#         print("llego aca")
-#         params = (nueva_cantidad, car_id, product_id)
-#         rows = execute_query(query, params, commit=True)
-
-#         if rows == 0:
-#             return {
-#                 "success": False,
-#                 "message": f"⚠️ No se encontró el producto {product_id} en el carrito {car_id}"
-#             }
-
-#         return {
-#             "success": True,
-#             "message": f"✅ Producto {product_id} actualizado a {nueva_cantidad} unidades"
-#         }
-#     except Exception as e:
-#         return {
-#             "success": False,
-#             "message": f"❌ Error al actualizar producto: {e}"
-#         }
 
  
 def eliminar_producto(detalle_id: int, car_id: int):
@@ -186,35 +156,35 @@ def eliminar_producto(detalle_id: int, car_id: int):
         }
 
 
-def finalizar_compra(car_id: int):
-    # 1. Verificar el carrito
-    query_carrito = """
-        SELECT Car_id, estado
-        FROM carrito
-        WHERE Car_id = %s
-    """
-    carrito = execute_query(query_carrito, (car_id,), fetchone=True)
+# def finalizar_compra(car_id: int):
+#     # 1. Verificar el carrito
+#     query_carrito = """
+#         SELECT Car_id, estado
+#         FROM carrito
+#         WHERE Car_id = %s
+#     """
+#     carrito = execute_query(query_carrito, (car_id,), fetchone=True)
 
-    if not carrito:
-        return {"success": False, "message": f"❌ Carrito {car_id} no encontrado"}
+#     if not carrito:
+#         return {"success": False, "message": f"❌ Carrito {car_id} no encontrado"}
 
-    estado = carrito[1]
-    if estado != 1:
-        return {"success": False, "message": "⚠️ Este carrito ya fue cerrado o cancelado"}
+#     estado = carrito[1]
+#     if estado != 1:
+#         return {"success": False, "message": "⚠️ Este carrito ya fue cerrado o cancelado"}
 
 
-    # 2. Actualizar estado del carrito
-    query_update = """
-        UPDATE carrito
-        SET estado = %s
-        WHERE Car_id = %s
-    """
-    estado_update = execute_query(query_update, (0, car_id,), commit=True)
+#     # 2. Actualizar estado del carrito
+#     query_update = """
+#         UPDATE carrito
+#         SET estado = %s
+#         WHERE Car_id = %s
+#     """
+#     estado_update = execute_query(query_update, (0, car_id,), commit=True)
     
-    if estado_update == 0:
+#     if estado_update == 0:
         
-        return {"success": False, "message": "⚠️ No se actualizó ningún registro."}
+#         return {"success": False, "message": "⚠️ No se actualizó ningún registro."}
 
-    return {"success": True, "message": f"✅ Compra finalizada. Carrito {car_id} cerrado."}
+#     return {"success": True, "message": f"✅ Compra finalizada. Carrito {car_id} cerrado."}
     
     
