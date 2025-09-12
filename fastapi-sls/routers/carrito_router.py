@@ -32,6 +32,3 @@ def eliminar(detalle_id: int, car_id: int):
 def actualizar(detalle_id: int,car_id:int, up:Updatecantidad):
     return carro.actualizar_producto(detalle_id,car_id,up)
 
-
-
- 
