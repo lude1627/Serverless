@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
 class CarritoEntity(BaseModel):
-    user_id: int
+    user_cc: int
     product_id: int
     car_cantidad: int
     

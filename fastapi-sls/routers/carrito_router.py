@@ -18,9 +18,9 @@ def agregar(carrito: CarritoEntity):
     return carro.agregar_producto(carrito)
 
 
-@carrito_router.get("/usuario/{user_id}")
-def obtener_carrito(user_id: int):
-    return obtener_carrito_usuario(user_id)
+@carrito_router.get("/usuario/{user_cc}")
+def obtener_carrito(user_cc: int):
+    return obtener_carrito_usuario(user_cc)
 
 
 @carrito_router.delete("/eliminar/{detalle_id}/{car_id}")
@@ -34,3 +34,4 @@ def actualizar(detalle_id: int,car_id:int, up:Updatecantidad):
 
 
 
+ 

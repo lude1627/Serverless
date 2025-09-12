@@ -9,7 +9,7 @@ class Usuario:
     
     def register_user(self, data: RegisterModel):
        
-        if not isinstance(data.User_id, int) or data.User_id <= 0:
+        if not isinstance(data.user_cc, int) or data.user_cc <= 0:
             return JSONResponse(content={"success": False, "message": "El ID debe ser un número entero positivo"}, status_code=400)
         if not data.username or data.username.strip() == "":
             return JSONResponse(content={"success": False, "message": "El nombre de usuario es obligatorio"}, status_code=400)
@@ -21,21 +21,21 @@ class Usuario:
             return JSONResponse(content={"success": False, "message": "La contraseña debe tener al menos 6 caracteres"}, status_code=400)
 
       
-        resultado_usuario = verificar_usuario_existe(data.User_id)
+        resultado_usuario = verificar_usuario_existe(data.user_cc)
         if resultado_usuario["existe"]:
                     return {
                         "success": False,
-                        "message": f"El usuario con el ID {data.User_id} ya existe"
+                        "message": f"El usuario con el ID {data.user_cc} ya existe"
                     }    
         
        
         query = """
-                INSERT INTO usuarios (User_id, User_name, User_phone, User_mail, User_password) 
+                INSERT INTO usuarios (User_cc, User_name, User_phone, User_mail, User_password) 
                 VALUES (%s, %s, %s, %s, %s)
             """
             
         try:
-                execute_query(query, (data.User_id, data.username, data.phone, data.email, data.password), commit=True)
+                execute_query(query, (data.user_cc, data.username, data.phone, data.email, data.password), commit=True)
                 return JSONResponse(content={
                     "success": True,
                     "message": "Usuario registrado exitosamente"
@@ -52,7 +52,7 @@ class Usuario:
 
     def update_user(self, data: UpdateUserModel):
        
-        if not isinstance(data.User_id, int) or data.User_id <= 0:
+        if not isinstance(data.user_cc, int) or data.user_cc <= 0:
             return JSONResponse(content={"success": False, "message": "El ID es inválido"}, status_code=400)
         if not data.username or data.username.strip() == "":
             return JSONResponse(content={"success": False, "message": "El nombre de usuario es obligatorio"}, status_code=400)
@@ -64,10 +64,10 @@ class Usuario:
         query = """
             UPDATE usuarios 
             SET User_name = %s, User_phone = %s, User_mail = %s, User_password = %s 
-            WHERE User_id = %s
+            WHERE User_cc = %s
         """
         try:
-            rows = execute_query(query, (data.username, data.phone, data.email, data.password, data.User_id), commit=True)
+            rows = execute_query(query, (data.username, data.phone, data.email, data.password, data.user_cc), commit=True)
             if rows == 0:
                 return JSONResponse(content={
                     "success": False,
@@ -87,19 +87,19 @@ class Usuario:
             }, status_code=500)
 
 
-    def view_user(self, User_id: int):
-        if not isinstance(User_id, int) or User_id <= 0:
+    def view_user(self, user_cc: int):
+        if not isinstance(user_cc, int) or user_cc <= 0:
             return JSONResponse(content={"success": False, "message": "ID inválido"}, status_code=400)
 
-        query = "SELECT User_id, User_name, User_phone, User_mail, User_password FROM usuarios WHERE User_id = %s"
+        query = "SELECT User_cc, User_name, User_phone, User_mail, User_password FROM usuarios WHERE User_cc = %s"
         try:
-            user = execute_query(query, (User_id,), fetchone=True)
+            user = execute_query(query, (user_cc,), fetchone=True)
             if user:
                 return JSONResponse(content={
                     "success": True,
                     "message": "Usuario encontrado",
                     "data": {
-                        "User_id": user[0],
+                        "user_cc": user[0],
                         "username": user[1],
                         "phone": user[2],
                         "email": user[3],

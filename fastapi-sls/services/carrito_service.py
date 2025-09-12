@@ -4,47 +4,47 @@ from services.usuario_service import  verificar_usuario_existe
 
 
 
-def verificar_carrito_activo(user_id: int):
+def verificar_carrito_activo(user_cc: int):
     try:
         # Verificar si el usuario existe antes de crear o consultar carrito
-        usuario = verificar_usuario_existe(user_id)
+        usuario = verificar_usuario_existe(user_cc)
         if not usuario["existe"]:
             return {
                 "success": False,
-                "message": f"❌ No se puede crear carrito porque el usuario {user_id} no existe"
+                "message": f"❌ No se puede crear carrito porque el usuario {user_cc} no existe"
             }
 
         # Buscar carrito activo
         query = """
             SELECT Car_id
             FROM carrito
-            WHERE User_id = %s AND estado = 'activo'
+            WHERE User_cc = %s AND estado = 'activo'
             LIMIT 1
         """
-        carrito = execute_query(query, (user_id,), fetchone=True)
+        carrito = execute_query(query, (user_cc,), fetchone=True)
 
         if not carrito:
             # Si no existe carrito, lo creamos
             query_insert = """
-                INSERT INTO carrito (User_id, fecha_creacion, estado)
+                INSERT INTO carrito (User_cc, fecha_creacion, estado)
                 VALUES (%s, NOW(), 'activo')
             """
-            execute_query(query_insert, (user_id,), commit=True, return_id=True)
+            execute_query(query_insert, (user_cc,), commit=True, return_id=True)
 
 
 
-            car_id = execute_query(query, (user_id,), fetchone=True)
+            car_id = execute_query(query, (user_cc,), fetchone=True)
 
             query = """
             SELECT Car_id
             FROM carrito
-            WHERE User_id = %s AND estado = 'activo'
+            WHERE User_cc = %s AND estado = 'activo'
             LIMIT 1
         """
 
             return {
                 "success": True,
-                "message": f"🛒 Carrito creado para el usuario {user_id}",
+                "message": f"🛒 Carrito creado para el usuario {user_cc}",
                 "car_id": car_id[0]
             }
 
@@ -62,7 +62,7 @@ def verificar_carrito_activo(user_id: int):
         }
 
 
-def obtener_carrito_usuario(user_id: int):
+def obtener_carrito_usuario(user_cc: int):
     query = """
         SELECT 
             u.User_name,
@@ -74,19 +74,19 @@ def obtener_carrito_usuario(user_id: int):
             p.Product_price AS precio_unitario,
             (cd.Detalle_cantidad * p.Product_price) AS subtotal
         FROM carrito c
-        INNER JOIN usuarios u ON u.User_id = c.User_id
+        INNER JOIN usuarios u ON u.User_cc = c.User_cc
         INNER JOIN carrito_detalle cd ON cd.Car_id = c.Car_id
         INNER JOIN productos p ON cd.Product_id = p.Product_id
-        WHERE c.User_id = %s AND c.estado = 'activo'
+        WHERE c.User_cc = %s AND c.estado = 'activo'
     """
 
     try:
-        result = execute_query(query, (user_id,), fetchall=True)
+        result = execute_query(query, (user_cc,), fetchall=True)
 
         if not result:
             return {
                 "success": False,
-                "message": f"⚠️ El usuario {user_id} no tiene productos en el carrito"
+                "message": f"⚠️ El usuario {user_cc} no tiene productos en el carrito"
             }
 
         # Datos generales del carrito (primer registro)

@@ -25,7 +25,7 @@ functions:
           path: /user/register
           method: post
       - httpApi:
-          path: /user/view/{id}
+          path: /user/view/{user_cc}
           method: get
       - httpApi:
           path: /user/update
@@ -67,7 +67,7 @@ functions:
           path: /carro/actualizar/{detalle_id}/{car_id}
           method: put
       - httpApi:
-          path: /carro/usuario/{user_id}
+          path: /carro/usuario/{user_cc}
           method: get
       - httpApi:
           path: /carro/eliminar/{detalle_id}/{car_id}

@@ -16,9 +16,9 @@ def register(data: RegisterModel):
         return usuario.register_user(data)
 
 
-@user_router.get("/view/{User_id}")
-def get_user_json(User_id: int):
-    return usuario.view_user(User_id)
+@user_router.get("/view/{user_cc}")
+def get_user_json(user_cc: int):
+    return usuario.view_user(user_cc)
 
 
 @user_router.put("/update")

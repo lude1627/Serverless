@@ -11,6 +11,6 @@ login=Login()
 
 
 @login_router.post("/sign_in")
-def log(data: LoginModel):
+def log( data:LoginModel):
  
-    return Login.login_user(data.username, data.password)
+    return login.login_user(data)

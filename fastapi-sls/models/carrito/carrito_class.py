@@ -17,7 +17,7 @@ class CarritoClass:
                 car_id = None
                 
                 # validar carrito
-                resultado_carrito = verificar_carrito_activo(carrito.user_id)
+                resultado_carrito = verificar_carrito_activo(carrito.user_cc)
                 if not resultado_carrito["success"]:
                     return resultado_carrito
                 
@@ -62,13 +62,13 @@ class CarritoClass:
                 }
         
                 
-        def eliminar_producto(self, user_id: int, detalle_id: int):
+        def eliminar_producto(self, user_cc: int, detalle_id: int):
             try:
-                resultado_usuario = verificar_usuario_existe(user_id)
+                resultado_usuario = verificar_usuario_existe(user_cc)
                 if not resultado_usuario["success"]:
                     return resultado_usuario
 
-                resultado_carrito = verificar_carrito_activo(user_id)
+                resultado_carrito = verificar_carrito_activo(user_cc)
                 if not resultado_carrito["success"]:
                     return resultado_carrito
 
