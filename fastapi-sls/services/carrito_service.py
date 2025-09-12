@@ -6,7 +6,7 @@ from services.usuario_service import  verificar_usuario_existe
 
 def verificar_carrito_activo(user_id: int):
     try:
-        # 1. Verificar si el usuario existe antes de crear o consultar carrito
+        # Verificar si el usuario existe antes de crear o consultar carrito
         usuario = verificar_usuario_existe(user_id)
         if not usuario["existe"]:
             return {
@@ -14,30 +14,41 @@ def verificar_carrito_activo(user_id: int):
                 "message": f"❌ No se puede crear carrito porque el usuario {user_id} no existe"
             }
 
-        # 2. Buscar carrito activo
+        # Buscar carrito activo
         query = """
-            SELECT Car_id, estado
+            SELECT Car_id
             FROM carrito
-            WHERE User_id = %s AND estado = %s
+            WHERE User_id = %s AND estado = 'activo'
             LIMIT 1
         """
-        carrito = execute_query(query, (user_id, "1"), fetchone=True)
+        carrito = execute_query(query, (user_id,), fetchone=True)
 
         if not carrito:
-            # 3. Crear carrito en estado ACTIVO (1)
+            # Si no existe carrito, lo creamos
             query_insert = """
                 INSERT INTO carrito (User_id, fecha_creacion, estado)
-                VALUES (%s, NOW(), %s)
+                VALUES (%s, NOW(), 'activo')
             """
-            nuevo_id = execute_query(query_insert, (user_id, "1"), commit=True, return_id=True)
+            execute_query(query_insert, (user_id,), commit=True, return_id=True)
+
+
+
+            car_id = execute_query(query, (user_id,), fetchone=True)
+
+            query = """
+            SELECT Car_id
+            FROM carrito
+            WHERE User_id = %s AND estado = 'activo'
+            LIMIT 1
+        """
 
             return {
                 "success": True,
                 "message": f"🛒 Carrito creado para el usuario {user_id}",
-                "car_id": nuevo_id
+                "car_id": car_id[0]
             }
 
-        # 4. Si ya existe, devolver el ID
+        # Si ya existe, devolver el ID
         return {
             "success": True,
             "message": "✅ Carrito activo encontrado",
