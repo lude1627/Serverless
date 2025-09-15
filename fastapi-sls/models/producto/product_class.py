@@ -57,7 +57,7 @@ class Productos:
                     "nombre": p[1],
                     "descripcion": p[2],
                     "cantidad": p[3],
-                    "precio": p[4],
+                    "precio": f"${p[4]:,.0f}".replace(",", "."),
                     "categoria": p[5]
                 }
                 for p in products
