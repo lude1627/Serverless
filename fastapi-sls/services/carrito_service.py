@@ -62,6 +62,7 @@ def verificar_carrito_activo(user_cc: int):
 
 
 def obtener_carrito_usuario(user_cc: int):
+    
     query = """
         SELECT 
             u.User_name,
