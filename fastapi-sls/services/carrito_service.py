@@ -21,36 +21,38 @@ def verificar_carrito_activo(user_cc: int):
         """
         carrito = execute_query(query, (user_cc,), fetchone=True)
     
-        if not carrito:
-            # Si no existe carrito, lo creamos
-            query_insert = """
-                INSERT INTO carrito (User_cc, fecha_creacion, estado)
-                VALUES (%s, NOW(), '1')
-            """
-            execute_query(query_insert, (user_cc,), commit=True, return_id=True)
+        if carrito:
 
+            # Si ya existe, devolver el ID
+            return {
+                "success": True,
+                "message": "✅ Carrito activo encontrado",
+                "car_id": carrito[0]
+            }
+    
+        # Si no existe carrito, lo creamos
+        query_insert = """
+            INSERT INTO carrito (User_cc, fecha_creacion, estado)
+            VALUES (%s, NOW(), '1')
+        """
+        execute_query(query_insert, (user_cc,), commit=True, return_id=True)
 
-            car_id = execute_query(query, (user_cc,), fetchone=True)
-
-            query = """
+        query = """
             SELECT Car_id
             FROM carrito
             WHERE User_cc = %s AND estado = '1'
             LIMIT 1
         """
-         
-            return {
-                "success": True,
-                "message": f"🛒 Carrito creado para el usuario {user_cc}",
-                "car_id": car_id[0]
-            }
+        car_id = execute_query(query, (user_cc,), fetchone=True)
+        
         print(car_id)
-        # Si ya existe, devolver el ID
         return {
             "success": True,
-            "message": "✅ Carrito activo encontrado",
-            "car_id": carrito[0]
+            "message": f"🛒 Carrito creado para el usuario {user_cc}",
+            "car_id": car_id[0]
         }
+        
+        
         
     except Exception as e:
         return {
@@ -101,7 +103,7 @@ def obtener_carrito_usuario(user_cc: int):
                 "subtotal": f"${row[7]:,.0f}".replace(",", ".")
             }
             for row in result
-        ]
+]
 
         # Total a pagar
         total_pagar = sum(row[7] for row in result)
