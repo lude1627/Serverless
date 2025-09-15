@@ -56,8 +56,8 @@ class Productos:
                     "id": p[0],
                     "nombre": p[1],
                     "descripcion": p[2],
-                    "cantidad": f"{p[3]} UND",
-                    "precio": f"${p[4]:,.0f}".replace(",", "."),
+                    "cantidad": p[3],
+                    "precio": p[4],
                     "categoria": p[5]
                 }
                 for p in products
