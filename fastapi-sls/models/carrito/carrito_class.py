@@ -14,6 +14,9 @@ class CarritoClass:
         def agregar_producto(self, carrito: CarritoEntity):
             
             try:
+                resultado_usuario = verificar_usuario_existe(carrito.user_cc)
+                if not resultado_usuario["success"]:
+                    return resultado_usuario
                 car_id = None
                 
                 # validar carrito
@@ -36,12 +39,12 @@ class CarritoClass:
                 
                 
                 # obtener precio del producto
-                precio_unitario = resultado_producto["producto"]["Product_price"]
+                precio_unitario = resultado_producto["producto"]["product_price"]
                 
                 
                 # insertar producto directamente aquí (antes estaba en el service)
                 query = """
-                    INSERT INTO carrito_detalle (Car_id, Product_id, Detalle_cantidad, precio_unitario)
+                    INSERT INTO carrito_detalle (car_id, product_id, detalle_cantidad, precio_unitario)
                     VALUES (%s, %s, %s, %s)
                 """
                 params = (car_id, carrito.product_id, carrito.car_cantidad, precio_unitario)
@@ -91,8 +94,8 @@ class CarritoClass:
         def actualizar_producto(self, detalle_id: int,car_id:int,up:Updatecantidad):
             query = """
                 UPDATE carrito_detalle
-                SET Detalle_cantidad = %s
-                WHERE Detalle_id = %s and Car_id = %s
+                SET detalle_cantidad = %s
+                WHERE detalle_id = %s and car_id = %s
             """
             try:
                 rows = execute_query(query, (up.detalle_cantidad,detalle_id,car_id ), commit=True)

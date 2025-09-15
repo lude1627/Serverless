@@ -13,7 +13,7 @@ categorias = Categoria()
 
 @category_router.post("/create")
 def create_category(data: CategoryCreate):
-    return categorias.create_cat(data.id, data.name)
+    return categorias.create_cat(data.name)
 
 
 @category_router.get("/view/data")
@@ -22,7 +22,7 @@ def get_category():
     return categoria
 
 
-@category_router.delete("/delete/{id}")
+@category_router.put("/update/{id}")
 def delete_category(id: int):
     return categorias.delete_cat(id)
     

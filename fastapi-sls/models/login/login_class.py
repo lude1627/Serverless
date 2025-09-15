@@ -5,13 +5,13 @@ from models.login.login_entity import LoginModel
 class Login:
 
     def login_user(self, data:LoginModel):
-        query = "SELECT * FROM usuarios WHERE User_cc = %s AND User_password = %s"
+        query = "SELECT * FROM usuarios WHERE user_cc = %s AND user_password = %s and user_status = '1'"
         try:
             confirmacion= execute_query(query, (data.user_cc, data.password), fetchone=True)
             
 
             if confirmacion:
-                query_name = "SELECT User_name FROM usuarios WHERE User_cc = %s"
+                query_name = "SELECT user_name FROM usuarios WHERE user_cc = %s"
                 username = execute_query(query_name,(data.user_cc,),fetchone=True)
 
                 return JSONResponse(content={

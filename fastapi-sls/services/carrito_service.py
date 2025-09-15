@@ -16,7 +16,7 @@ def verificar_carrito_activo(user_cc: int):
         query = """
             SELECT Car_id
             FROM carrito
-            WHERE User_cc = %s AND estado = '1'
+            WHERE user_cc = %s AND estado = '1'
             LIMIT 1
         """
         carrito = execute_query(query, (user_cc,), fetchone=True)
@@ -32,15 +32,15 @@ def verificar_carrito_activo(user_cc: int):
     
         # Si no existe carrito, lo creamos
         query_insert = """
-            INSERT INTO carrito (User_cc, fecha_creacion, estado)
+            INSERT INTO carrito (user_cc, fecha_creacion, estado)
             VALUES (%s, NOW(), '1')
         """
         execute_query(query_insert, (user_cc,), commit=True, return_id=True)
 
         query = """
-            SELECT Car_id
+            SELECT car_id
             FROM carrito
-            WHERE User_cc = %s AND estado = '1'
+            WHERE user_cc = %s AND estado = '1'
             LIMIT 1
         """
         car_id = execute_query(query, (user_cc,), fetchone=True)
@@ -65,19 +65,19 @@ def obtener_carrito_usuario(user_cc: int):
     
     query = """
         SELECT 
-            u.User_name,
-            c.Car_id,
+            u.user_name,
+            c.car_id,
             c.fecha_creacion,
             c.estado,
-            p.Product_name AS nombre_producto,
-            cd.Detalle_cantidad AS cantidad,
-            p.Product_price AS precio_unitario,
-            (cd.Detalle_cantidad * p.Product_price) AS subtotal
+            p.product_name AS nombre_producto,
+            cd.detalle_cantidad AS cantidad,
+            p.product_price AS precio_unitario,
+            (cd.detalle_cantidad * p.product_price) AS subtotal
         FROM carrito c
-        INNER JOIN usuarios u ON u.User_cc = c.User_cc
-        INNER JOIN carrito_detalle cd ON cd.Car_id = c.Car_id
-        INNER JOIN productos p ON cd.Product_id = p.Product_id
-        WHERE c.User_cc = %s AND c.estado = '1'
+        INNER JOIN usuarios u ON u.user_cc = c.user_cc
+        INNER JOIN carrito_detalle cd ON cd.car_id = c.car_id
+        INNER JOIN productos p ON cd.product_id = p.product_id
+        WHERE c.user_cc = %s AND c.estado = '1'
     """
 
     try:
@@ -113,7 +113,7 @@ def obtener_carrito_usuario(user_cc: int):
             "success": True,
             "usuario": user_name,
             "carrito": {
-                "Car_id": car_id,
+                "car_id": car_id,
                 "fecha_creacion": str(fecha_creacion),
                 "estado": estado
             },
@@ -134,7 +134,7 @@ def eliminar_producto(detalle_id: int, car_id: int):
     try:
         query = """
             DELETE FROM carrito_detalle
-            WHERE Detalle_id = %s AND Car_id = %s
+            WHERE detalle_id = %s AND car_id = %s
         """
         params = (detalle_id, car_id)
         rows_deleted = execute_query(query, params, commit=True)
@@ -161,9 +161,9 @@ def eliminar_producto(detalle_id: int, car_id: int):
 def finalizar_compra(car_id: int):
     # 1. Verificar carrito
     query_carrito = """
-        SELECT Car_id, estado
+        SELECT car_id, estado
         FROM carrito
-        WHERE Car_id = %s and estado = 1
+        WHERE car_id = %s and estado = 1
     """
     carrito = execute_query(query_carrito, (car_id,), fetchone=True)
 
@@ -177,7 +177,7 @@ def finalizar_compra(car_id: int):
     query_update = """
         UPDATE carrito
         SET estado = 0
-        WHERE Car_id = %s
+        WHERE car_id = %s
     """
     execute_query(query_update, (car_id,))
 

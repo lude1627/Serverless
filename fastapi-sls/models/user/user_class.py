@@ -30,8 +30,8 @@ class Usuario:
         
        
         query = """
-                INSERT INTO usuarios (User_cc, User_name, User_phone, User_mail, User_password) 
-                VALUES (%s, %s, %s, %s, %s)
+                INSERT INTO usuarios (user_cc, user_name, user_phone, user_mail, user_password,user_status) 
+                VALUES (%s, %s, %s, %s, %s,'1')
             """
             
         try:
@@ -63,8 +63,8 @@ class Usuario:
 
         query = """
             UPDATE usuarios 
-            SET User_name = %s, User_phone = %s, User_mail = %s, User_password = %s 
-            WHERE User_cc = %s
+            SET user_name = %s, user_phone = %s, user_mail = %s, user_password = %s 
+            WHERE user_cc = %s
         """
         try:
             rows = execute_query(query, (data.username, data.phone, data.email, data.password, data.user_cc), commit=True)
@@ -91,7 +91,7 @@ class Usuario:
         if not isinstance(user_cc, int) or user_cc <= 0:
             return JSONResponse(content={"success": False, "message": "ID inválido"}, status_code=400)
 
-        query = "SELECT User_cc, User_name, User_phone, User_mail, User_password FROM usuarios WHERE User_cc = %s"
+        query = "SELECT user_cc, user_name, user_phone, user_mail, user_password FROM usuarios WHERE user_cc = %s"
         try:
             user = execute_query(query, (user_cc,), fetchone=True)
             if user:

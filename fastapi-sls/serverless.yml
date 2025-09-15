@@ -40,8 +40,8 @@ functions:
           path: /category/view/data
           method: get
       - httpApi:
-          path: /category/delete/{id}
-          method: delete
+          path: /category/update/{id}
+          method: put
   product:
     handler: handler.handler
     events:
@@ -56,7 +56,7 @@ functions:
           method: put 
       - httpApi:
           path: /product/delete/{id}
-          method: delete
+          method: put
   Carrito:
     handler: handler.handler
     events:

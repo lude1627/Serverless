@@ -5,9 +5,9 @@ def verificar_usuario_existe(user_cc: int):
         
         
         query = """
-            SELECT User_cc 
+            SELECT user_cc
             FROM usuarios
-            WHERE User_cc = %s
+            WHERE user_cc = %s and user_status = '1'
             LIMIT 1
         """
         usuario = execute_query(query, (user_cc,), fetchone=True)
