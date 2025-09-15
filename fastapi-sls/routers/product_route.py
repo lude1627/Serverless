@@ -21,7 +21,7 @@ def get_products():
     return  productos.all_products()  
 
 
-@Product_router.delete("/delete/{id}")
+@Product_router.put("/delete/{id}")
 def deleteP(id: int):
     return productos.delete_product(id)
 

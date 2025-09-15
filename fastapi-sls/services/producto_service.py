@@ -2,9 +2,9 @@ from db import execute_query
 
 def verificar_producto_existe(product_id: int):
     query = """
-        SELECT Product_id, Product_name, Product_cant, Product_price
+        SELECT product_id, product_name, product_cant, product_price
         FROM productos
-        WHERE Product_id = %s
+        WHERE product_id = %s and product_status = '1'
         LIMIT 1
     """
     producto = execute_query(query, (product_id,), fetchone=True)
@@ -16,8 +16,8 @@ def verificar_producto_existe(product_id: int):
         }
         
     listar_product = {
-        "Product_id": producto[0],
-        "Product_name": producto[1],
+        "product_id": producto[0],
+        "product_name": producto[1],
         "Product_cant": producto[2],
         "Product_price": producto[3],
     }
@@ -31,9 +31,9 @@ def verificar_producto_existe(product_id: int):
 def verificar_cantidad(product_id: int, product_cant: int):
    
     query = """
-        SELECT Product_cant
+        SELECT product_cant
         FROM productos
-        WHERE Product_id = %s
+        WHERE product_id = %s
         LIMIT 1
     """
     producto = execute_query(query, (product_id,), fetchone=True)
@@ -54,8 +54,8 @@ def verificar_cantidad(product_id: int, product_cant: int):
         
     query_update = """
         UPDATE productos
-        SET Product_cant = %s
-        WHERE Product_id = %s
+        SET product_cant = %s
+        WHERE product_id = %s
     """
     
     stock_update = stock - product_cant

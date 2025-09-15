@@ -7,7 +7,7 @@ class Productos:
             
     def view_product(self, id: int):
 
-        query = " SELECT Product_id, Product_name, Product_description,  Product_cant, Product_price, Cat_id FROM productos WHERE Product_id = %s "
+        query = " SELECT product_id, product_name, product_description,  product_cant, product_price, cat_id FROM productos WHERE product_id = %s "
         try:
             product = execute_query(query, (id,), fechnone=True)
             if not product:
@@ -26,15 +26,13 @@ class Productos:
 
 
     def all_products(self):
-        """
-        Retorna un JSONResponse con todos los productos o un mensaje si no hay.
-        """
+      
         query = """
-            SELECT p.Product_id, p.Product_name, p.Product_description,  
-                   p.Product_cant, p.Product_price, c.Cat_name 
+            SELECT p.Product_id, p.product_name, p.product_description,  
+                   p.product_cant, p.Product_price, c.Cat_name 
             FROM productos p 
-            INNER JOIN categorias c ON p.Cat_id = c.Cat_id 
-            ORDER BY p.Product_name
+            INNER JOIN categorias c ON p.cat_id = c.cat_id and p.product_status = '1'
+            ORDER BY p.product_name
         """
         try:
             products = execute_query(query, fetchall=True)
@@ -97,9 +95,9 @@ class Productos:
 
         query = """
             UPDATE productos  
-            SET Product_name = %s,  
-                Product_description = %s,  
-                Product_cant = %s,   
+            SET product_name = %s,  
+                product_description = %s,  
+                product_cant = %s,   
                 Product_price = %s, 
                 Cat_id = %s 
             WHERE Product_id = %s
@@ -127,8 +125,8 @@ class Productos:
     def delete_product(self, id: int):
         if not isinstance(id, int) or id <= 0:
             return JSONResponse(content={"success": False, "message": "ID inválido"}, status_code=400)
-    
-        query = "DELETE FROM productos WHERE Product_id = %s"
+
+        query = "Update productos SET product_status = '0' WHERE Product_id = %s"
 
         try:
             rows = execute_query(query, (id,), commit=True)
@@ -143,7 +141,7 @@ class Productos:
         
 
     def all_categories(self):
-        query = "SELECT Cat_id, Cat_name FROM categorias"
+        query = "SELECT cat_id, cat_name FROM categorias where cat_status = '1'"
         try:
             categorias = execute_query(query, fetchall=True)
             if categorias:
@@ -182,8 +180,8 @@ class Productos:
             return JSONResponse(content={"success": False, "message": "La categoría es obligatoria"}, status_code=400)
 
         query = """
-            INSERT INTO productos (Product_name, Product_description, Product_cant, Product_price, Cat_id) 
-            VALUES (%s, %s, %s, %s, %s)
+            INSERT INTO productos (product_name, product_description, product_cant, product_price, cat_id, product_status) 
+            VALUES (%s, %s, %s, %s, %s, '1')
         """
         try:
             execute_query(query, (data.name, data.description, data.cant, data.price, data.category_id), commit=True)
