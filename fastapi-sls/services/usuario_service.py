@@ -2,7 +2,7 @@ from db import execute_query
 
 def verificar_usuario_existe(user_cc: int):
     try:
-        print("DEBUG verificar_usuario_existe - user_cc:", user_cc, type(user_cc))
+        
         
         query = """
             SELECT User_cc 
@@ -12,7 +12,7 @@ def verificar_usuario_existe(user_cc: int):
         """
         usuario = execute_query(query, (user_cc,), fetchone=True)
         
-        print("DEBUG resultado consulta:", usuario)
+     
 
         existe = usuario is not None and (usuario.get("User_cc") if isinstance(usuario, dict) else usuario[0])
     

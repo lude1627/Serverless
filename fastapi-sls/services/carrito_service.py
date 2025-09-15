@@ -20,7 +20,7 @@ def verificar_carrito_activo(user_cc: int):
             LIMIT 1
         """
         carrito = execute_query(query, (user_cc,), fetchone=True)
-        print("2")
+    
         if not carrito:
             # Si no existe carrito, lo creamos
             query_insert = """
@@ -38,7 +38,7 @@ def verificar_carrito_activo(user_cc: int):
             WHERE User_cc = %s AND estado = '1'
             LIMIT 1
         """
-            print("llego 4")
+         
             return {
                 "success": True,
                 "message": f"🛒 Carrito creado para el usuario {user_cc}",
