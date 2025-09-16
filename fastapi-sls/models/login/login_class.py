@@ -1,7 +1,8 @@
 from db import execute_query
 from fastapi.responses import JSONResponse
 from models.login.login_entity import LoginModel
-
+from services.usuario_service import ValidateU
+val = ValidateU()
 class Login:
 
     def login_user(self, data:LoginModel):
@@ -11,14 +12,27 @@ class Login:
             
 
             if confirmacion:
-                query_name = "SELECT user_name FROM usuarios WHERE user_cc = %s"
-                username = execute_query(query_name,(data.user_cc,),fetchone=True)
-
-                return JSONResponse(content={
-                    "success": True,
-                    "message": {"Bienvenid@": username},
-                    "": {"Identificacion":data.user_cc}
+                resultado = val.verificar_user_type_por_password(data.password)
+                user_type = resultado["user_type"]
+                if user_type == 1:
+                     return JSONResponse(content={
+                            "success": True,
+                            "message": "Bienvenido Admin",
+                    
                 })
+                else:
+                    
+                    query_name = "SELECT user_name FROM usuarios WHERE user_cc = %s and user_type = '2'"
+                    username = execute_query(query_name,(data.user_cc,),fetchone=True)
+                   
+                    
+                    return JSONResponse(content={
+                         
+                        "success": True,
+                        "message": {"Bienvenid@": username},
+                        "": {"Identificacion":data.user_cc}
+                    })
+                    
             else:
                  return JSONResponse(content={
                                     "success": False,

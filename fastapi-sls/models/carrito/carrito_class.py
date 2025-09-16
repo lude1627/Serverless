@@ -1,12 +1,12 @@
 from models.carrito.carrito_entity import CarritoEntity,Updatecantidad
 from fastapi.responses import JSONResponse
-from services.usuario_service import verificar_usuario_existe
+from services.usuario_service import ValidateU
 from services.producto_service import verificar_producto_existe, verificar_cantidad
 from services.carrito_service import (
     verificar_carrito_activo,
     eliminar_producto
 )
-
+val = ValidateU()
 from db import execute_query
 
 class CarritoClass:
@@ -14,7 +14,7 @@ class CarritoClass:
         def agregar_producto(self, carrito: CarritoEntity):
             
             try:
-                resultado_usuario = verificar_usuario_existe(carrito.user_cc)
+                resultado_usuario = val.verificar_usuario_existe(carrito.user_cc)
                 if not resultado_usuario["success"]:
                     return resultado_usuario
                 car_id = None
@@ -67,7 +67,7 @@ class CarritoClass:
                 
         def eliminar_producto(self, user_cc: int, detalle_id: int):
             try:
-                resultado_usuario = verificar_usuario_existe(user_cc)
+                resultado_usuario = val.verificar_usuario_existe(user_cc)
                 if not resultado_usuario["success"]:
                     return resultado_usuario
 

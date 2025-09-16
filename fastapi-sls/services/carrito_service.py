@@ -1,11 +1,11 @@
 from db import execute_query
-from services.usuario_service import  verificar_usuario_existe
+from services.usuario_service import ValidateU
 
-
+val = ValidateU()
 def verificar_carrito_activo(user_cc: int):
     try:
         # Verificar si el usuario existe antes de crear o consultar carrito
-        usuario = verificar_usuario_existe(user_cc)
+        usuario = val.verificar_usuario_existe(user_cc)
         if not usuario["existe"]:
             return {
                 "success": False,
