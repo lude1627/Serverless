@@ -31,7 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     timer: 2000
                 }).then(() => {
                     // Redirigir según tipo de usuario
-                    if (result.message.includes("1")) {
+                    if (result.user_type == 1) {
                         window.location.href = "/views/admin/admin_usuarios.html";
                     } else {
                         window.location.href = "/views/producto/producto.html";
