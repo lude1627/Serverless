@@ -6,8 +6,8 @@ body {
     justify-content: center;
     align-items: center;
     background: #F7F8F8;
-    background: -webkit-linear-gradient(to bottom, #8d469b9c, #F7F8F8);
-    background: linear-gradient(to bottom, #2fc4ff9c, #F7F8F8);
+    background: -webkit-linear-gradient(to bottom, #8d469b36, #F7F8F8);
+    background: linear-gradient(to bottom, #2fc4ff10, #F7F8F8);
     overflow: hidden;
     position: relative;
     font-family: Arial, sans-serif;
