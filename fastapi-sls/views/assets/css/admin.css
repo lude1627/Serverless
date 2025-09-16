@@ -15,3 +15,6 @@ body {
       text-align: center;
       padding: 1rem;
     }
+
+    body { background: #f5f6fa; }
+    .card { border-radius: 1rem; }

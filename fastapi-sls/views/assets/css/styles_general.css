@@ -1,0 +1,53 @@
+ body {
+     display: flex;
+     flex-direction: column;
+     min-height: 100vh;
+     margin: 0;
+ }
+
+ main {
+     flex: 1;
+ }
+
+ footer {
+     background: #343a40;
+     color: white;
+     text-align: center;
+     padding: 1rem;
+ }
+
+
+
+ /* nav */
+
+ nav a.text-white {
+     position: relative;
+     transition: color 0.3s ease;
+ }
+
+ /* Efecto de línea animada al hacer hover */
+ nav a.text-white::after {
+     content: "";
+     position: absolute;
+     bottom: 0;
+     left: 0;
+     width: 0;
+     height: 2px;
+     background-color: #ffd700;
+     transition: width 0.3s ease;
+ }
+
+ /* Cuando paso el mouse, aparece la línea */
+ nav a.text-white:hover::after {
+     width: 100%;
+ }
+
+ /* Resaltar el enlace activo */
+ nav a.text-white.active {
+     font-weight: bold;
+     color: #ffd700 !important;
+ }
+
+ nav a.text-white.active::after {
+     width: 100%;
+ }
