@@ -1,9 +1,10 @@
 from db import execute_query
 from fastapi.responses import JSONResponse
 from models.user.user_entity import RegisterModel, UpdateUserModel
-from services.usuario_service import verificar_usuario_existe
+from services.usuario_service import ValidateU
 import re
 
+val = ValidateU()
 
 class Usuario:
     
@@ -21,21 +22,22 @@ class Usuario:
             return JSONResponse(content={"success": False, "message": "La contraseña debe tener al menos 6 caracteres"}, status_code=400)
 
       
-        resultado_usuario = verificar_usuario_existe(data.user_cc)
+        resultado_usuario = val.verificar_usuario_existe(data.user_cc)
         if resultado_usuario["existe"]:
                     return {
                         "success": False,
                         "message": f"El usuario con el ID {data.user_cc} ya existe"
-                    }    
-        
-       
+                    }
+        resultado = val.verificar_user_type_por_password(data.password)
+        user_type = resultado["user_type"]
+              
         query = """
-                INSERT INTO usuarios (user_cc, user_name, user_phone, user_mail, user_password,user_status) 
-                VALUES (%s, %s, %s, %s, %s,'1')
+                INSERT INTO usuarios (user_cc, user_type, user_name, user_phone, user_mail, user_password, user_status) 
+                VALUES (%s, %s, %s, %s, %s, %s, '1')
             """
             
         try:
-                execute_query(query, (data.user_cc, data.username, data.phone, data.email, data.password), commit=True)
+                execute_query(query, (data.user_cc,user_type, data.username, data.phone, data.email, data.password), commit=True)
                 return JSONResponse(content={
                     "success": True,
                     "message": "Usuario registrado exitosamente"
