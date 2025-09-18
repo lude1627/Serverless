@@ -37,9 +37,13 @@ class Login:
                                     "message": "Usuario o contraseña incorrectos"
                                 })
         except Exception as e:        
+<<<<<<< HEAD
                 print(f"Error en login_user: {e}")
                 
 
 
  
      
+=======
+                print(f"Error en login_user: {e}")
+>>>>>>> fa8a8bb2d2ff674690a3ef004684323889f786b1
