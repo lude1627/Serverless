@@ -30,16 +30,13 @@ def deleteP(id: int):
 def get_product(id: int):
     product = productos.view_product(id)
     if not product:
-        return JSONResponse(content={"error": "Producto no encontrado"}, status_code=404)
-    return JSONResponse(content={
-        "id": product[0],
-        "name": product[1],
-        "description": product[2],
-        "cant": product[3],
-        "price": product[4],
-        "category_id": product[5]
-    })
-
+        return JSONResponse(
+            content={"success": False, "message": "Producto no encontrado"},
+            status_code=404
+        )
+        
+    return JSONResponse(content=product, status_code=200)
+    
 
 @Product_router.put("/edit/{id}")
 def edit_product( data: ProductUpdate):
@@ -49,7 +46,5 @@ def edit_product( data: ProductUpdate):
 
 @Product_router.get("/all_categories")
 def get_all_categories():
-    categorias = productos.all_categories()
-    if not categorias:
-        return JSONResponse({"message: " "no hay datos"}, 404)
-    return JSONResponse(content= categorias)
+    return productos.all_categories()
+

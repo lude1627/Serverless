@@ -5,17 +5,27 @@ from models.producto.product_entity import ProductCreate, ProductUpdate
 
 class Productos:
             
-    def view_product(self, id: int):
+    from fastapi.responses import JSONResponse
 
-        query = " SELECT product_id, product_name, product_description,  product_cant, product_price, cat_id FROM productos WHERE product_id = %s "
+    def view_product(self, id: int):
+        query = """
+            SELECT product_id, product_name, product_description, product_cant, product_price, cat_id 
+            FROM productos 
+            WHERE product_id = %s AND product_status = '1'
+        """
         try:
-            product = execute_query(query, (id,), fechnone=True)
+            product = execute_query(query, (id,), fetchone=True)
             if not product:
-                return JSONResponse(content={
-                    "success": False,
-                    "message": "Producto no encontrado"
-                }, status_code=404)
-            return product
+                return None
+            
+            return {   # 👈 devolvemos dict crudo
+            "product_id": product[0],
+            "product_name": product[1],
+            "product_description": product[2],
+            "product_cant": product[3],
+            "product_price": float(product[4]),
+            "category_id": product[5]
+        }
         except Exception as e:
             print(f"Error al mostrar Producto: {e}")
             return JSONResponse(content={
@@ -37,49 +47,35 @@ class Productos:
         try:
             products = execute_query(query, fetchall=True)
 
-           
             if not products:
-                return JSONResponse(
-                    content={
+                return JSONResponse(content={
                         "success": True,
                         "message": "No hay productos registrados",
                         "data": []
-                    },
-                    status_code=200
-                )
+                    },status_code=200)
 
-         
-            productos_json = [
-                {
-                    "id": p[0],
-                    "nombre": p[1],
-                    "descripcion": p[2],
-                    "cantidad": f"{p[3]} UND",
-                    "precio": f"${p[4]:,.0f}".replace(",", "."),
-                    "categoria": p[5]
-                }
-                for p in products
-            ]
-
-            return JSONResponse(
-                content={
-                    "success": True,
-                    "message": "Productos obtenidos correctamente",
-                    "data": productos_json
-                },
-                status_code=200
-            )
+            response = {
+                "success": True,
+                "message": "Productos obtenidos correctamente",
+                "data": [
+                    {
+                        "id": p[0],
+                        "nombre": p[1],
+                        "descripcion": p[2],
+                        "cantidad": p[3],
+                        "precio": f"${p[4]:,.0f}",
+                        "categoria": p[5]
+                    } for p in products
+                ]
+            }
+            return JSONResponse(content=response, status_code=200)
 
         except Exception as e:
-            print(f"Error al mostrar productos: {e}")
-            return JSONResponse(
-                content={
+            return JSONResponse(content={
                     "success": False,
-                    "message": "Error interno al obtener productos"
-                },
-                status_code=500
-            )
-
+                    "message": f"Error al obtener productos: {str(e)}",
+                    "data": []
+                },status_code=500)
 
 
     def update_product(self, data: ProductUpdate):
@@ -141,7 +137,7 @@ class Productos:
         
 
     def all_categories(self):
-        query = "SELECT cat_id, cat_name FROM categorias where cat_status = '1'"
+        query = "SELECT cat_id, cat_name FROM categorias WHERE cat_status = '1'"
         try:
             categorias = execute_query(query, fetchall=True)
             if categorias:

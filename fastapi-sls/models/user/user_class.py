@@ -1,6 +1,6 @@
 from db import execute_query
 from fastapi.responses import JSONResponse
-from models.user.user_entity import RegisterModel, UpdateUserModel
+from models.user.user_entity import RegisterModel, UpdateUserModel, AdminUpdateUserModel
 from services.usuario_service import ValidateU
 import re
 
@@ -21,13 +21,14 @@ class Usuario:
         if not data.password or len(data.password) < 6:
             return JSONResponse(content={"success": False, "message": "La contraseña debe tener al menos 6 caracteres"}, status_code=400)
 
-      
+        # Check if user exists
         resultado_usuario = val.verificar_usuario_existe(data.user_cc)
         if resultado_usuario["existe"]:
-                    return {
-                        "success": False,
-                        "message": f"El usuario con el ID {data.user_cc} ya existe"
-                    }
+            return JSONResponse(content={
+                "success": False,
+                "message": f"El usuario con el ID {data.user_cc} ya existe"
+            }, status_code=400)
+            
         resultado = val.verificar_user_type_por_password(data.password)
         user_type = resultado["user_type"]
               
@@ -37,20 +38,18 @@ class Usuario:
             """
             
         try:
-                execute_query(query, (data.user_cc,user_type, data.username, data.phone, data.email, data.password), commit=True)
-                return JSONResponse(content={
-                    "success": True,
-                    "message": "Usuario registrado exitosamente"
-                }, status_code=201)
+            execute_query(query, (data.user_cc, user_type, data.username, data.phone, data.email, data.password), commit=True)
+            return JSONResponse(content={
+                "success": True,
+                "message": "Usuario registrado exitosamente"
+            }, status_code=201)
         except Exception as e:
-                print(f"Error en register_user: {e}")
-                return JSONResponse(content={
-                    "success": False,
-                    "message": f"Error al registrar usuario: {e}"
-                }, status_code=500)
+            print(f"Error en register_user: {e}")
+            return JSONResponse(content={
+                "success": False,
+                "message": f"Error al registrar usuario: {e}"
+            }, status_code=500)
         
-
-
 
     def update_user(self, data: UpdateUserModel):
        
@@ -80,20 +79,23 @@ class Usuario:
                 "success": True,
                 "message": "Usuario actualizado exitosamente"
             }, status_code=200)
-           
+            
         except Exception as e:
             print(f"Error en update_user: {e}")
             return JSONResponse(content={
                 "success": False,
                 "message": "Error al actualizar usuario"
             }, status_code=500)
-
+            
 
     def view_user(self, user_cc: int):
         if not isinstance(user_cc, int) or user_cc <= 0:
             return JSONResponse(content={"success": False, "message": "ID inválido"}, status_code=400)
 
-        query = "SELECT user_cc, user_name, user_phone, user_mail, user_password FROM usuarios WHERE user_cc = %s"
+        query = """
+            SELECT user_cc, user_type, user_name, user_phone, user_mail, user_password, user_status 
+            FROM usuarios WHERE user_cc = %s
+        """
         try:
             user = execute_query(query, (user_cc,), fetchone=True)
             if user:
@@ -102,17 +104,172 @@ class Usuario:
                     "message": "Usuario encontrado",
                     "data": {
                         "user_cc": user[0],
-                        "username": user[1],
-                        "phone": user[2],
-                        "email": user[3],
-                        "password": user[4]  
+                        "user_type": user[1],
+                        "username": user[2],
+                        "phone": user[3],
+                        "email": user[4],
+                        "status": user[6]  
                     }
                 }, status_code=200)
             else:
-                return JSONResponse(content={"success": False, "message": "Usuario no encontrado"}, status_code=404)
+                return JSONResponse(content={
+                    "success": False, 
+                    "message": "Usuario no encontrado"
+                }, status_code=404)
         except Exception as e:
             print(f"Error en view_user: {e}")
             return JSONResponse(content={
                 "success": False,
                 "message": "Error al obtener usuario"
+            }, status_code=500)
+            
+    #Exclusivo para acciones del admin 
+    def view_all_users(self):
+        query = """
+            SELECT user_cc, user_type, user_name, user_phone, user_mail, user_status 
+            FROM usuarios 
+            ORDER BY user_cc
+        """
+        
+        try:
+            users = execute_query(query, fetchall=True)
+            if users:
+                user_list = []
+                for user in users:
+                    user_list.append({
+                        "user_cc": user[0],
+                        "user_type": user[1],
+                        "username": user[2],
+                        "phone": user[3],
+                        "email": user[4],
+                        "status": user[5]
+                    })
+                return JSONResponse(content={
+                    "success": True,
+                    "data": user_list
+                   }, status_code=200)
+            else:
+                return JSONResponse(content={
+                    "success": True,
+                    "data": [],
+                    "message": "No hay usuarios registrados"
+                }, status_code=200)
+        except Exception as e:
+            print(f"Error en view_all_users: {e}")
+            return JSONResponse(content={
+                "success": False,
+                "message": "Error al obtener usuarios"
+            }, status_code=500)
+                
+                
+    def admin_update_user(self, data: AdminUpdateUserModel):
+        # Validation
+        if not isinstance(data.user_cc, int) or data.user_cc <= 0:
+            return JSONResponse(content={"success": False, "message": "El ID es inválido"}, status_code=400)
+        if not data.username or data.username.strip() == "":
+            return JSONResponse(content={"success": False, "message": "El nombre de usuario es obligatorio"}, status_code=400)
+        if not re.match(r"[^@]+@[^@]+\.[^@]+", data.email):
+            return JSONResponse(content={"success": False, "message": "Correo electrónico inválido"}, status_code=400)
+        if not isinstance(data.phone, int) or data.phone <= 0:
+            return JSONResponse(content={"success": False, "message": "El teléfono debe ser un número válido"}, status_code=400)
+        
+        # Check if user exists first
+        check_query = "SELECT user_cc FROM usuarios WHERE user_cc = %s"
+        try:
+            existing_user = execute_query(check_query, (data.user_cc,), fetchone=True)
+            if not existing_user:
+                return JSONResponse(content={
+                    "success": False,
+                    "message": "Usuario no encontrado"
+                }, status_code=404)
+        except Exception as e:
+            print(f"Error checking user existence: {e}")
+            return JSONResponse(content={
+                "success": False,
+                "message": "Error al verificar usuario"
+            }, status_code=500)
+        
+        # Update query - password is optional for admin updates
+        if data.password:
+            query = """
+                UPDATE usuarios 
+                SET user_name = %s, user_phone = %s, user_mail = %s, user_type = %s, user_status = %s, user_password = %s
+                WHERE user_cc = %s
+            """
+            params = (data.username, data.phone, data.email, data.user_type, data.user_status, data.password, data.user_cc)
+        else:
+            query = """
+                UPDATE usuarios 
+                SET user_name = %s, user_phone = %s, user_mail = %s, user_type = %s, user_status = %s
+                WHERE user_cc = %s
+            """
+            params = (data.username, data.phone, data.email, data.user_type, data.user_status, data.user_cc)
+            
+        try:
+            rows_affected = execute_query(query, params, commit=True)
+            
+            if rows_affected == 0:
+                return JSONResponse(content={
+                    "success": False,
+                    "message": "No se pudo actualizar el usuario"
+                }, status_code=400)
+            
+            return JSONResponse(content={
+                "success": True, 
+                "message": "Usuario actualizado correctamente"
+            }, status_code=200)
+            
+        except Exception as e:
+            print(f"Error en admin_update_user: {e}")
+            return JSONResponse(content={
+                "success": False, 
+                "message": f"Error al actualizar usuario: {str(e)}"
+            }, status_code=500)
+            
+            
+            
+    def admin_register_user(self, data: AdminUpdateUserModel):
+        # Validation
+        if not isinstance(data.user_cc, int) or data.user_cc <= 0:
+            return JSONResponse(content={"success": False, "message": "El ID debe ser un número entero positivo"}, status_code=400)
+        if not data.username or data.username.strip() == "":
+            return JSONResponse(content={"success": False, "message": "El nombre de usuario es obligatorio"}, status_code=400)
+        if not isinstance(data.phone, int) or data.phone <= 0:
+            return JSONResponse(content={"success": False, "message": "El teléfono debe ser un número válido"}, status_code=400)
+        if not re.match(r"[^@]+@[^@]+\.[^@]+", data.email):
+            return JSONResponse(content={"success": False, "message": "El correo electrónico no es válido"}, status_code=400)
+        if data.password and len(data.password) < 6:
+            return JSONResponse(content={"success": False, "message": "La contraseña debe tener al menos 6 caracteres"}, status_code=400)
+        if data.user_type not in [1, 2]:
+            return JSONResponse(content={"success": False, "message": "Tipo de usuario inválido"}, status_code=400)
+        if data.user_status not in [0, 1]:
+            return JSONResponse(content={"success": False, "message": "Estado de usuario inválido"}, status_code=400)
+
+        # Check if user exists
+        resultado_usuario = val.verificar_usuario_existe(data.user_cc)
+        if resultado_usuario["existe"]:
+            return JSONResponse(content={
+                "success": False,
+                "message": f"El usuario con el ID {data.user_cc} ya existe"
+            }, status_code=400)
+            
+        # Use provided password or generate default if not provided
+        password = data.password if data.password else "123456"  # Default password for admin-created users
+              
+        query = """
+                INSERT INTO usuarios (user_cc, user_type, user_name, user_phone, user_mail, user_password, user_status) 
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """
+            
+        try:
+            execute_query(query, (data.user_cc, data.user_type, data.username, data.phone, data.email, password, data.user_status), commit=True)
+            return JSONResponse(content={
+                "success": True,
+                "message": "Usuario registrado exitosamente por el administrador"
+            }, status_code=201)
+        except Exception as e:
+            print(f"Error en admin_register_user: {e}")
+            return JSONResponse(content={
+                "success": False,
+                "message": f"Error al registrar usuario: {e}"
             }, status_code=500)

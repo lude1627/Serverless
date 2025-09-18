@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from typing import Optional
 
 class RegisterModel(BaseModel):
     user_cc: int
@@ -7,9 +8,20 @@ class RegisterModel(BaseModel):
     email: str
     password: str
 
+
 class UpdateUserModel(BaseModel):
     user_cc: int
     username: str
     phone: int
     email: str
     password: str
+
+
+class AdminUpdateUserModel(BaseModel):
+    user_cc: int
+    username: str
+    phone: int
+    email: str
+    user_type: int  
+    user_status: int  
+    password: Optional[str] = None 

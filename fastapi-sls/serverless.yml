@@ -1,4 +1,3 @@
-
 # org: lude1627
 # app: fastapi-sls
 
@@ -6,7 +5,7 @@ service: fastapi-sls
 
 plugins:
   - serverless-offline
-  
+
 provider:
   name: aws
   runtime: python3.12
@@ -25,8 +24,17 @@ functions:
           path: /user/register
           method: post
       - httpApi:
+          path: /user/admin/register
+          method: post
+      - httpApi:
+          path: /user/view/all
+          method: get
+      - httpApi:
           path: /user/view/{user_cc}
           method: get
+      - httpApi:
+          path: /user/admin/update
+          method: put
       - httpApi:
           path: /user/update
           method: put
@@ -52,8 +60,11 @@ functions:
           path: /product/view/data
           method: get
       - httpApi:
+          path: /product/get_product/{id}
+          method: get
+      - httpApi:
           path: /product/edit/{id}
-          method: put 
+          method: put
       - httpApi:
           path: /product/delete/{id}
           method: put
@@ -75,11 +86,3 @@ functions:
       - httpApi:
           path: /carro/finalizar/{car_id}
           method: put
-
-
-
-
-
-
-   
-      
