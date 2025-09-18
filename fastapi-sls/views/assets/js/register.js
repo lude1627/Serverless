@@ -1,20 +1,23 @@
 // 📄 /views/assets/js/login.js
 
 document.addEventListener("DOMContentLoaded", () => {
-    const loginForm = document.getElementById("loginForm");
+    const registerForm = document.getElementById("formRegistro");
 
-    if (!loginForm) return;
+    if (!registerForm) return;
 
-    loginForm.addEventListener("submit", async (e) => {
+    registerForm.addEventListener("submit", async (e) => {
         e.preventDefault();
 
         const data = {
             user_cc: document.getElementById("user_cc").value,
+            username: document.getElementById("username").value,
+            phone: document.getElementById("phone").value,
+            email: document.getElementById("email").value,
             password: document.getElementById("password").value
         };
 
         try {
-            const response = await fetch("http://localhost:8000/login/sign_in", {
+            const response = await fetch("http://localhost:8000/user/register", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(data)
@@ -25,17 +28,13 @@ document.addEventListener("DOMContentLoaded", () => {
             if (result.success) {
                 Swal.fire({
                     icon: "success",
-                    title: "¡Bienvenido!",
+                    title: "Registro Exitoso",
                     text: result.message,
                     showConfirmButton: false,
                     timer: 2000
                 }).then(() => {
-                    // Redirigir según tipo de usuario
-                    if (result.user_type == 1) {
-                        window.location.href = "/views/admin/admin_usuarios.html";
-                    } else {
-                        window.location.href = "/views/producto/producto.html";
-                    }
+                
+                        window.location.href = "/views/login/login.html";
                 });
             } else {
                 Swal.fire({
