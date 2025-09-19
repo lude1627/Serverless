@@ -59,16 +59,15 @@ class Usuario:
             return JSONResponse(content={"success": False, "message": "El nombre de usuario es obligatorio"}, status_code=400)
         if not re.match(r"[^@]+@[^@]+\.[^@]+", data.email):
             return JSONResponse(content={"success": False, "message": "Correo electrónico inválido"}, status_code=400)
-        if not data.password or len(data.password) < 6:
-            return JSONResponse(content={"success": False, "message": "La contraseña debe tener al menos 6 caracteres"}, status_code=400)
+      
 
         query = """
             UPDATE usuarios 
-            SET user_name = %s, user_phone = %s, user_mail = %s, user_password = %s 
+            SET user_name = %s, user_phone = %s, user_mail = %s
             WHERE user_cc = %s
         """
         try:
-            rows = execute_query(query, (data.username, data.phone, data.email, data.password, data.user_cc), commit=True)
+            rows = execute_query(query, (data.username, data.phone, data.email, data.user_cc), commit=True)
             if rows == 0:
                 return JSONResponse(content={
                     "success": False,
@@ -93,7 +92,7 @@ class Usuario:
             return JSONResponse(content={"success": False, "message": "ID inválido"}, status_code=400)
 
         query = """
-            SELECT user_cc, user_type, user_name, user_phone, user_mail, user_password, user_status 
+            SELECT user_cc, user_name, user_phone, user_mail, user_password
             FROM usuarios WHERE user_cc = %s
         """
         try:
@@ -104,11 +103,10 @@ class Usuario:
                     "message": "Usuario encontrado",
                     "data": {
                         "user_cc": user[0],
-                        "user_type": user[1],
-                        "username": user[2],
-                        "phone": user[3],
-                        "email": user[4],
-                        "status": user[6]  
+                        "username": user[1],
+                        "phone": user[2],
+                        "email": user[3],
+                        
                     }
                 }, status_code=200)
             else:

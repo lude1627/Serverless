@@ -1,3 +1,4 @@
+const API_BASE = "http://localhost:8000";
 
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -6,61 +7,110 @@ document.addEventListener("DOMContentLoaded", () => {
     const phoneInput    = document.getElementById("phone");
     const emailInput    = document.getElementById("email");
     const passwordInput = document.getElementById("password");
-
-    const btnVerDatos   = document.getElementById("btnVerDatos");
     const form          = document.querySelector("form");
 
-    // 👉 Cargar datos del usuario
-    btnVerDatos.addEventListener("click", async () => {
-        try {
-            const user_cc = userCcInput.value.trim();
-            if (!user_cc) {
-                Swal.fire("Atención", "Ingrese el N° de Identificación para consultar", "warning");
-                return;
-            }
+    document.getElementById("btnVerDatos").addEventListener("click", () => {
+    const idUsuario = document.getElementById("user_cc").value.trim();
+    cargarDatosUsuario(idUsuario);
+    });
 
-            const resp = await fetch(`/user/view/${user_cc}`);
-            if (!resp.ok) throw new Error("No se pudo obtener la información");
 
-            const data = await resp.json();
+// 👉 Cargar datos del usuario
 
-            
-            usernameInput.value = data.user_name || "";
-            phoneInput.value    = data.phone     || "";
-            emailInput.value    = data.email     || "";
+async function cargarDatosUsuario(user_cc) {
+    try {
+        if (!user_cc) {
+            Swal.fire("Atención", "Ingrese el N° de Identificación para consultar", "warning");
+            return;
+        }
+        const resp = await fetch(`${API_BASE}/user/view/${user_cc}`);
+        if (!resp.ok) throw new Error("Usuario no encontrado");
+
+        const usuario = await resp.json();
+
+        console.log('usuarios', usuario);
+
+        if(usuario.success) {
+
+            console.log('success', usuario.success);
+            // Llenar inputs del formulario de perfil
+            document.getElementById("user_cc").value  = usuario.data.user_cc;
+            document.getElementById("username").value = usuario.data.username;
+            document.getElementById("phone").value    = usuario.data.phone;
+            document.getElementById("email").value    = usuario.data.email;
+
+
+            document.getElementById("perfilTabsContent")
 
             Swal.fire("Datos cargados", "Información obtenida correctamente", "success");
-        } catch (err) {
-            console.error(err);
-            Swal.fire("Error","No fue posible cargar los datos", "error");
         }
-    });
+        else if (!usuario || !usuario.user_cc) {
+            throw new Error("Usuario no encontrado en la base de datos");
+        }
+        
 
-    // 👉 Actualizar datos del usuario
-    form.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        try {
-            const payload = {
-                user_cc:  userCcInput.value.trim(),
-                user_name: usernameInput.value,
-                phone:     phoneInput.value,
-                email:     emailInput.value,
-                password:  passwordInput.value
-            };
+       
 
-            const resp = await fetch(`/user/update`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
+    } catch (error) {
+        console.error("Error obteniendo usuario:", error);
+        Swal.fire("⚠️ Error", "No se pudo cargar la información del usuario", "error");
+    }
+}
+
+form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    actualizarUsuario();
+});
+
+
+
+async function actualizarUsuario() {
+    // 👉 Tomar los valores actuales de los campos del formulario
+    const usuarioActualizado = {
+        user_cc: Number(userCcInput.value.trim()),      
+        username: usernameInput.value.trim(),         
+        phone: Number(phoneInput.value.trim()),        
+        email: emailInput.value.trim()
+    };
+
+    console.log("Sending update data:", usuarioActualizado);
+
+    try {
+        const response = await fetch(`${API_BASE}/user/update`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+            },
+            body: JSON.stringify(usuarioActualizado),
+        });
+
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+            Swal.fire({
+                icon: "success",
+                title: "✅ Usuario actualizado",
+                text: result.message,
+                timer: 1500,
+                showConfirmButton: false,
             });
-
-            if (!resp.ok) throw new Error("Error al actualizar");
-            const result = await resp.json();
-
-            Swal.fire("Éxito", result.message || "Datos actualizados correctamente", "success");
-        } catch (err) {
-            console.error(err);
-            Swal.fire("Error", "No fue posible actualizar los datos", "error");
+        } else {
+            console.error("Update failed:", result);
+            Swal.fire({
+                icon: "error",
+                title: "❌ Error",
+                text: result.message || "No se pudo actualizar el usuario",
+            });
         }
-    });
+    } catch (error) {
+        console.error("Error updating user:", error);
+        Swal.fire({
+            icon: "error",
+            title: "⚠️ Error inesperado",
+            text: "Ocurrió un problema al actualizar el usuario",
+        });
+    }
+}
+
 });
