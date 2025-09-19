@@ -29,7 +29,37 @@ document.addEventListener("DOMContentLoaded", async () => {
                 // Opcional: agregar funcionalidad al botón
                 clone.querySelector(".add-to-cart-btn").addEventListener("click", () => {
                     console.log(`Agregando al carrito: ${producto.nombre}`);
-                    // Aquí iría tu función de carrito
+                    try {
+                        // Aquí tomas el ID del usuario desde la sesión o storage
+                        const userCc = sessionStorage.getItem("user_cc");
+                        if (!userCc) {
+                            alert("Debes iniciar sesión para agregar productos");
+                            return;
+                        }
+
+                        const payload = {
+                            user_cc: Number(userCc),          // ID del usuario
+                            product_id: producto.id,          // Debe venir en el JSON de backend
+                            cantidad: 1                       // o un valor elegido por el usuario
+                        };
+
+                        const resp = await fetch("http://localhost:8000/carro/agregar", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify(payload)
+                        });
+
+                        const data = await resp.json();
+                        if (!resp.ok || !data.success) {
+                            throw new Error(data.message || "No se pudo agregar");
+                        }
+
+                        alert(`Producto "${producto.nombre}" agregado al carrito`);
+                        // aquí puedes actualizar un contador del carrito en el header, etc.
+                    } catch (err) {
+                        console.error(err);
+                        alert("Error al agregar al carrito");
+                    }
                 });
 
                 fragment.appendChild(clone);
