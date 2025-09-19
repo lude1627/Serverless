@@ -37,9 +37,9 @@ class Login:
                                     "message": "Usuario o contraseña incorrectos"
                                 })
         except Exception as e:        
+
                 print(f"Error en login_user: {e}")
                 
 
 
  
-     

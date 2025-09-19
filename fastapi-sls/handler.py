@@ -2,11 +2,11 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from mangum import Mangum
 from routers.router import array_router
-from fastapi.staticfiles import StaticFiles
+
 
 app = FastAPI()
 
-app.mount("/views", StaticFiles(directory="views"), name="views")
+
 
 
 app.add_middleware(
