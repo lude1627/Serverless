@@ -1,6 +1,12 @@
 const API_BASE = "http://localhost:8000";
 
+// 1️⃣ Verificar sesión
+const userCc = sessionStorage.getItem("user_cc");
+if (!userCc) {
+    window.location.href = "/views/login/login.html";
+}
 
+// 2️⃣ Cuando el DOM esté listo, cargar datos del usuario automáticamente
 document.addEventListener("DOMContentLoaded", () => {
     const userCcInput   = document.getElementById("user_cc");
     const usernameInput = document.getElementById("username");
@@ -9,53 +15,37 @@ document.addEventListener("DOMContentLoaded", () => {
     const passwordInput = document.getElementById("password");
     const form          = document.querySelector("form");
 
-    document.getElementById("btnVerDatos").addEventListener("click", () => {
-    const idUsuario = document.getElementById("user_cc").value.trim();
-    cargarDatosUsuario(idUsuario);
-    });
+    // 👉 Llamar a la función directamente usando el id guardado en sesión
+    cargarDatosUsuario(userCc);
+});
 
-
-// 👉 Cargar datos del usuario
-
-async function cargarDatosUsuario(user_cc) {
+// 3️⃣ Función para obtener y mostrar datos del usuario
+async function cargarDatosUsuario(user_Cc) {
     try {
-        if (!user_cc) {
-            Swal.fire("Atención", "Ingrese el N° de Identificación para consultar", "warning");
-            return;
-        }
-        const resp = await fetch(`${API_BASE}/user/view/${user_cc}`);
+        const resp = await fetch(`${API_BASE}/user/view/${user_Cc}`);
         if (!resp.ok) throw new Error("Usuario no encontrado");
 
         const usuario = await resp.json();
+        console.log("usuarios", usuario);
 
-        console.log('usuarios', usuario);
-
-        if(usuario.success) {
-
-            console.log('success', usuario.success);
-            // Llenar inputs del formulario de perfil
+        if (usuario.success) {
+            // Rellenar los inputs del formulario de perfil
             document.getElementById("user_cc").value  = usuario.data.user_cc;
             document.getElementById("username").value = usuario.data.username;
             document.getElementById("phone").value    = usuario.data.phone;
             document.getElementById("email").value    = usuario.data.email;
 
-
-            document.getElementById("perfilTabsContent")
-
-            Swal.fire("Datos cargados", "Información obtenida correctamente", "success");
-        }
-        else if (!usuario || !usuario.user_cc) {
+       
+        } else {
             throw new Error("Usuario no encontrado en la base de datos");
         }
-        
-
-       
 
     } catch (error) {
         console.error("Error obteniendo usuario:", error);
         Swal.fire("⚠️ Error", "No se pudo cargar la información del usuario", "error");
     }
 }
+
 
 form.addEventListener("submit", (e) => {
     e.preventDefault();
@@ -112,5 +102,7 @@ async function actualizarUsuario() {
         });
     }
 }
-
+document.getElementById("logoutBtn").addEventListener("click", () => {
+    sessionStorage.clear();
+    window.location.href = "/views/login/login.html";
 });
