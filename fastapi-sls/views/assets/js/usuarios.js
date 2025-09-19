@@ -1,3 +1,6 @@
+// aquí guardaremos todos los usuarios
+let usuariosGlobal = [];
+
 // API_BASE esté definido
 const API_BASE = "http://localhost:8000";
 
@@ -9,7 +12,98 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 });
 
-// Registrar usuarido panel admin
+// ✅ Cargar usuarios (única función)
+async function cargarUsuarios() {
+  try {
+    const response = await fetch(`${API_BASE}/user/view/all`);
+    const result = await response.json();
+
+    if (result.success && result.data) {
+      usuariosGlobal = result.data; // 🔑 Guardar globalmente
+      renderUsuarios(usuariosGlobal);
+    } else {
+      usuariosGlobal = [];
+      renderUsuarios([]);
+    }
+  } catch (error) {
+    console.error("Error cargando usuarios:", error);
+    usuariosGlobal = [];
+    renderUsuarios([]);
+  }
+}
+
+// ✅ Renderizar usuarios
+function renderUsuarios(lista) {
+  const tbody = document.querySelector("#tablaUsuarios tbody");
+  if (!tbody) {
+    console.error("No se encontró el tbody de la tabla de usuarios");
+    return;
+  }
+
+  tbody.innerHTML = ""; // Limpiar tabla
+
+  if (lista.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="8" class="text-center text-muted">
+          No se encontraron usuarios
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  lista.forEach((usuario, index) => {
+    const roleBadge =
+      usuario.user_type == 1
+        ? '<span class="badge bg-primary"><i class="fas fa-user-shield"></i> Admin</span>'
+        : '<span class="badge bg-success"><i class="fas fa-user"></i> Cliente</span>';
+
+    const statusBadge =
+      usuario.status == 1
+        ? '<span class="badge bg-success"><i class="fas fa-check-circle"></i> Activo</span>'
+        : '<span class="badge bg-danger"><i class="fas fa-times-circle"></i> Inactivo</span>';
+
+    tbody.innerHTML += `
+      <tr>
+        <td><strong>${index + 1}</strong></td>
+        <td>${usuario.user_cc}</td>
+        <td>${usuario.username}</td>
+        <td><i class="fas fa-phone"></i> ${usuario.phone}</td>
+        <td><i class="fas fa-envelope"></i> ${usuario.email}</td>
+        <td>${roleBadge}</td>
+        <td>${statusBadge}</td>
+        <td class="text-end">
+          <button class="btn btn-warning btn-sm me-1" onclick="abrirModalEditar(${
+            usuario.user_cc
+          })">
+            ✏ Editar
+          </button>
+        </td>
+      </tr>
+    `;
+  });
+}
+
+// ✅ Filtro por rol
+document.getElementById("filtroRol").addEventListener("change", (e) => {
+  const filtro = e.target.value;
+  let filtrados = usuariosGlobal;
+
+  if (filtro === "cliente") {
+    filtrados = usuariosGlobal.filter((u) => u.user_type != 1);
+  } else if (filtro === "admin") {
+    filtrados = usuariosGlobal.filter((u) => u.user_type == 1);
+  }
+
+  console.log("🔎 Filtro:", filtro, "| Resultado:", filtrados.length);
+  renderUsuarios(filtrados);
+});
+
+// ✅ Cargar usuarios al iniciar
+document.addEventListener("DOMContentLoaded", cargarUsuarios);
+
+// Registrar usuario panel admin
 document
   .getElementById("formAgregarUsuario")
   .addEventListener("submit", async (e) => {
@@ -24,7 +118,7 @@ document
       user_status: parseInt(document.getElementById("adduser_status").value),
     };
 
-    // validar
+    // Validaciones
     if (isNaN(data.user_cc) || data.user_cc <= 0) {
       Swal.fire(
         "⚠️ Error",
@@ -33,12 +127,10 @@ document
       );
       return;
     }
-
     if (!data.username) {
       Swal.fire("⚠️ Error", "El nombre de usuario es requerido", "error");
       return;
     }
-
     if (isNaN(data.phone) || data.phone <= 0) {
       Swal.fire(
         "⚠️ Error",
@@ -47,17 +139,14 @@ document
       );
       return;
     }
-
     if (!data.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
       Swal.fire("⚠️ Error", "El correo electrónico no es válido", "error");
       return;
     }
-
     if (isNaN(data.user_type) || data.user_type < 1) {
       Swal.fire("⚠️ Error", "Selecciona un tipo de usuario válido", "error");
       return;
     }
-
     if (isNaN(data.user_status) || data.user_status < -1) {
       Swal.fire("⚠️ Error", "Selecciona un estado válido", "error");
       return;
@@ -71,7 +160,7 @@ document
       });
 
       const result = await response.json();
-      console.log
+      console.log(result); // Para depuración
 
       if (result.success) {
         Swal.fire({
@@ -81,14 +170,17 @@ document
           showConfirmButton: false,
         });
 
-        // Limpia el formulario y cierra modal
+        // Limpia el formulario
         document.getElementById("formAgregarUsuario").reset();
-        const modal = bootstrap.Modal.getInstance(
-          document.getElementById("modalAgregarUsuario")
-        );
-        modal.hide();
 
-        // Recargar la lista de usuarios
+        // Cierra modal de forma segura
+        const modalEl = document.getElementById("modalAgregarUsuario");
+        if (modalEl) {
+          let modalInstance = bootstrap.Modal.getInstance(modalEl);
+          if (modalInstance) modalInstance.hide();
+        }
+
+        // Recarga usuarios
         cargarUsuarios();
       } else {
         Swal.fire(
@@ -110,30 +202,21 @@ document
 // Modal editar
 async function abrirModalEditar(user_cc) {
   try {
-    // Petición al backend para traer datos de un usuario
     const response = await fetch(`${API_BASE}/user/view/${user_cc}`);
     const result = await response.json();
 
     if (result.success) {
       const usuario = result.data;
 
-      // Cargar opciones de selección
       await cargarSelectsEditarUsuario();
 
-      // Rellenar campos de formulario
       document.getElementById("editusuarioId").value = usuario.user_id;
       document.getElementById("edituser_cc").value = usuario.user_cc;
       document.getElementById("edituser_name").value = usuario.username;
       document.getElementById("edituser_phone").value = usuario.phone;
       document.getElementById("edituser_mail").value = usuario.email;
-
-      // Establecer rol y estado
       document.getElementById("edituser_type").value = usuario.user_type;
       document.getElementById("edituser_status").value = usuario.status;
-
-      console.log("User data loaded:", usuario);
-      console.log("Role from backend:", usuario.user_type);
-      console.log("Status from backend:", usuario.status);
 
       const modal = new bootstrap.Modal(
         document.getElementById("modalEditarUsuario")
@@ -151,47 +234,41 @@ async function abrirModalEditar(user_cc) {
 // Cargar opciones de selección
 async function cargarSelectsEditarUsuario() {
   try {
-    // Cargar tipos de usuarios (roles)
     const userTypeSelect = document.getElementById("edituser_type");
     if (userTypeSelect) {
       userTypeSelect.innerHTML = `
+        <option value="">Seleccionar rol</option>
         <option value="1">Administrador</option>
         <option value="2">Cliente</option>
       `;
     }
 
-    // Opciones de estado
     const statusSelect = document.getElementById("edituser_status");
     if (statusSelect) {
       statusSelect.innerHTML = `
+       <option value="">Seleccionar estado</option>
         <option value="1">Activo</option>
         <option value="0">Inactivo</option>
       `;
     }
-
-    console.log("Select options loaded successfully");
   } catch (error) {
     console.error("Error loading select options:", error);
   }
 }
 
-// formulario de usuario
+// formulario de usuario (editar)
 document
   .getElementById("formEditarUsuario")
   .addEventListener("submit", async function (e) {
     e.preventDefault();
 
-    // Get form values
     const user_cc = parseInt(document.getElementById("edituser_cc").value);
     const username = document.getElementById("edituser_name").value.trim();
     const phone = parseInt(document.getElementById("edituser_phone").value);
     const email = document.getElementById("edituser_mail").value.trim();
     const user_type = parseInt(document.getElementById("edituser_type").value);
-    const user_status = parseInt(
-      document.getElementById("edituser_status").value
-    );
+    const user_status = parseInt(document.getElementById("edituser_status").value);
 
-    // Basic validation
     if (!user_cc || user_cc <= 0) {
       Swal.fire("Error", "La cédula debe ser un número válido", "error");
       return;
@@ -210,16 +287,14 @@ document
     }
 
     const usuarioActualizado = {
-      user_cc: user_cc,
-      username: username,
-      phone: phone,
-      email: email,
-      user_type: user_type,
-      user_status: user_status,
-      password: null, // La contraseña es opcional
+      user_cc,
+      username,
+      phone,
+      email,
+      user_type,
+      user_status,
+      password: null,
     };
-
-    console.log("Sending update data:", usuarioActualizado);
 
     try {
       const response = await fetch(`${API_BASE}/user/admin/update`, {
@@ -242,20 +317,13 @@ document
           showConfirmButton: false,
         });
 
-        // Close modal
         const modal = bootstrap.Modal.getInstance(
           document.getElementById("modalEditarUsuario")
         );
-        if (modal) {
-          modal.hide();
-        }
+        if (modal) modal.hide();
 
-        // Reload table
-        if (typeof cargarUsuarios === "function") {
-          cargarUsuarios();
-        }
+        cargarUsuarios();
       } else {
-        console.error("Update failed:", result);
         Swal.fire({
           icon: "error",
           title: "❌ Error",
@@ -272,79 +340,7 @@ document
     }
   });
 
-// Función de carga de usuarios
-async function cargarUsuarios() {
-  try {
-    const response = await fetch(`${API_BASE}/user/view/all`);
-    const result = await response.json();
-
-    const tbody = document.querySelector("#tablaUsuarios tbody");
-    if (!tbody) return;
-
-    if (result.success && result.data) {
-      tbody.innerHTML = "";
-      result.data.forEach((usuario, index) => {
-        // 🎨 Badge de tipo de usuario (rol)
-        const roleBadge =
-          usuario.user_type == 1
-            ? '<span class="badge bg-primary"><i class="fas fa-user-shield"></i>Admin</span>'
-            : '<span class="badge bg-success"><i class="fas fa-user"></i> Cliente</span>';
-
-        // 🎨 Badge de estado
-        const statusBadge =
-          usuario.status == 1
-            ? '<span class="badge bg-success"><i class="fas fa-check-circle"></i> Activo</span>'
-            : '<span class="badge bg-danger"><i class="fas fa-times-circle"></i> Inactivo</span>';
-
-        tbody.innerHTML += `
-          <tr>
-            <td><strong>${index + 1}</strong></td>
-            <td>${usuario.user_cc}</td>
-            <td>${usuario.username}</td>
-            <td><i class="fas fa-phone"></i> ${usuario.phone}</td>
-            <td><i class="fas fa-envelope"></i> ${usuario.email}</td>
-            <td>${roleBadge}</td>
-            <td>${statusBadge}</td>
-            <td class="text-end">
-              <button class="btn btn-warning btn-sm me-1" onclick="abrirModalEditar(${
-                usuario.user_cc
-              })">
-                ✏ Editar
-              </button>
-            </td>
-          </tr>
-        `;
-      });
-    } else {
-      tbody.innerHTML = `
-        <tr>
-          <td colspan="8" class="text-center text-muted">
-            ${result.message || "No hay usuarios registrados"}
-          </td>
-        </tr>
-      `;
-    }
-  } catch (error) {
-    console.error("Error loading users:", error);
-    const tbody = document.querySelector("#tablaUsuarios tbody");
-    if (tbody) {
-      tbody.innerHTML = `
-        <tr>
-          <td colspan="8" class="text-center text-danger">
-            Error al cargar usuarios
-          </td>
-        </tr>
-      `;
-    }
-  }
-}
-
-//Cargar usuarios
-document.addEventListener("DOMContentLoaded", function () {
-  cargarUsuarios();
-});
-
-// Cargar opciones de selección
+// Cargar opciones de selección para agregar
 async function cargarSelectsAgregarUsuario() {
   try {
     const userTypeSelect = document.getElementById("adduser_type");
@@ -393,7 +389,7 @@ async function eliminarUsuario(user_cc) {
           result.message || "Usuario eliminado",
           "success"
         );
-        cargarUsuarios(); // recargar la tabla
+        cargarUsuarios();
       } else {
         Swal.fire(
           "Error",
