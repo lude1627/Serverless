@@ -14,7 +14,7 @@ class UpdateUserModel(BaseModel):
     username: str
     phone: int
     email: str
-    password: str
+   
 
 
 class AdminUpdateUserModel(BaseModel):
