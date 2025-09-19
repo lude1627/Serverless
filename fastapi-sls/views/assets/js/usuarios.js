@@ -20,7 +20,7 @@ document
       username: document.getElementById("adduser_name").value.trim(),
       phone: parseInt(document.getElementById("adduser_phone").value),
       email: document.getElementById("adduser_mail").value.trim(),
-      user_type: parseInt(document.getElementById("addtuser_type").value),
+      user_type: parseInt(document.getElementById("adduser_type").value),
       user_status: parseInt(document.getElementById("adduser_status").value),
     };
 
@@ -58,7 +58,7 @@ document
       return;
     }
 
-    if (isNaN(data.user_status) || data.user_status < 0) {
+    if (isNaN(data.user_status) || data.user_status < -1) {
       Swal.fire("⚠️ Error", "Selecciona un estado válido", "error");
       return;
     }
@@ -71,6 +71,7 @@ document
       });
 
       const result = await response.json();
+      console.log
 
       if (result.success) {
         Swal.fire({
