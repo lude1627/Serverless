@@ -39,6 +39,9 @@ def obtener_carrito(user_cc: int):
 def eliminar(detalle_id: int, car_id: int):
     return eliminar_producto(detalle_id, car_id)
 
+@carrito_router.get("/dcarrito/{car_id}")
+def obtener_detalles_carrito(car_id: int):
+    return carro.ver_detalles_por_carrito(car_id)
 
 @carrito_router.get("/{car_id}/historial")
 def historial_carrito(car_id: int):

@@ -23,6 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const result = await response.json();
 
             if (result.success) {
+                sessionStorage.setItem("user_cc", result.user_cc);
                 Swal.fire({
                     icon: "success",
                     title: "¡Bienvenido!",

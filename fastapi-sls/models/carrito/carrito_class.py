@@ -117,8 +117,48 @@ class CarritoClass:
                 }
 
 
-
+        def ver_detalles_por_carrito(self, car_id: int):
         
+            query = """
+                SELECT 
+                    detalle_id,
+                    car_id,
+                    product_id,
+                    detalle_cantidad,
+                    precio_unitario
+                FROM carrito_detalle
+                WHERE car_id = %s
+            """
+            try:
+                detalles = execute_query(query, (car_id,), fetchall=True)
+
+                if not detalles:
+                    return JSONResponse(
+                        content={"success": False, "message": "No se encontraron detalles para este carrito"},
+                        status_code=404
+                    )
+
+            
+                detalles_list = [
+                    {
+                        "detalle_id": d[0],
+                        "car_id": d[1],
+                        "product_id": d[2],
+                        "detalle_cantidad": d[3],
+                        "precio_unitario": float(d[4])
+                    }
+                    for d in detalles
+                ]
+
+                return JSONResponse(
+                    content={"success": True, "detalles": detalles_list}
+                )
+
+            except Exception as e:
+                return {
+                    "success": False,
+                    "message": f"❌ Error al obtener detalles: {e}"
+                }
         
         
         

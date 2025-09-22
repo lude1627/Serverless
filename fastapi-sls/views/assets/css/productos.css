@@ -41,7 +41,7 @@ main.container {
     height: 20rem !important; 
   border: 1px black solid;
   border-radius: 10px;
-  background-color: #f4f5c863;
+  background-color: #ffffffae;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   display: flex;
   flex-wrap: wrap;

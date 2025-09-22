@@ -1,3 +1,12 @@
+const API_BASE = "http://localhost:8000";
+
+const userCc = sessionStorage.getItem("user_cc");
+if (!userCc) {
+    window.location.href = "/views/login/login.html";
+}
+
+
+
 document.addEventListener("DOMContentLoaded", async () => {
     const container = document.querySelector("main.container");
     const template = document.getElementById("product-template");
@@ -5,7 +14,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!container || !template) return;
 
     try {
-        const response = await fetch("http://localhost:8000/product/view/data", {
+        const response = await fetch(`${API_BASE}/product/view/data`, {
             method: "GET",
             headers: { "Content-Type": "application/json" }
         });
@@ -16,50 +25,56 @@ document.addEventListener("DOMContentLoaded", async () => {
             const fragment = document.createDocumentFragment();
 
             result.data.forEach(producto => {
-                // Clonar el template
+               
                 const clone = template.content.cloneNode(true);
 
-                // Asignar datos
+              
                 clone.querySelector(".card-title").textContent = producto.nombre;
                 clone.querySelector(".desc").textContent = producto.descripcion;
                 clone.querySelector(".cant").textContent = producto.cantidad;
                 clone.querySelector(".price").textContent = producto.precio;
                 clone.querySelector(".cat").textContent = `Categoría: ${producto.categoria}`;
 
-                // Opcional: agregar funcionalidad al botón
-                clone.querySelector(".add-to-cart-btn").addEventListener("click", () => {
-                    console.log(`Agregando al carrito: ${producto.nombre}`);
-                    // try {
-                    //     // Aquí tomas el ID del usuario desde la sesión o storage
-                    //     const userCc = sessionStorage.getItem("user_cc");
-                    //     if (!userCc) {
-                    //         alert("Debes iniciar sesión para agregar productos");
-                    //         return;
-                    //     }
 
-                    //     const payload = {
-                    //         user_cc: Number(userCc),          // ID del usuario
-                    //         product_id: producto.id,          // Debe venir en el JSON de backend
-                    //         cantidad: 1                       // o un valor elegido por el usuario
-                    //     };
+                
+                clone.querySelector(".add-to-cart-btn").addEventListener("click", async () => {
+                    try {
+                        
+                        const carritoData = {
+                            user_cc: parseInt(userCc),    
+                            product_id: producto.id,      
+                            car_cantidad: 1                   
+                        };
 
-                    //     const resp = await fetch("http://localhost:8000/carro/agregar", {
-                    //         method: "POST",
-                    //         headers: { "Content-Type": "application/json" },
-                    //         body: JSON.stringify(payload)
-                    //     });
+                        const resp = await fetch(`${API_BASE}/carro/agregar`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify(carritoData)
+                        });
 
-                    //     const data = await resp.json();
-                    //     if (!resp.ok || !data.success) {
-                    //         throw new Error(data.message || "No se pudo agregar");
-                    //     }
+                        const data = await resp.json();
 
-                    //     alert(`Producto "${producto.nombre}" agregado al carrito`);
-                    //     // aquí puedes actualizar un contador del carrito en el header, etc.
-                    // } catch (err) {
-                    //     console.error(err);
-                    //     alert("Error al agregar al carrito");
-                    // }
+                        if (resp.ok && data.success) { 
+                            Swal.fire({
+                                icon: "success",
+                                title: "Producto agregado",
+                                text: `${producto.nombre} fue agregado al carrito`,
+                                timer: 1500,
+                                showConfirmButton: false
+                            });
+                        } else {
+                            throw new Error(data.message || "Error al agregar al carrito");
+                        }
+                    } catch (error) {
+                        console.error("Error agregando al carrito:", error);
+                        Swal.fire({
+                            icon: "error",
+                            title: "Error",
+                            text: "No se pudo agregar el producto al carrito"
+                        });
+                    }
+                   
+
                 });
 
                 fragment.appendChild(clone);
@@ -73,4 +88,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         console.error("Error al cargar productos:", error);
         container.innerHTML += `<p class="text-center text-danger">Error de conexión con el servidor.</p>`;
     }
+});
+
+document.getElementById("logoutBtn").addEventListener("click", () => {
+    sessionStorage.clear();
+    window.location.href = "/views/login/login.html";
 });
