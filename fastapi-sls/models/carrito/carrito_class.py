@@ -118,47 +118,36 @@ class CarritoClass:
 
 
         def ver_detalles_por_carrito(self, car_id: int):
-        
             query = """
-                SELECT 
-                    detalle_id,
-                    car_id,
-                    product_id,
-                    detalle_cantidad,
-                    precio_unitario
-                FROM carrito_detalle
-                WHERE car_id = %s
+                SELECT d.detalle_id,
+                    d.car_id,
+                    d.product_id,
+                    d.detalle_cantidad,
+                    d.precio_unitario,
+                    p.product_name AS nombre_producto   
+                FROM carrito_detalle d
+                JOIN productos p ON p.product_id = d.product_id
+                WHERE d.car_id = %s
             """
             try:
-                detalles = execute_query(query, (car_id,), fetchall=True)
+                filas = execute_query(query, (car_id,), fetchall=True)
+                if not filas:
+                    return {"success": False, "detalles": []}
 
-                if not detalles:
-                    return JSONResponse(
-                        content={"success": False, "message": "No se encontraron detalles para este carrito"},
-                        status_code=404
-                    )
-
-            
-                detalles_list = [
-                    {
-                        "detalle_id": d[0],
-                        "car_id": d[1],
-                        "product_id": d[2],
-                        "detalle_cantidad": d[3],
-                        "precio_unitario": float(d[4])
-                    }
-                    for d in detalles
-                ]
-
-                return JSONResponse(
-                    content={"success": True, "detalles": detalles_list}
-                )
-
+                detalles = []
+                for r in filas:
+                    detalles.append({
+                        "detalle_id": r[0],
+                        "car_id": r[1],
+                        "product_id": r[2],
+                        "detalle_cantidad": r[3],
+                        "precio_unitario": float(r[4]),
+                        "nombre_producto": r[5]          
+                    })
+                return {"success": True, "detalles": detalles}
             except Exception as e:
-                return {
-                    "success": False,
-                    "message": f"❌ Error al obtener detalles: {e}"
-                }
+                return {"success": False, "message": f"❌ Error: {e}"}
+
         
         
         
