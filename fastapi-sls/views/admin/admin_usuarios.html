@@ -47,7 +47,7 @@
         <table class="table align-middle" id="tablaUsuarios">
           <thead>
             <tr>
-              <th>#</th>
+              <th>ID</th>
               <th>Cedula</th>
               <th>Nombre</th>
               <th>Telefono</th>
@@ -121,7 +121,10 @@
         </div>
         <div class="modal-body">
           <form id="formEditarUsuario">
-            <input type="hidden" id="usuarioId">
+            <div class="mb-3">
+              <label for="edituser_id" class="form-label">ID</label>
+              <input type="text" class="form-control" id="edituser_id" readonly>
+            </div>
             <div class="mb-3">
               <label for="edituser_cc" class="form-label">Cedula</label>
               <input type="text" class="form-control" id="edituser_cc" required>
