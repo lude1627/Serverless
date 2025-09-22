@@ -86,3 +86,6 @@ functions:
       - httpApi:
           path: /carro/finalizar/{car_id}
           method: put
+      - httpApi:
+          path: /carro/dcarrito/{car_id}
+          method: get
