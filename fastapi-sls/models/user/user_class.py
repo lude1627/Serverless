@@ -64,7 +64,7 @@ class Usuario:
         query = """
             UPDATE usuarios 
             SET user_name = %s, user_phone = %s, user_mail = %s
-            WHERE user_cc = %s
+            WHERE user_cc = %s or user_id = %s
         """
         try:
             rows = execute_query(query, (data.username, data.phone, data.email, data.user_cc), commit=True)
@@ -87,39 +87,61 @@ class Usuario:
             }, status_code=500)
             
 
-    def view_user(self, user_cc: int):
-        if not isinstance(user_cc, int) or user_cc <= 0:
-            return JSONResponse(content={"success": False, "message": "ID inválido"}, status_code=400)
-
-        query = """
-            SELECT user_cc, user_name, user_phone, user_mail, user_password
-            FROM usuarios WHERE user_cc = %s
-        """
+    def view_user(self, user_cc: int = None, user_id: int = None):
         try:
-            user = execute_query(query, (user_cc,), fetchone=True)
+            # Validación: al menos uno de los dos debe venir
+            if user_cc is None and user_id is None:
+                return JSONResponse(content={"success": False, "message": "Debe proporcionar user_cc o user_id"}, status_code=400)
+
+            # Construcción dinámica de query y parámetros
+            if user_cc:
+                query = """
+                    SELECT user_id, user_cc, user_name, user_phone, user_mail, user_password
+                    FROM usuarios WHERE user_cc = %s
+                """
+                params = (user_cc,)
+            else:
+                query = """
+                    SELECT user_id, user_cc, user_name, user_phone, user_mail, user_password
+                    FROM usuarios WHERE user_id = %s
+                """
+                params = (user_id,)
+
+            # Ejecución de la consulta
+            user = execute_query(query, params, fetchone=True)
+
             if user:
                 return JSONResponse(content={
                     "success": True,
                     "message": "Usuario encontrado",
                     "data": {
-                        "user_cc": user[0],
-                        "username": user[1],
-                        "phone": user[2],
-                        "email": user[3],
-                        
+                        "user_id": user[0],
+                        "user_cc": user[1],
+                        "username": user[2],
+                        "phone": user[3],
+                        "email": user[4],
                     }
                 }, status_code=200)
             else:
                 return JSONResponse(content={
-                    "success": False, 
+                    "success": False,
                     "message": "Usuario no encontrado"
                 }, status_code=404)
+
         except Exception as e:
             print(f"Error en view_user: {e}")
             return JSONResponse(content={
                 "success": False,
                 "message": "Error al obtener usuario"
             }, status_code=500)
+
+       
+       
+       
+       
+       
+       
+       
             
     #Exclusivo para acciones del admin 
     def view_all_users(self):
@@ -191,15 +213,15 @@ class Usuario:
         if data.password:
             query = """
                 UPDATE usuarios 
-                SET user_name = %s, user_phone = %s, user_mail = %s, user_type = %s, user_status = %s, user_password = %s
-                WHERE user_cc = %s
+                SET user_cc = %s, user_name = %s, user_phone = %s, user_mail = %s, user_type = %s, user_status = %s, user_password = %s
+                WHERE user_cc = %s or user_id = %s
             """
             params = (data.username, data.phone, data.email, data.user_type, data.user_status, data.password, data.user_cc)
         else:
             query = """
                 UPDATE usuarios 
-                SET user_name = %s, user_phone = %s, user_mail = %s, user_type = %s, user_status = %s
-                WHERE user_cc = %s
+                SET user_cc = %s, user_name = %s, user_phone = %s, user_mail = %s, user_type = %s, user_status = %s
+                WHERE user_id = %s or user_cc = %s
             """
             params = (data.username, data.phone, data.email, data.user_type, data.user_status, data.user_cc)
             

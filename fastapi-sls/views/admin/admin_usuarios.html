@@ -18,6 +18,7 @@
         <a href="/views/admin/admin_categorias.html" class="text-white text-decoration-none me-3">Categorías</a>
         <a href="/views/admin/admin_productos.html" class="text-white text-decoration-none me-3">Productos</a>
         <a href="/views/admin/admin_usuarios.html" class="text-white text-decoration-none fw-bold me-3">Usuarios</a>
+        <a href="/views/admin/admin_pedidos.html" class="text-white text-decoration-none me-3">Pedidos</a>
         <a href="/views/login/login.html" class="btn btn-outline-light btn-sm">Cerrar Sesión</a>
       </nav>
     </div>
@@ -120,7 +121,7 @@
         </div>
         <div class="modal-body">
           <form id="formEditarUsuario">
-            <input type="hidden" id="editusuarioId">
+            <input type="hidden" id="usuarioId">
             <div class="mb-3">
               <label for="edituser_cc" class="form-label">Cedula</label>
               <input type="text" class="form-control" id="edituser_cc" required>
@@ -139,17 +140,11 @@
             </div>
             <div class="mb-3">
               <label class="form-label">Rol</label>
-              <select id="edituser_type" class="form-select" required>
-                <option value="1">Administrador</option>
-                <option value="2">Cliente</option>
-              </select>
+              <select id="edituser_type" class="form-select" required></select>
             </div>
             <div class="mb-3">
               <label class="form-label">Estado</label>
-              <select class="form-select" id="edituser_status" required>
-                <option value="1">Activo</option>
-                <option value="0">Inactivo</option>
-              </select>
+              <select class="form-select" id="edituser_status" required></select>
             </div>
             <button type="submit" class="btn btn-primary w-100">Actualizar</button>
           </form>

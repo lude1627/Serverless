@@ -12,6 +12,14 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 });
 
+// Cargar opciones de selección
+document.addEventListener("DOMContentLoaded", function () {
+  const addModal = document.getElementById("modalEditarUsuario");
+  if (addModal) {
+    addModal.addEventListener("shown.bs.modal", cargarSelectsEditarUsuario);
+  }
+});
+
 // ✅ Cargar usuarios (única función)
 async function cargarUsuarios() {
   try {
@@ -19,7 +27,7 @@ async function cargarUsuarios() {
     const result = await response.json();
 
     if (result.success && result.data) {
-      usuariosGlobal = result.data; // 🔑 Guardar globalmente
+      usuariosGlobal = result.data;
       renderUsuarios(usuariosGlobal);
     } else {
       usuariosGlobal = [];
@@ -40,7 +48,7 @@ function renderUsuarios(lista) {
     return;
   }
 
-  tbody.innerHTML = ""; // Limpiar tabla
+  tbody.innerHTML = "";
 
   if (lista.length === 0) {
     tbody.innerHTML = `
@@ -170,15 +178,11 @@ document
           showConfirmButton: false,
         });
 
-        // Limpia el formulario
-        document.getElementById("formAgregarUsuario").reset();
-
         // Cierra modal de forma segura
-        const modalEl = document.getElementById("modalAgregarUsuario");
-        if (modalEl) {
-          let modalInstance = bootstrap.Modal.getInstance(modalEl);
-          if (modalInstance) modalInstance.hide();
-        }
+        const modal = bootstrap.Modal.getInstance(
+          document.getElementById("modalUsuario")
+        );
+        if (modal) modal.hide();
 
         // Recarga usuarios
         cargarUsuarios();
@@ -200,9 +204,9 @@ document
   });
 
 // Modal editar
-async function abrirModalEditar(user_cc) {
+async function abrirModalEditar(user_id) {
   try {
-    const response = await fetch(`${API_BASE}/user/view/${user_cc}`);
+    const response = await fetch(`${API_BASE}/user/view/${user_id}`);
     const result = await response.json();
 
     if (result.success) {
@@ -210,7 +214,7 @@ async function abrirModalEditar(user_cc) {
 
       await cargarSelectsEditarUsuario();
 
-      document.getElementById("editusuarioId").value = usuario.user_id;
+      document.getElementById("usuarioId").value = usuario.user_id;
       document.getElementById("edituser_cc").value = usuario.user_cc;
       document.getElementById("edituser_name").value = usuario.username;
       document.getElementById("edituser_phone").value = usuario.phone;
@@ -262,13 +266,20 @@ document
   .addEventListener("submit", async function (e) {
     e.preventDefault();
 
+    const user_id = parseInt(document.getElementById("usuarioId").value);
     const user_cc = parseInt(document.getElementById("edituser_cc").value);
     const username = document.getElementById("edituser_name").value.trim();
     const phone = parseInt(document.getElementById("edituser_phone").value);
     const email = document.getElementById("edituser_mail").value.trim();
     const user_type = parseInt(document.getElementById("edituser_type").value);
-    const user_status = parseInt(document.getElementById("edituser_status").value);
+    const user_status = parseInt(
+      document.getElementById("edituser_status").value
+    );
 
+    if (!user_id) {
+      Swal.fire("Error", "No se encontró el ID del usuario", "error");
+      return;
+    }
     if (!user_cc || user_cc <= 0) {
       Swal.fire("Error", "La cédula debe ser un número válido", "error");
       return;
@@ -297,7 +308,7 @@ document
     };
 
     try {
-      const response = await fetch(`${API_BASE}/user/admin/update`, {
+      const response = await fetch(`${API_BASE}/user/admin/update/${user_id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

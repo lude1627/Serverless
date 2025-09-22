@@ -26,12 +26,12 @@ def get_all_users():
     return usuario.view_all_users()
 
 
-@user_router.get("/view/{user_cc}")
-def get_user_json(user_cc: int):
-    return usuario.view_user(user_cc)
+@user_router.get("/view/{user_id}")
+def get_user_json(user_id: int):
+    return usuario.view_user(user_id)
 
 
-@user_router.put("/admin/update")
+@user_router.put("/admin/update/{user_id}")
 def admin_update_user(data: AdminUpdateUserModel):
     return usuario.admin_update_user(data)
 

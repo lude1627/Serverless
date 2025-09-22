@@ -30,10 +30,10 @@ functions:
           path: /user/view/all
           method: get
       - httpApi:
-          path: /user/view/{user_cc}
+          path: /user/view/{user_id}
           method: get
       - httpApi:
-          path: /user/admin/update
+          path: /user/admin/update/{user_id}
           method: put
       - httpApi:
           path: /user/update
@@ -72,11 +72,20 @@ functions:
     handler: handler.handler
     events:
       - httpApi:
-          path: /carro/agregar
+          path: /carro/agregar 
           method: post
       - httpApi:
           path: /carro/actualizar/{detalle_id}/{car_id}
           method: put
+      - httpApi:
+          path: /carro/{car_id}/estado
+          method: put
+      - httpApi:
+          path: /carro/view/all
+          method: get
+      - httpApi:
+          path: /carro/{user_cc}/historial
+          method: get
       - httpApi:
           path: /carro/usuario/{user_cc}
           method: get

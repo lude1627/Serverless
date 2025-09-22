@@ -31,26 +31,40 @@ class ValidateU:
                 "message": f"❌ Error al verificar usuario: {e}"
             }
 
-    def verificar_user_type_por_password(self,password: str):
+    def verificar_user_type(self, user_cc: int, password: str):
         try:
-            CLAVE_ADMIN = "ADMIN1627"
+            query = """
+                SELECT user_type
+                FROM usuarios
+                WHERE user_cc = %s AND user_password = %s
+                LIMIT 1
+            """
+            result = execute_query(query, params=(user_cc, password), fetchone=True)
 
-            user_type = 1 if password == CLAVE_ADMIN else 2
+            if result:
+                user_type = result[0]
+                return {
+                    "success": True,
+                    "user_type": user_type,
+                    "message": (
+                        "✅ Usuario administrador (user_type=1)"
+                        if user_type == 1
+                        else "👤 Usuario cliente (user_type=2)"
+                    )
+                }
+            else:
+                return {
+                    "success": False,
+                    "user_type": None,
+                    "message": "❌ Usuario o contraseña incorrectos."
+                }
 
-            return {
-                "success": True,
-                "user_type": user_type,
-                "message": (
-                    "Contraseña de administrador: user_type=1"
-                    if user_type == 1
-                    else "Usuario normal: user_type=2"
-                )
-            }
         except Exception as e:
             return {
                 "success": False,
-                "user_type": 2,
-                "message": f"❌ Error al verificar contraseña: {e}"
+                "user_type": None,
+                "message": f"⚠️ Error al verificar usuario: {e}"
             }
+
 
 
