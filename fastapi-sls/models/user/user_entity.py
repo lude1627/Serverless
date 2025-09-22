@@ -2,7 +2,6 @@ from pydantic import BaseModel
 from typing import Optional
 
 class RegisterModel(BaseModel):
-    user_id: int
     user_cc: int
     username: str
     phone: int
