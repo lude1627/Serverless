@@ -1,4 +1,3 @@
-
 document.addEventListener("DOMContentLoaded", async () => {
     const userCc = sessionStorage.getItem("user_cc");
     if (!userCc) {
@@ -14,10 +13,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     const template = list.querySelector(".template");
     const finalizarBtn = document.getElementById("finalizarBtn");
 
+    // 🔹 Formateador de moneda COP
+    const formatoCOP = new Intl.NumberFormat("es-CO", {
+        style: "currency",
+        currency: "COP",
+        minimumFractionDigits: 0
+    });
+
     async function actualizarResumen(monto) {
-        subtotalSpan.textContent = `$${monto}`;
-        resumenSubtotal.textContent = `$${monto}`;
-        resumenTotal.textContent = `$${monto}`;
+        const dinero = formatoCOP.format(monto);
+        subtotalSpan.textContent = dinero;
+        resumenSubtotal.textContent = dinero;
+        resumenTotal.textContent = dinero;
     }
 
     async function cargarDetalle() {
@@ -48,8 +55,12 @@ document.addEventListener("DOMContentLoaded", async () => {
                 clone.classList.remove("template", "d-none");
 
                 const precioNum = parseFloat(item.precio_unitario);
-                clone.querySelector(".nombre").textContent = item.nombre_producto || `Producto ${item.product_id}`;
-                clone.querySelector(".precio-unitario").textContent = `Precio: $${item.precio_unitario}`;
+                const subtotalItem = item.detalle_cantidad * precioNum;
+
+                clone.querySelector(".nombre").textContent =
+                    item.nombre_producto || `Producto ${item.product_id}`;
+                clone.querySelector(".precio-unitario").textContent =
+                    `Precio: ${formatoCOP.format(precioNum)}`;
                 clone.querySelector(".cantidad").value = item.detalle_cantidad;
                 clone.querySelector(".cantidad").dataset.price = precioNum;
 
@@ -62,10 +73,11 @@ document.addEventListener("DOMContentLoaded", async () => {
                 clone.querySelector(".eliminar").dataset.id = item.detalle_id;
                 clone.querySelector(".eliminar").dataset.carid = item.car_id;
 
-                clone.querySelector(".subtotal").textContent = `$${item.detalle_cantidad * precioNum}`;
+                // ✅ subtotal con formato de moneda
+                clone.querySelector(".subtotal").textContent = formatoCOP.format(subtotalItem);
 
                 list.appendChild(clone);
-                subtotalTotal += item.detalle_cantidad * precioNum;
+                subtotalTotal += subtotalItem;
             });
 
             actualizarResumen(subtotalTotal);
@@ -104,9 +116,5 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     });
 
- 
-
-   
     cargarDetalle();
 });
-

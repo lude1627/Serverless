@@ -1,61 +1,77 @@
-#titulo{
+
+#titulo {
   position: relative;
-  top: 5rem;
-  left: 25rem;
-    width: 1000px;
-    height: 100px;
-    justify-content: center;
-    align-items: center;
+  top: 0;
+  left: 0;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  margin: 2rem auto;        
+  padding: 0 1rem;
 }
-
-
-/* ===== Estilos para la página de productos ===== */
 
 main.container {
-    position: relative;
-    top: -5rem ; 
-    display: flex;
-    flex: 1;
-    animation: fadeIn 0.5s ease-in-out;
+  position: relative;
+  top: 0;                   
+  display: flex;
+  flex: 1;
+  animation: fadeIn 0.5s ease-in-out;
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  margin-top: 1rem;         
 }
 
-/* Animación */
+
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  to   { opacity: 1; transform: translateY(0); }
 }
-
-/* Grid de productos (cartas más pequeñas y horizontales) */
+/* CONTENEDOR */
 #productosGrid {
-    display: flex;
   display: grid;
-  flex-wrap: wrap;
-  grid-template-columns: repeat(auto-fit, minmax(10px, 1fr)); /* MÁS PEQUEÑAS */
-  gap: 15px; /* Espacio entre las tarjetas */
-  justify-items: center;
-  align-items: stretch;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 25px;
+  justify-content: center;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  box-sizing: border-box;
 }
 
-/* Tarjetas */
+/* TARJETA CUADRADA */
 .card {
-    height: 20rem !important; 
-  border: 1px black solid;
+  width: 100%;
+  max-width: 300px;       /* ancho máximo */
+  aspect-ratio: 1 / 1;    /* 🔑 mantiene la tarjeta cuadrada */
+  border: 1px solid #000;
   border-radius: 10px;
-  background-color: #ffffffae;
+  background: #ffffffae;
+  padding: 15px;
+  box-sizing: border-box;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  text-align: center;
+
+  /* quita estiramientos heredados */
+  height: auto !important;
   display: flex;
-  flex-wrap: wrap;
-  flex-direction: row-reverse;
-  margin: 10px;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
-/* Hover elegante */
+
+
 .card:hover {
   transform: scale(1.03);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
 }
 
-/* Ajustes de texto */
+/* ---------- TEXTOS ---------- */
 .card-title {
   font-size: 1rem;
   margin-bottom: 0.4rem;
@@ -71,15 +87,28 @@ main.container {
   color: #28a745;
 }
 
-/* Botón más compacto */
+/* ---------- BOTÓN ---------- */
 .add-to-cart-btn {
   border-radius: 6px;
   font-size: 0.85rem;
   padding: 6px;
   font-weight: bold;
   transition: background-color 0.2s ease;
+  width: 100%;
 }
 
 .add-to-cart-btn:hover {
   background-color: #0a58ca;
+}
+
+/* ---------- RESPONSIVE EXTRA ---------- */
+@media (max-width: 576px) {
+  #titulo {
+    top: 2rem;
+    font-size: 1.4rem;
+    padding: 0 0.5rem;
+  }
+  .card {
+    height: auto !important;
+  }
 }

@@ -7,8 +7,8 @@ from services.carrito_service import (
     finalizar_compra, 
     obtener_todos_carritos,
     agregar_estado_carrito,
-    obtener_historial_carrito
-)
+    obtener_historial_carrito,
+    obtener_carritos_user)
 
 
 
@@ -29,6 +29,9 @@ def agregar(carrito: CarritoEntity):
 def listar_carritos():
     return obtener_todos_carritos()
 
+@carrito_router.get("/view/all/{user_cc}")
+def listar_carritos(user_cc: int):
+    return obtener_carritos_user(user_cc)
 
 @carrito_router.get("/usuario/{user_cc}")
 def obtener_carrito(user_cc: int):

@@ -1,76 +1,67 @@
+
 const API_BASE = "http://localhost:8000";
 
-// 1️⃣ Verificar sesión
 const userCc = sessionStorage.getItem("user_cc");
 if (!userCc) {
     window.location.href = "/views/login/login.html";
 }
 
-// 2️⃣ Cuando el DOM esté listo, cargar datos del usuario automáticamente
-document.addEventListener("DOMContentLoaded", () => {
-    const userCcInput   = document.getElementById("user_cc");
-    const usernameInput = document.getElementById("username");
-    const phoneInput    = document.getElementById("phone");
-    const emailInput    = document.getElementById("email");
-    const passwordInput = document.getElementById("password");
-    const form          = document.querySelector("form");
+let userCcInput, usernameInput, phoneInput, emailInput, form;
 
-    // 👉 Llamar a la función directamente usando el id guardado en sesión
+document.addEventListener("DOMContentLoaded", () => {
+    userCcInput   = document.getElementById("user_cc");
+    usernameInput = document.getElementById("username");
+    phoneInput    = document.getElementById("phone");
+    emailInput    = document.getElementById("email");
+    form          = document.querySelector("form");
+
     cargarDatosUsuario(userCc);
+
+    form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        actualizarUsuario();
+    });
+
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+        sessionStorage.clear();
+        window.location.href = "/views/login/login.html";
+    });
 });
 
-// 3️⃣ Función para obtener y mostrar datos del usuario
-async function cargarDatosUsuario(user_Cc) {
+async function cargarDatosUsuario(cc) {
     try {
-        const resp = await fetch(`${API_BASE}/user/view/${user_Cc}`);
+        const resp = await fetch(`${API_BASE}/user/view/${cc}`);
         if (!resp.ok) throw new Error("Usuario no encontrado");
-
         const usuario = await resp.json();
-        console.log("usuarios", usuario);
 
         if (usuario.success) {
-            // Rellenar los inputs del formulario de perfil
-            document.getElementById("user_cc").value  = usuario.data.user_cc;
-            document.getElementById("username").value = usuario.data.username;
-            document.getElementById("phone").value    = usuario.data.phone;
-            document.getElementById("email").value    = usuario.data.email;
-
-       
+            userCcInput.value   = usuario.data.user_cc;
+            usernameInput.value = usuario.data.username;
+            phoneInput.value    = usuario.data.phone;
+            emailInput.value    = usuario.data.email;
         } else {
             throw new Error("Usuario no encontrado en la base de datos");
         }
-
     } catch (error) {
         console.error("Error obteniendo usuario:", error);
         Swal.fire("⚠️ Error", "No se pudo cargar la información del usuario", "error");
     }
 }
 
-
-form.addEventListener("submit", (e) => {
-    e.preventDefault();
-    actualizarUsuario();
-});
-
-
-
 async function actualizarUsuario() {
-    // 👉 Tomar los valores actuales de los campos del formulario
     const usuarioActualizado = {
-        user_cc: Number(userCcInput.value.trim()),      
-        username: usernameInput.value.trim(),         
-        phone: Number(phoneInput.value.trim()),        
+        user_cc: Number(userCcInput.value.trim()),
+        username: usernameInput.value.trim(),
+        phone: phoneInput.value.trim(),   
         email: emailInput.value.trim()
     };
-
-    console.log("Sending update data:", usuarioActualizado);
 
     try {
         const response = await fetch(`${API_BASE}/user/update`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
-                "Accept": "application/json",
+                "Accept": "application/json"
             },
             body: JSON.stringify(usuarioActualizado),
         });
@@ -81,12 +72,11 @@ async function actualizarUsuario() {
             Swal.fire({
                 icon: "success",
                 title: "✅ Usuario actualizado",
-                text: result.message,
+                text: result.message || "Datos guardados",
                 timer: 1500,
                 showConfirmButton: false,
             });
         } else {
-            console.error("Update failed:", result);
             Swal.fire({
                 icon: "error",
                 title: "❌ Error",
@@ -94,7 +84,7 @@ async function actualizarUsuario() {
             });
         }
     } catch (error) {
-        console.error("Error updating user:", error);
+        console.error("Error actualizando:", error);
         Swal.fire({
             icon: "error",
             title: "⚠️ Error inesperado",
@@ -102,7 +92,4 @@ async function actualizarUsuario() {
         });
     }
 }
-document.getElementById("logoutBtn").addEventListener("click", () => {
-    sessionStorage.clear();
-    window.location.href = "/views/login/login.html";
-});
+
