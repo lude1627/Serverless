@@ -54,7 +54,6 @@ class CarritoClass:
                 return {
                     "success": True,
                     "message": f"✅ Producto {carrito.product_id} agregado al carrito {car_id}",
-                    # "detalle": detalle
                 }
 
                    
@@ -83,7 +82,6 @@ class CarritoClass:
                 return {
                     "success": True,
                     "message": resultado_eliminar["message"],
-                    # "carrito": carrito_actualizado
                 }
             except Exception as e:
                 return {

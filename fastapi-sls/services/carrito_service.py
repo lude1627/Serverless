@@ -107,6 +107,8 @@ def obtener_todos_carritos():
             "success": False,
             "message": "❌ Error al obtener los carritos"
         }
+        
+        
 def obtener_carritos_user(user_cc: int):
     query = """
         SELECT 
@@ -224,8 +226,9 @@ def obtener_carrito_usuario(user_cc: int):
         }    
 
 
-def agregar_estado_carrito(car_id: int, data):
+def agregar_estado_carrito(car_id:int, estado:int, comentario:str, actualizado_por:str):
     try:
+        # 1️⃣ Verificar si el carrito existe
         query_check_carrito = """
             SELECT car_id
             FROM carrito
@@ -239,6 +242,7 @@ def agregar_estado_carrito(car_id: int, data):
                 "message": f"❌ Carrito con ID {car_id} no encontrado"
             }
 
+        # 2️⃣ Verificar si ya existe un estado para el carrito
         query_check_estado = """
             SELECT id 
             FROM carrito_estados 
@@ -249,12 +253,13 @@ def agregar_estado_carrito(car_id: int, data):
         estado_existente = execute_query(query_check_estado, (car_id,), fetchone=True)
 
         if estado_existente:
+            # 3️⃣ Actualizar el estado existente
             query_update = """
                 UPDATE carrito_estados
                 SET estado = %s, comentario = %s, actualizado_por = %s, fecha_actualizacion = NOW()
                 WHERE id = %s
             """
-            params = (data.estado, data.comentario, data.actualizado_por, estado_existente[0])
+            params = (estado, comentario, actualizado_por, estado_existente[0])
             execute_query(query_update, params, commit=True)
 
             return {
@@ -263,11 +268,12 @@ def agregar_estado_carrito(car_id: int, data):
             }
 
         else:
+            # 4️⃣ Insertar un nuevo estado
             query_insert = """
                 INSERT INTO carrito_estados (car_id, estado, comentario, actualizado_por, fecha_actualizacion)
                 VALUES (%s, %s, %s, %s, NOW())
             """
-            params = (car_id, data.estado, data.comentario, data.actualizado_por)
+            params = (car_id, estado, comentario, actualizado_por)
             execute_query(query_insert, params, commit=True)
 
             return {
@@ -296,7 +302,7 @@ def obtener_historial_carrito(car_id: int):
         if not historial:
             return {
                 "success": True,
-                "data": []  # Si no hay historial, devolvemos un arreglo vacío
+                "data": [] 
             }
 
         lista_historial = []
@@ -304,8 +310,8 @@ def obtener_historial_carrito(car_id: int):
             lista_historial.append({
                 "estado": row[0],
                 "comentario": row[1],
-                "actualizado_por": row[2],
-                "fecha": str(row[3])
+                "fecha": str(row[2]),           # ✅ ahora es la fecha correcta
+                "actualizado_por": row[3]       # ✅ ahora es el usuario correcto
             })
 
         return {
@@ -319,6 +325,7 @@ def obtener_historial_carrito(car_id: int):
             "success": False,
             "message": f"Error al obtener historial: {e}"
         }
+
 
 
 def eliminar_producto(detalle_id: int, car_id: int):

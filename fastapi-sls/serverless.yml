@@ -75,22 +75,25 @@ functions:
     handler: handler.handler
     events:
       - httpApi:
-          path: /carro/agregar
+          path: /carro/agregar                             #agregar producto al carrito (usuario)
           method: post
       - httpApi:
-          path: /carro/actualizar/{detalle_id}/{car_id}
+          path: /carro/actualizar/{detalle_id}/{car_id}    #actualizar cantidad de un producto en el carrito (usuario)
           method: put
       - httpApi:
-          path: /carro/{car_id}/estado
+          path: /carro/{car_id}/estado                     #agregar estado a un carrito (admin)
           method: put
       - httpApi:
           path: /carro/view/all
           method: get
       - httpApi:
-          path: /carro/{user_cc}/historial
+          path: /carro/{car_id}/historial
           method: get
       - httpApi:
           path: /carro/usuario/{user_cc}
+          method: get
+      - httpApi:
+          path: /carro/admin/{car_id}
           method: get
       - httpApi:
           path: /carro/view/all/{user_cc}
