@@ -64,7 +64,7 @@ class Usuario:
         query = """
             UPDATE usuarios 
             SET user_name = %s, user_phone = %s, user_mail = %s
-            WHERE user_cc = %s or user_id = %s
+            WHERE user_cc = %s 
         """
         try:
             rows = execute_query(query, (data.username, data.phone, data.email, data.user_cc), commit=True)

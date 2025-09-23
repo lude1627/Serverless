@@ -11,7 +11,7 @@ class RegisterModel(BaseModel):
 
 
 class UpdateUserModel(BaseModel):
-    user_id: int
+
     user_cc: int
     username: str
     phone: int
