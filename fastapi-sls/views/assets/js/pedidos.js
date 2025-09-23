@@ -44,20 +44,26 @@ async function cargarCarritos() {
 }
 
 // 📌 VER DETALLE DE UN CARRITO + HISTORIAL
-async function verDetalleCarrito(carritoId) {
+async function verDetalleCarrito(user_cc) {
   try {
-    const response = await fetch(`${API_BASE}/carro/usuario/${carritoId}`);
+    const response = await fetch(`${API_BASE}/carro/admin/${user_cc}`);
     const data = await response.json();
 
     if (!data.success) {
-      Swal.fire("❌ Error", "No se pudo cargar el detalle del carrito", "error");
+      Swal.fire(
+        "❌ Error",
+        "No se pudo cargar el detalle del carrito",
+        "error"
+      );
       return;
     }
 
     // Llenar info principal
-    document.getElementById("detalleCarritoID").textContent = data.carrito.car_id;
+    document.getElementById("detalleCarritoID").textContent =
+      data.carrito.car_id;
     document.getElementById("detalleUsuario").textContent = data.usuario;
-    document.getElementById("detalleFecha").textContent = data.carrito.fecha_creacion;
+    document.getElementById("detalleFecha").textContent =
+      data.carrito.fecha_creacion;
     document.getElementById("detalleEstado").innerHTML =
       data.carrito.estado == 1
         ? '<span class="badge bg-success"><i class="fas fa-lock-open"></i> Abierto</span>'
@@ -74,31 +80,41 @@ async function verDetalleCarrito(carritoId) {
           <td>$${prod.subtotal.toLocaleString()}</td>
         </tr>`;
     });
-    document.getElementById("detalleProductos").innerHTML = productosHTML;
-    document.getElementById("detalleTotal").textContent = `$${data.total_pagar.toLocaleString()}`;
 
+    document.getElementById("detalleProductos").innerHTML = productosHTML;
+    document.getElementById(
+      "detalleTotal"
+    ).textContent = `$${data.total_pagar.toLocaleString()}`;
     // Cargar historial de estados
-    await cargarHistorialEstados(carritoId);
+    await cargarHistorialEstados((car_id = data.carrito.car_id));
 
     // Guardar carritoId en el formulario
-    document.getElementById("formActualizarEstado").dataset.carritoId = carritoId;
+    const form = document.getElementById("formActualizarEstado");
+    form.dataset.carritoId = user_cc;
+    form.reset();
 
     // Mostrar modal
-    const modal = new bootstrap.Modal(document.getElementById("modalDetalleCarrito"));
+    const modal = new bootstrap.Modal(
+      document.getElementById("modalDetalleCarrito")
+    );
     modal.show();
   } catch (error) {
     console.error(error);
-    Swal.fire("❌ Error", "Ocurrió un problema al obtener el detalle del carrito", "error");
+    Swal.fire(
+      "❌ Error",
+      "Ocurrió un problema al obtener el detalle del carrito",
+      "error"
+    );
   }
 }
 
 // 📌 CARGAR HISTORIAL DE ESTADOS
-async function cargarHistorialEstados(carritoId) {
+async function cargarHistorialEstados(car_id) {
   const ulHistorial = document.getElementById("historialEstados");
   ulHistorial.innerHTML = `<li class="list-group-item text-muted text-center">Cargando...</li>`;
 
   try {
-    const response = await fetch(`${API_BASE}/carro/${carritoId}/historial`);
+    const response = await fetch(`${API_BASE}/carro/${car_id}/historial`);
     const result = await response.json();
 
     if (result.success && result.data.length > 0) {
@@ -125,54 +141,68 @@ async function cargarHistorialEstados(carritoId) {
 // 📌 MAPEO DE ESTADOS
 function mapEstadoTexto(estado) {
   switch (estado) {
-    case 1: return "Pendiente";
-    case 2: return "Procesando";
-    case 3: return "Enviado";
-    case 4: return "Entregado";
-    case 5: return "Cancelado";
-    default: return "Desconocido";
+    case 1:
+      return "Pendiente";
+    case 2:
+      return "Procesando";
+    case 3:
+      return "Enviado";
+    case 4:
+      return "Entregado";
+    case 5:
+      return "Cancelado";
+    default:
+      return "Desconocido";
   }
 }
 
-// 📌 FORMULARIO PARA ACTUALIZAR ESTADO
-document.getElementById("formActualizarEstado").addEventListener("submit", async (e) => {
-  e.preventDefault();
+// 📌 ABRIR MODAL ACTUALIZAR ESTADO
+function abrirModalActualizarEstado(car_id) {
+  const form = document.getElementById("formActualizarEstado");
+  form.dataset.carritoId = car_id;
+}
 
-  const carritoId = e.target.dataset.carritoId;
-  const estado = parseInt(document.getElementById("estadoSelect").value);
-  const comentario = document.getElementById("comentarioEstado").value;
+// 📌 ACTUALIZAR ESTADO DEL CARRITO
 
-  if (!estado) {
-    Swal.fire("⚠️ Atención", "Debe seleccionar un estado", "warning");
+async function actualizarEstadoCarrito() {
+ 
+    
+  if (!car_id || isNaN(estado)) {
+    Swal.fire("❌ Error", "Datos inválidos para actualizar estado", "error");
     return;
   }
-
   try {
-    const response = await fetch(`${API_BASE}/carro/${carritoId}/estado`, {
+    const response = await fetch(`${API_BASE}/carro/${car_id}/estado`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        estado,
-        comentario,
-        actualizado_por: "ADMIN" // ⚠️ Puedes reemplazar con el admin logueado
-      }),
+      body: JSON.stringify({ estado, comentario }),
     });
-
     const result = await response.json();
-
-    if (result.success) {
+    
+    if (result.success) {   
       Swal.fire("✅ Éxito", "Estado actualizado correctamente", "success");
-      await cargarHistorialEstados(carritoId);
-      cargarCarritos(); // refresca tabla principal
-      e.target.reset();
-
-      console.log("1:", result);
-    } else {
-        console.log("2:", result);
+      cargarCarritos();
+      verDetalleCarrito(car_id);
+      const modalElement = document.getElementById("modalDetalleCarrito");
+      const modalInstance = bootstrap.Modal.getInstance(modalElement);
+      modalInstance.hide();
+    }
+    else {
       Swal.fire("❌ Error", result.message || "No se pudo actualizar el estado", "error");
     }
-  } catch (error) {
-    console.error("Error al actualizar estado:", error);
-    Swal.fire("❌ Error", "Hubo un problema al actualizar el estado", "error");
   }
-});
+  catch (error) {
+    console.error("Error actualizando estado:", error);
+    Swal.fire("❌ Error", "Ocurrió un problema al actualizar el estado", "error");
+  }
+}
+
+// 📌 EVENTO SUBMIT FORM ACTUALIZAR ESTADO
+document
+  .getElementById("formActualizarEstado")
+  .addEventListener("submit", actualizarEstadoCarrito);
+
+
+
+
+

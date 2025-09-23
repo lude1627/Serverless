@@ -84,26 +84,29 @@ functions:
           path: /carro/{car_id}/estado                     #agregar estado a un carrito (admin)
           method: put
       - httpApi:
-          path: /carro/view/all
+          path: /carro/view/all                            #listar todos los carritos (admin)
           method: get
       - httpApi:
-          path: /carro/{car_id}/historial
+          path: /carro/{car_id}/historial                  #obtener historial de estados de un carrito (admin)
           method: get
       - httpApi:
-          path: /carro/usuario/{user_cc}
+          path: /carro/usuario/{user_cc}                   #obtener carrito por usuario (usuario)
           method: get
       - httpApi:
-          path: /carro/admin/{car_id}
+          path: /carro/admin/{user_cc}                      #obtener un carrito por su ID (admin)
           method: get
       - httpApi:
-          path: /carro/view/all/{user_cc}
+          path: /carro/view/all/{user_cc}                  #listar todos los carritos de un usuario (usuario)
           method: get
       - httpApi:
-          path: /carro/eliminar/{detalle_id}/{car_id}
+          path: /carro/eliminar/{detalle_id}/{car_id}      #eliminar un producto del carrito (usuario)
           method: delete
       - httpApi:
-          path: /carro/finalizar/{car_id}
+          path: /carro/finalizar/{car_id}                  #finalizar compra del carrito (usuario)
           method: put
       - httpApi:
-          path: /carro/dcarrito/{car_id}
+          path: /carro/dcarrito/{car_id}                   #ver detalles por carrito (usuario)
           method: get
+
+
+          

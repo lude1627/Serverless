@@ -66,6 +66,12 @@ def listar_carritos():
     return obtener_todos_carritos()
 
 
+# Obtener un carrito por su ID (admin)
+@carrito_router.get("/admin/{user_cc}")
+def obtener_carrito(user_cc: int):
+    return obtener_carrito_usuario(user_cc)
+
+
 # Agregar estado a un carrito (admin)
 @carrito_router.put("/{car_id}/estado")
 def agregar_estado(car_id: int, data: EstadoUpdate):
@@ -77,4 +83,5 @@ def agregar_estado(car_id: int, data: EstadoUpdate):
 def historial_carrito(car_id: int):
     return obtener_historial_carrito(car_id)
 
-# ========================================================================
+
+# =======================================================================

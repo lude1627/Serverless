@@ -158,6 +158,9 @@ def obtener_carritos_user(user_cc: int):
         }
 
 
+# ======================== FUNCIONES PARA ADMIN =============================
+
+
 def obtener_carrito_usuario(user_cc: int):
     
     query = """
@@ -223,7 +226,7 @@ def obtener_carrito_usuario(user_cc: int):
         return {
             "success": False,
             "message": "❌ Error al obtener los productos del carrito"
-        }    
+        }
 
 
 def agregar_estado_carrito(car_id:int, estado:int, comentario:str, actualizado_por:str):
@@ -325,7 +328,6 @@ def obtener_historial_carrito(car_id: int):
             "success": False,
             "message": f"Error al obtener historial: {e}"
         }
-
 
 
 def eliminar_producto(detalle_id: int, car_id: int):
