@@ -119,15 +119,18 @@ class CarritoClass:
 
         def ver_detalles_por_carrito(self, car_id: int):
             query = """
-                SELECT d.detalle_id,
+                SELECT 
+                    d.detalle_id,
                     d.car_id,
                     d.product_id,
                     d.detalle_cantidad,
                     d.precio_unitario,
-                    p.product_name AS nombre_producto   
+                    p.product_name AS nombre_producto
                 FROM carrito_detalle d
                 JOIN productos p ON p.product_id = d.product_id
-                WHERE d.car_id = %s and estado = '1'
+                JOIN carrito c   ON c.car_id = d.car_id      -- unión con carrito
+                WHERE d.car_id = %s
+                AND c.estado = '1'                        -- solo carritos activos
             """
             try:
                 filas = execute_query(query, (car_id,), fetchall=True)
@@ -142,9 +145,11 @@ class CarritoClass:
                         "product_id": r[2],
                         "detalle_cantidad": r[3],
                         "precio_unitario": float(r[4]),
-                        "nombre_producto": r[5]          
+                        "nombre_producto": r[5]
                     })
+
                 return {"success": True, "detalles": detalles}
+
             except Exception as e:
                 return {"success": False, "message": f"❌ Error: {e}"}
 

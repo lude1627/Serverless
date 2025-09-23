@@ -13,7 +13,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const template = list.querySelector(".template");
     const finalizarBtn = document.getElementById("finalizarBtn");
 
-    // 🔹 Formateador de moneda COP
+    let carritoActivoId = null;   // ✅ guardar id del carrito activo
+
     const formatoCOP = new Intl.NumberFormat("es-CO", {
         style: "currency",
         currency: "COP",
@@ -23,8 +24,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     async function actualizarResumen(monto) {
         const dinero = formatoCOP.format(monto);
         subtotalSpan.textContent = dinero;
-        resumenSubtotal.textContent = dinero;
-        resumenTotal.textContent = dinero;
+        if (resumenSubtotal) resumenSubtotal.textContent = dinero;
+        if (resumenTotal) resumenTotal.textContent = dinero;
     }
 
     async function cargarDetalle() {
@@ -34,11 +35,14 @@ document.addEventListener("DOMContentLoaded", async () => {
             if (!carritoData.success || !carritoData.carrito) {
                 actualizarResumen(0);
                 list.querySelectorAll("li:not(.template)").forEach(el => el.remove());
+                carritoActivoId = null;
                 return;
             }
-            const carId = carritoData.carrito.car_id;
 
-            const resp = await fetch(`${API_BASE}/carro/dcarrito/${carId}`);
+            // ✅ guardar id de carrito activo
+            carritoActivoId = carritoData.carrito.car_id;
+
+            const resp = await fetch(`${API_BASE}/carro/dcarrito/${carritoActivoId}`);
             const data = await resp.json();
 
             list.querySelectorAll("li:not(.template)").forEach(el => el.remove());
@@ -63,17 +67,13 @@ document.addEventListener("DOMContentLoaded", async () => {
                     `Precio: ${formatoCOP.format(precioNum)}`;
                 clone.querySelector(".cantidad").value = item.detalle_cantidad;
                 clone.querySelector(".cantidad").dataset.price = precioNum;
-
                 clone.querySelector(".cantidad").dataset.detalleId = item.detalle_id;
                 clone.querySelector(".cantidad").dataset.carId = item.car_id;
-
                 clone.querySelector(".guardar").dataset.detalleId = item.detalle_id;
                 clone.querySelector(".guardar").dataset.carId = item.car_id;
-
                 clone.querySelector(".eliminar").dataset.id = item.detalle_id;
                 clone.querySelector(".eliminar").dataset.carid = item.car_id;
 
-                // ✅ subtotal con formato de moneda
                 clone.querySelector(".subtotal").textContent = formatoCOP.format(subtotalItem);
 
                 list.appendChild(clone);
@@ -115,6 +115,52 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
         }
     });
+
+   
+    finalizarBtn.addEventListener("click", async () => {
+    if (!carritoActivoId) {
+        Swal.fire({
+            icon: "warning",
+            title: "Sin carrito activo",
+            text: "No hay carrito activo para finalizar.",
+            confirmButtonColor: "#0d6efd"
+        });
+        return;
+    }
+
+    try {
+        const resp = await fetch(`${API_BASE}/carro/finalizar/${carritoActivoId}`, {
+            method: "PUT"
+        });
+        const result = await resp.json();
+
+        if (result.success) {
+            Swal.fire({
+                icon: "success",
+                title: "✅ Compra finalizada con éxito.",
+                text: "La compra se ha completado correctamente.",
+                confirmButtonColor: "#198754"
+            }).then(() => {
+                cargarDetalle(); // limpiar vista
+            });
+        } else {
+            Swal.fire({
+                icon: "error",
+                title: "❌ No se pudo finalizar la compra",
+                text: result.message || "",
+                confirmButtonColor: "#dc3545"
+            });
+        }
+    } catch (err) {
+        Swal.fire({
+            icon: "error",
+            title: "Error de conexión",
+            text: "Error al finalizar la compra.",
+            confirmButtonColor: "#dc3545"
+        });
+    }
+});
+
 
     cargarDetalle();
 });
