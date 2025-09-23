@@ -135,18 +135,11 @@ class Usuario:
                 "message": "Error al obtener usuario"
             }, status_code=500)
 
-       
-       
-       
-       
-       
-       
-       
             
     #Exclusivo para acciones del admin 
     def view_all_users(self):
         query = """
-            SELECT user_cc, user_type, user_name, user_phone, user_mail, user_status 
+            SELECT user_id,user_cc, user_type, user_name, user_phone, user_mail, user_status 
             FROM usuarios 
             ORDER BY user_cc
         """
@@ -157,12 +150,13 @@ class Usuario:
                 user_list = []
                 for user in users:
                     user_list.append({
-                        "user_cc": user[0],
-                        "user_type": user[1],
-                        "username": user[2],
-                        "phone": user[3],
-                        "email": user[4],
-                        "status": user[5]
+                        "user_id": user[0],
+                        "user_cc": user[1],
+                        "user_type": user[2],
+                        "username": user[3],
+                        "phone": user[4],
+                        "email": user[5],
+                        "status": user[6]
                     })
                 return JSONResponse(content={
                     "success": True,
@@ -194,9 +188,13 @@ class Usuario:
             return JSONResponse(content={"success": False, "message": "El teléfono debe ser un número válido"}, status_code=400)
         
         # Check if user exists first
-        check_query = "SELECT user_cc FROM usuarios WHERE user_cc = %s"
+        check_query = """
+        SELECT user_id 
+        FROM usuarios 
+        WHERE user_id = %s
+        """
         try:
-            existing_user = execute_query(check_query, (data.user_cc,), fetchone=True)
+            existing_user = execute_query(check_query, (data.user_id,), fetchone=True)
             if not existing_user:
                 return JSONResponse(content={
                     "success": False,
@@ -214,16 +212,16 @@ class Usuario:
             query = """
                 UPDATE usuarios 
                 SET user_cc = %s, user_name = %s, user_phone = %s, user_mail = %s, user_type = %s, user_status = %s, user_password = %s
-                WHERE user_cc = %s or user_id = %s
+                WHERE user_id = %s
             """
-            params = (data.username, data.phone, data.email, data.user_type, data.user_status, data.password, data.user_cc)
+            params = (data.user_cc, data.username, data.phone, data.email, data.user_type, data.user_status, data.password, data.user_id)
         else:
             query = """
                 UPDATE usuarios 
                 SET user_cc = %s, user_name = %s, user_phone = %s, user_mail = %s, user_type = %s, user_status = %s
-                WHERE user_id = %s or user_cc = %s
+                WHERE user_id = %s
             """
-            params = (data.username, data.phone, data.email, data.user_type, data.user_status, data.user_cc)
+            params = (data.user_cc, data.username, data.phone, data.email, data.user_type, data.user_status, data.user_id)
             
         try:
             rows_affected = execute_query(query, params, commit=True)

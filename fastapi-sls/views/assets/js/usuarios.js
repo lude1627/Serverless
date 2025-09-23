@@ -61,7 +61,7 @@ function renderUsuarios(lista) {
     return;
   }
 
-  lista.forEach((usuario, index) => {
+  lista.forEach((usuario) => {
     const roleBadge =
       usuario.user_type == 1
         ? '<span class="badge bg-primary"><i class="fas fa-user-shield"></i> Admin</span>'
@@ -74,7 +74,8 @@ function renderUsuarios(lista) {
 
     tbody.innerHTML += `
       <tr>
-        <td><strong>${index + 1}</strong></td>
+      
+        <td><strong>${usuario.user_id}</strong></td>
         <td>${usuario.user_cc}</td>
         <td>${usuario.username}</td>
         <td><i class="fas fa-phone"></i> ${usuario.phone}</td>
@@ -214,7 +215,7 @@ async function abrirModalEditar(user_id) {
 
       await cargarSelectsEditarUsuario();
 
-      document.getElementById("usuarioId").value = usuario.user_id;
+      document.getElementById("edituser_id").value = usuario.user_id;
       document.getElementById("edituser_cc").value = usuario.user_cc;
       document.getElementById("edituser_name").value = usuario.username;
       document.getElementById("edituser_phone").value = usuario.phone;
@@ -266,7 +267,7 @@ document
   .addEventListener("submit", async function (e) {
     e.preventDefault();
 
-    const user_id = parseInt(document.getElementById("usuarioId").value);
+    const user_id = parseInt(document.getElementById("edituser_id").value);
     const user_cc = parseInt(document.getElementById("edituser_cc").value);
     const username = document.getElementById("edituser_name").value.trim();
     const phone = parseInt(document.getElementById("edituser_phone").value);
@@ -298,6 +299,7 @@ document
     }
 
     const usuarioActualizado = {
+      user_id,
       user_cc,
       username,
       phone,
