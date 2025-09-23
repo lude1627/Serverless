@@ -107,6 +107,53 @@ def obtener_todos_carritos():
             "success": False,
             "message": "❌ Error al obtener los carritos"
         }
+def obtener_carritos_user(user_cc: int):
+    query = """
+        SELECT 
+            c.car_id,
+            u.user_cc,
+            u.user_name,
+            c.fecha_creacion,
+            c.estado,
+            SUM(cd.detalle_cantidad * p.product_price) AS total
+        FROM carrito c
+        INNER JOIN usuarios u ON c.user_cc = u.user_cc
+        LEFT JOIN carrito_detalle cd ON c.car_id = cd.car_id
+        LEFT JOIN productos p ON cd.product_id = p.product_id
+        WHERE u.user_cc = %s
+        GROUP BY c.car_id, u.user_cc, u.user_name, c.fecha_creacion, c.estado
+        ORDER BY c.fecha_creacion DESC 
+    """
+    try:
+        carritos = execute_query(query,(user_cc,), fetchall=True)
+        if not carritos:
+            return {
+                "success": False,
+                "message": "⚠️ No hay carritos disponibles"
+            }
+
+        lista_carritos = []
+        for row in carritos:
+            lista_carritos.append({
+                "car_id": row[0],
+                "user_cc": row[1],
+                "user_name": row[2],
+                "fecha_creacion": row[3].strftime("%Y-%m-%d"),
+                "estado": row[4],
+                "total": f"${row[5]:,.0f}".replace(",", ".") if row[5] is not None else "$0"
+            })
+
+        return {
+            "success": True,
+            "data": lista_carritos
+        }
+
+    except Exception as e:
+        print(f"Error al obtener todos los carritos: {e}")
+        return {
+            "success": False,
+            "message": "❌ Error al obtener los carritos"
+        }
 
 
 def obtener_carrito_usuario(user_cc: int):
@@ -125,7 +172,7 @@ def obtener_carrito_usuario(user_cc: int):
         INNER JOIN usuarios u ON u.user_cc = c.user_cc
         INNER JOIN carrito_detalle cd ON cd.car_id = c.car_id
         INNER JOIN productos p ON cd.product_id = p.product_id
-        WHERE c.user_cc = %s AND c.estado = '1'
+        WHERE c.user_cc = %s
     """
 
     try:

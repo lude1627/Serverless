@@ -127,7 +127,7 @@ class CarritoClass:
                     p.product_name AS nombre_producto   
                 FROM carrito_detalle d
                 JOIN productos p ON p.product_id = d.product_id
-                WHERE d.car_id = %s
+                WHERE d.car_id = %s and estado = '1'
             """
             try:
                 filas = execute_query(query, (car_id,), fetchall=True)

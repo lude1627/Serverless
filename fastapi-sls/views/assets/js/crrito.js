@@ -10,22 +10,33 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!list) return;
 
     try {
-        const resp = await fetch(`${API_BASE}/carro/usuario/${userCc}`);
+        const resp = await fetch(`${API_BASE}/carro/view/all/${userCc}`);
         const data = await resp.json();
 
-        if (!data.success || !data.carrito) {
+        // Ahora la respuesta tiene { success: true, data: [ ... ] }
+        if (!data.success || !Array.isArray(data.data) || data.data.length === 0) {
             list.innerHTML = `
                 <li class="list-group-item text-center text-muted">
-                    No se encontró información del carrito.
+                    No se encontraron carritos.
                 </li>`;
             return;
         }
 
-        const estadoActivo = data.carrito.estado === "1";
-        const estadoTexto  = estadoActivo ? "Activo" : "Inactivo";
-        const estadoClase  = estadoActivo ? "bg-primary" : "bg-danger";
+        // Generar las filas de todos los carritos
+        const filas = data.data.map(c => {
+            const estadoActivo = c.estado === "1";
+            const estadoTexto  = estadoActivo ? "Activo" : "Inactivo";
+            const estadoClase  = estadoActivo ? "bg-primary" : "bg-danger";
 
-       
+            return `
+                <tr>
+                    <td>${c.user_name}</td>
+                    <td>${c.fecha_creacion}</td>
+                    <td><span class="badge ${estadoClase} px-3 py-2">${estadoTexto}</span></td>
+                    <td>${c.total}</td>
+                </tr>`;
+        }).join("");
+
         list.innerHTML = `
             <li class="list-group-item p-0">
                 <div class="table-responsive m-0">
@@ -35,30 +46,18 @@ document.addEventListener("DOMContentLoaded", async () => {
                                 <th>Usuario</th>
                                 <th>Fecha de Creación</th>
                                 <th>Estado</th>
-                                <th>Acciones</th>
+                                <th>Total</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>${data.usuario}</td>
-                                <td>${data.carrito.fecha_creacion}</td>
-                                <td>
-                                    <span class="badge ${estadoClase} px-3 py-2">${estadoTexto}</span>
-                                </td>
-                                <td>
-                                    <a href="/views/carrito/carrito.html" 
-                                       class="btn btn-sm btn-outline-primary">
-                                       Ver Detalles
-                                    </a>
-                                </td>
-                            </tr>
+                            ${filas}
                         </tbody>
                     </table>
                 </div>
             </li>
         `;
     } catch (err) {
-        console.error("Error cargando carrito:", err);
+        console.error("Error cargando carritos:", err);
         list.innerHTML = `
             <li class="list-group-item text-center text-danger">
                 Error de conexión con el servidor.

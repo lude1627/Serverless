@@ -90,6 +90,9 @@ functions:
           path: /carro/usuario/{user_cc}
           method: get
       - httpApi:
+          path: /carro/view/all/{user_cc}
+          method: get
+      - httpApi:
           path: /carro/eliminar/{detalle_id}/{car_id}
           method: delete
       - httpApi:
