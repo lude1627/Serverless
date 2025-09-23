@@ -328,7 +328,7 @@ class Usuario:
               
         query = """
                 INSERT INTO usuarios (user_cc, user_type, user_name, user_phone, user_mail, user_status) 
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                VALUES (%s, %s, %s, %s, %s, %s)
             """
             
         try:

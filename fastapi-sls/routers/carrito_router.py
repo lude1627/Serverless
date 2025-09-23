@@ -25,13 +25,10 @@ def agregar(carrito: CarritoEntity):
     return carro.agregar_producto(carrito)
 
 
-@carrito_router.get("/view/all")
-def listar_carritos():
-    return obtener_todos_carritos()
-
 @carrito_router.get("/view/all/{user_cc}")
 def listar_carritos(user_cc: int):
     return obtener_carritos_user(user_cc)
+
 
 @carrito_router.get("/usuario/{user_cc}")
 def obtener_carrito(user_cc: int):
@@ -42,23 +39,16 @@ def obtener_carrito(user_cc: int):
 def eliminar(detalle_id: int, car_id: int):
     return eliminar_producto(detalle_id, car_id)
 
+
 @carrito_router.get("/dcarrito/{car_id}")
 def obtener_detalles_carrito(car_id: int):
     return carro.ver_detalles_por_carrito(car_id)
-
-@carrito_router.get("/{car_id}/historial")
-def historial_carrito(car_id: int):
-    return obtener_historial_carrito(car_id)
-
-
-@carrito_router.put("/{car_id}/estado")
-def agregar_estado(car_id: int, data: EstadoUpdate):
-    return agregar_estado_carrito(car_id, data)
 
 
 @carrito_router.put("/actualizar/{detalle_id}/{car_id}")
 def actualizar(detalle_id: int,car_id:int, up:Updatecantidad):
     return carro.actualizar_producto(detalle_id,car_id,up)
+
 
 @carrito_router.put("/finalizar/{car_id}")
 def finalizar(car_id: int):
@@ -66,4 +56,25 @@ def finalizar(car_id: int):
 
 
 
- 
+#  ========================================================================
+#  ========================= RUTAS PARA ADMIN =============================
+#  ========================================================================
+
+# Listar todos los carritos (admin)
+@carrito_router.get("/view/all")
+def listar_carritos():
+    return obtener_todos_carritos()
+
+
+# Agregar estado a un carrito (admin)
+@carrito_router.put("/{car_id}/estado")
+def agregar_estado(car_id: int, data: EstadoUpdate):
+    return agregar_estado_carrito(car_id, data)
+
+
+# Obtener historial de estados de un carrito (admin)
+@carrito_router.get("/{car_id}/historial")
+def historial_carrito(car_id: int):
+    return obtener_historial_carrito(car_id)
+
+# ========================================================================
