@@ -177,7 +177,7 @@ def obtener_carrito_usuario(user_cc: int):
         INNER JOIN usuarios u ON u.user_cc = c.user_cc
         INNER JOIN carrito_detalle cd ON cd.car_id = c.car_id
         INNER JOIN productos p ON cd.product_id = p.product_id
-        WHERE c.user_cc = %s
+        WHERE c.user_cc = %s AND c.estado = '1'
     """
 
     try:
@@ -360,21 +360,20 @@ def eliminar_producto(detalle_id: int, car_id: int):
 
 
 def finalizar_compra(car_id: int):
-    # 1. Verificar carrito
     query_carrito = """
         SELECT car_id, estado
         FROM carrito
-        WHERE car_id = %s and estado = 1
+        WHERE car_id = %s AND estado = 1
     """
     carrito = execute_query(query_carrito, (car_id,), fetchone=True)
 
     if not carrito:
         return {"success": False, "message": f"❌ Carrito {car_id} no encontrado"}
 
-    if carrito["estado"] == 0:
+    # carrito es una tupla: (car_id, estado)
+    if carrito[1] == 0:
         return {"success": False, "message": "⚠️ Este carrito ya fue cerrado"}
 
-    # 2. Cerrar carrito
     query_update = """
         UPDATE carrito
         SET estado = 0
@@ -384,5 +383,3 @@ def finalizar_compra(car_id: int):
 
     return {"success": True, "message": f"✅ Carrito {car_id} finalizado correctamente"}
 
-    
-    
