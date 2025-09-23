@@ -26,6 +26,11 @@ def get_all_users():
     return usuario.view_all_users()
 
 
+@user_router.get("/view/admin/{user_id}")
+def get_user(user_id: int):
+    return usuario.view_user_admin(user_id)
+
+
 @user_router.get("/view/{user_id}")
 def get_user_json(user_id: int):
     return usuario.view_user(user_id)

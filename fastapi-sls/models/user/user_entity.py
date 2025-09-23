@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from typing import Optional
 
+
 class RegisterModel(BaseModel):
     user_cc: int
     username: str
@@ -17,9 +18,8 @@ class UpdateUserModel(BaseModel):
     email: str
    
 
-
 class AdminUpdateUserModel(BaseModel):
-    user_id: int
+    user_id: Optional[int] = None
     user_cc: int
     username: str
     phone: int

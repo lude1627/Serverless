@@ -33,7 +33,7 @@ class Usuario:
         user_type = resultado["user_type"]
               
         query = """
-                INSERT INTO usuarios (user_cc, user_type, user_name, user_phone, user_mail, user_password, user_status) 
+                INSERT INTO usuarios (user_cc, user_type, user_name, user_phone, user_mail, user_status) 
                 VALUES (%s, %s, %s, %s, %s, %s, '1')
             """
             
@@ -139,9 +139,9 @@ class Usuario:
     #Exclusivo para acciones del admin 
     def view_all_users(self):
         query = """
-            SELECT user_id,user_cc, user_type, user_name, user_phone, user_mail, user_status 
+            SELECT user_id, user_cc, user_type, user_name, user_phone, user_mail, user_status 
             FROM usuarios 
-            ORDER BY user_cc
+            ORDER BY user_id ASC
         """
         
         try:
@@ -174,6 +174,58 @@ class Usuario:
                 "success": False,
                 "message": "Error al obtener usuarios"
             }, status_code=500)
+            
+            
+    def view_user_admin(self, user_cc: int = None, user_id: int = None):
+        try:
+            # Validación: al menos uno de los dos debe venir
+            if user_cc is None and user_id is None:
+                return JSONResponse(content={"success": False, "message": "Debe proporcionar user_cc o user_id"}, status_code=400)
+
+            # Construcción dinámica de query y parámetros
+            if user_cc:
+                query = """
+                    SELECT user_id, user_cc, user_name, user_phone, user_mail, user_type, user_status
+                    FROM usuarios WHERE user_cc = %s
+                """
+                params = (user_cc,)
+            else:
+                query = """
+                    SELECT user_id, user_cc, user_name, user_phone, user_mail, user_type, user_status
+                    FROM usuarios WHERE user_id = %s
+                """
+                params = (user_id,)
+
+            # Ejecución de la consulta
+            user = execute_query(query, params, fetchone=True)
+
+            if user:
+                return JSONResponse(content={
+                    "success": True,
+                    "message": "Usuario encontrado",
+                    "data": {
+                        "user_id": user[0],
+                        "user_cc": user[1],
+                        "username": user[2],
+                        "phone": user[3],
+                        "email": user[4],
+                        "user_type": user[5],
+                        "user_status": user[6]
+                    }
+                }, status_code=200)
+            else:
+                return JSONResponse(content={
+                    "success": False,
+                    "message": "Usuario no encontrado"
+                }, status_code=404)
+
+        except Exception as e:
+            print(f"Error en view_user: {e}")
+            return JSONResponse(content={
+                "success": False,
+                "message": "Error al obtener usuario"
+            }, status_code=500)
+
                 
                 
     def admin_update_user(self, data: AdminUpdateUserModel):
@@ -268,14 +320,14 @@ class Usuario:
         if resultado_usuario["existe"]:
             return JSONResponse(content={
                 "success": False,
-                "message": f"El usuario con el ID {data.user_cc} ya existe"
+                "message": f"No se puede registrar. El usuario con el CC {data.user_cc} ya existe"
             }, status_code=400)
             
         # Use provided password or generate default if not provided
         password = data.password if data.password else "123456"  # Default password for admin-created users
               
         query = """
-                INSERT INTO usuarios (user_cc, user_type, user_name, user_phone, user_mail, user_password, user_status) 
+                INSERT INTO usuarios (user_cc, user_type, user_name, user_phone, user_mail, user_status) 
                 VALUES (%s, %s, %s, %s, %s, %s, %s)
             """
             

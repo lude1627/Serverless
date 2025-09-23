@@ -1,4 +1,4 @@
-// aquí guardaremos todos los usuarios
+modalUsuario; // aquí guardaremos todos los usuarios
 let usuariosGlobal = [];
 
 // API_BASE esté definido
@@ -83,9 +83,7 @@ function renderUsuarios(lista) {
         <td>${roleBadge}</td>
         <td>${statusBadge}</td>
         <td class="text-end">
-          <button class="btn btn-warning btn-sm me-1" onclick="abrirModalEditar(${
-            usuario.user_cc
-          })">
+          <button class="btn btn-warning btn-sm me-1" onclick="abrirModalEditar(${usuario.user_cc})">
             ✏ Editar
           </button>
         </td>
@@ -179,6 +177,9 @@ document
           showConfirmButton: false,
         });
 
+        // ✅ Limpiar el formulario
+        document.getElementById("formAgregarUsuario").reset();
+
         // Cierra modal de forma segura
         const modal = bootstrap.Modal.getInstance(
           document.getElementById("modalUsuario")
@@ -194,6 +195,12 @@ document
           "error"
         );
       }
+
+      // Cierra modal de forma segura
+      const modal = bootstrap.Modal.getInstance(
+        document.getElementById("modalUsuario")
+      );
+      if (modal) modal.hide();
     } catch (error) {
       console.error("Error al agregar usuario:", error);
       Swal.fire(
@@ -207,21 +214,33 @@ document
 // Modal editar
 async function abrirModalEditar(user_id) {
   try {
-    const response = await fetch(`${API_BASE}/user/view/${user_id}`);
+    const response = await fetch(`${API_BASE}/user/view/admin/${user_id}`);
     const result = await response.json();
 
-    if (result.success) {
+    if (result.success && result.data) {
       const usuario = result.data;
 
-      await cargarSelectsEditarUsuario();
+      const userTypeSelect = document.getElementById("edituser_type");
+      userTypeSelect.innerHTML = `
+        <option value="">Seleccionar rol</option>
+        <option value="1">Administrador</option>
+        <option value="2">Cliente</option>
+      `;
+      userTypeSelect.value = usuario.user_type; 
+
+      const statusSelect = document.getElementById("edituser_status");
+      statusSelect.innerHTML = `
+        <option value="">Seleccionar estado</option>
+        <option value="1">Activo</option>
+        <option value="0">Inactivo</option>
+      `;
+      statusSelect.value = usuario.user_status; 
 
       document.getElementById("edituser_id").value = usuario.user_id;
       document.getElementById("edituser_cc").value = usuario.user_cc;
       document.getElementById("edituser_name").value = usuario.username;
       document.getElementById("edituser_phone").value = usuario.phone;
       document.getElementById("edituser_mail").value = usuario.email;
-      document.getElementById("edituser_type").value = usuario.user_type;
-      document.getElementById("edituser_status").value = usuario.status;
 
       const modal = new bootstrap.Modal(
         document.getElementById("modalEditarUsuario")
@@ -236,30 +255,6 @@ async function abrirModalEditar(user_id) {
   }
 }
 
-// Cargar opciones de selección
-async function cargarSelectsEditarUsuario() {
-  try {
-    const userTypeSelect = document.getElementById("edituser_type");
-    if (userTypeSelect) {
-      userTypeSelect.innerHTML = `
-        <option value="">Seleccionar rol</option>
-        <option value="1">Administrador</option>
-        <option value="2">Cliente</option>
-      `;
-    }
-
-    const statusSelect = document.getElementById("edituser_status");
-    if (statusSelect) {
-      statusSelect.innerHTML = `
-       <option value="">Seleccionar estado</option>
-        <option value="1">Activo</option>
-        <option value="0">Inactivo</option>
-      `;
-    }
-  } catch (error) {
-    console.error("Error loading select options:", error);
-  }
-}
 
 // formulario de usuario (editar)
 document
@@ -267,20 +262,16 @@ document
   .addEventListener("submit", async function (e) {
     e.preventDefault();
 
-    const user_id = parseInt(document.getElementById("edituser_id").value);
+    const user_id = parseInt(
+      document.getElementById("edituser_id").value || null
+    );
     const user_cc = parseInt(document.getElementById("edituser_cc").value);
     const username = document.getElementById("edituser_name").value.trim();
     const phone = parseInt(document.getElementById("edituser_phone").value);
     const email = document.getElementById("edituser_mail").value.trim();
     const user_type = parseInt(document.getElementById("edituser_type").value);
-    const user_status = parseInt(
-      document.getElementById("edituser_status").value
-    );
+    const user_status = parseInt(document.getElementById("edituser_status").value);
 
-    if (!user_id) {
-      Swal.fire("Error", "No se encontró el ID del usuario", "error");
-      return;
-    }
     if (!user_cc || user_cc <= 0) {
       Swal.fire("Error", "La cédula debe ser un número válido", "error");
       return;
@@ -343,6 +334,12 @@ document
           text: result.message || "No se pudo actualizar el usuario",
         });
       }
+
+      // Cierra modal de forma segura
+      const modal = bootstrap.Modal.getInstance(
+        document.getElementById("modalEditarUsuario")
+      );
+      if (modal) modal.hide();
     } catch (error) {
       console.error("Error updating user:", error);
       Swal.fire({

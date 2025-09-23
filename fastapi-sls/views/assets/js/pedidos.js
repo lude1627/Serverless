@@ -27,7 +27,7 @@ async function cargarCarritos() {
           <td>${carrito.fecha_creacion}</td>
           <td>${estadoBadge}</td>
           <td class="text-end">
-            <button class="btn btn-primary btn-sm" onclick="verDetalleCarrito(${carrito.car_id})">
+            <button class="btn btn-primary btn-sm" onclick="verDetalleCarrito(${carrito.user_cc})">
               <i class="fas fa-eye"></i> Ver Detalle
             </button>
           </td>
