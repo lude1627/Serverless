@@ -29,16 +29,17 @@ class Usuario:
                 "message": f"El usuario con el ID {data.user_cc} ya existe"
             }, status_code=400)
             
-        resultado = val.verificar_user_type_por_password(data.password)
-        user_type = resultado["user_type"]
+      
               
         query = """
-                INSERT INTO usuarios (user_cc, user_type, user_name, user_phone, user_mail, user_status) 
-                VALUES (%s, %s, %s, %s, %s, %s, '1')
+            INSERT INTO usuarios
+                (user_cc, user_name, user_phone, user_mail, user_password, user_type, user_status)
+            VALUES
+                (%s, %s, %s, %s, %s, '2', '1')
             """
             
         try:
-            execute_query(query, (data.user_cc, user_type, data.username, data.phone, data.email, data.password), commit=True)
+            execute_query(query, (data.user_cc, data.username, data.phone, data.email, data.password), commit=True)
             return JSONResponse(content={
                 "success": True,
                 "message": "Usuario registrado exitosamente"
