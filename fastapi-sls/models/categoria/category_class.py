@@ -26,7 +26,7 @@ class Categoria:
             }, status_code=500)
         
     def all_categories(self):
-        query = "SELECT cat_id, cat_name FROM categorias WHERE cat_status = '1'"
+        query = "SELECT * FROM categorias"
         try:
             categorias = execute_query(query, fetchall=True)
 
@@ -37,7 +37,11 @@ class Categoria:
                 response = {
                     "success": True,
                     "message": "Categorías obtenidas exitosamente",
-                    "data" : [{ "cat_id": cat[0],"cat_name": cat[1] }for cat in categorias]
+                    "data" : [{ 
+                        "cat_id": cat[0],
+                        "cat_name": cat[1], 
+                        "cat_status": cat[2] 
+                        }for cat in categorias]
                 }
                 return JSONResponse(content=response, status_code=200)
 
@@ -58,10 +62,38 @@ class Categoria:
             }
             return JSONResponse(content=response, status_code=500)
 
+            
+            
+    def update_cat(self, id: int, name: str, status: str):
+        query = """
+            UPDATE categorias 
+            SET cat_name = %s, cat_status = %s
+            WHERE cat_id = %s
+        """
+        try:
+            execute_query(query, (name, status, id), commit=True)
+
+            return JSONResponse(content={
+                "success": True,
+                "message": "Categoría actualizada exitosamente"
+            }, status_code=200)
+
+        except Exception as e:
+            print(f"Error al actualizar la categoría: {e}")
+            return JSONResponse(content={
+                "success": False,
+                "message": "Error al actualizar la categoría"
+            }, status_code=500)
+
 
         
     def delete_cat(self, id: int):
-        query = "UPDATE categorias SET cat_status = '0' WHERE cat_id = %s"
+        query = """
+        UPDATE categorias 
+        SET cat_status = '0' 
+        WHERE cat_id = %s
+        """
+        
         try:
             execute_query(query, (id,), commit=True)
 

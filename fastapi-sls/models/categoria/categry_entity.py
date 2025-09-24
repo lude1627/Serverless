@@ -1,4 +1,5 @@
 from pydantic import BaseModel  
 
-class CategoryCreate(BaseModel):
+class Category(BaseModel):
     name: str
+    status: str

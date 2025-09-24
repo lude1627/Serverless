@@ -12,13 +12,43 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 });
 
-// Cargar opciones de selección
-document.addEventListener("DOMContentLoaded", function () {
-  const addModal = document.getElementById("modalEditarUsuario");
-  if (addModal) {
-    addModal.addEventListener("shown.bs.modal", cargarSelectsEditarUsuario);
+async function cargarSelectsEditarUsuario() {
+  try {
+    // Ejemplo: cargar tipo de usuario
+    const responseTipos = await fetch("http://localhost:8000/user-types");
+    const tipos = await responseTipos.json();
+
+    const selectTipo = document.getElementById("editTipoUsuario");
+    selectTipo.innerHTML = ""; // limpiar opciones
+
+    tipos.data.forEach(tipo => {
+      const option = document.createElement("option");
+      option.value = tipo.id;
+      option.textContent = tipo.nombre;
+      selectTipo.appendChild(option);
+    });
+
+    // Ejemplo: cargar estados
+    const estados = [
+      { value: 1, text: "Activo" },
+      { value: 0, text: "Inactivo" }
+    ];
+
+    const selectEstado = document.getElementById("editEstadoUsuario");
+    selectEstado.innerHTML = "";
+
+    estados.forEach(e => {
+      const option = document.createElement("option");
+      option.value = e.value;
+      option.textContent = e.text;
+      selectEstado.appendChild(option);
+    });
+
+  } catch (error) {
+    console.error("Error cargando selects:", error);
   }
-});
+}
+
 
 // ✅ Cargar usuarios (única función)
 async function cargarUsuarios() {
@@ -154,7 +184,7 @@ document
       Swal.fire("⚠️ Error", "Selecciona un tipo de usuario válido", "error");
       return;
     }
-    if (isNaN(data.user_status) || data.user_status < -1) {
+    if (isNaN(data.user_status) || ![0,1].includes(data.user_status)) {
       Swal.fire("⚠️ Error", "Selecciona un estado válido", "error");
       return;
     }
@@ -171,9 +201,11 @@ document
 
       if (result.success) {
         Swal.fire({
+          title: "✅ Éxito",
+          text: "Usuario agregado correctamente",
           icon: "success",
-          title: "✅ Usuario agregado",
-          timer: 1500,
+          timer: 1000,
+          timerProgressBar: true,
           showConfirmButton: false,
         });
 
@@ -314,10 +346,11 @@ document
 
       if (response.ok && result.success) {
         Swal.fire({
+          title: "✅ Éxito",
+          text: "Usuario actualizado correctamente",
           icon: "success",
-          title: "✅ Usuario actualizado",
-          text: result.message,
-          timer: 1500,
+          timer: 1000,
+          timerProgressBar: true,
           showConfirmButton: false,
         });
 
@@ -394,11 +427,14 @@ async function eliminarUsuario(user_cc) {
       const result = await response.json();
 
       if (result.success) {
-        Swal.fire(
-          "Eliminado",
-          result.message || "Usuario eliminado",
-          "success"
-        );
+        Swal.fire({
+          title: "✅ Éxito",
+          text: "Usuario eliminado correctamente",
+          icon: "success",
+          timer: 1000,
+          timerProgressBar: true,
+          showConfirmButton: false,
+      });
         cargarUsuarios();
       } else {
         Swal.fire(

@@ -1,176 +1,199 @@
 document.addEventListener("DOMContentLoaded", async () => {
-    const tbody = document.querySelector("tbody");
+  const tbody = document.querySelector("tbody");
 
-    try {
-        const response = await fetch("http://localhost:8000/category/view/data");
-        const result = await response.json();
+  try {
+    const response = await fetch("http://localhost:8000/category/view/data");
+    const result = await response.json();
 
-        if (result.success && result.data.length > 0) {
-            tbody.innerHTML = "";
-            result.data.forEach(cat => {
-                const row = `
+    if (result.success && result.data.length > 0) {
+      tbody.innerHTML = "";
+      result.data.forEach((cat) => {
+        const row = `
           <tr>
-            <td>${cat.cat_id}</td>
-            <td>${cat.cat_name}</td>
-            <td class="text-end">
-              <button class="btn btn-sm btn-warning btn-editar"
-                data-id="${cat.cat_id}"
-                data-nombre="${cat.cat_name}"
-                data-bs-toggle="modal"
-                data-bs-target="#modalEditarCategoria">
-                ✏ Editar
-              </button>
-              <button class="btn btn-sm btn-danger btn-eliminar" data-id="${cat.cat_id}">🗑 Eliminar</button>
-            </td>
-          </tr>
-        `;
-                tbody.insertAdjacentHTML("beforeend", row);
-            });
-        } else {
-            tbody.innerHTML = `<tr><td colspan="3" class="text-center">No hay categorías</td></tr>`;
-        }
-    } catch (error) {
-        console.error("Error cargando categorías:", error);
+  <td>${cat.cat_id}</td>
+  <td>${cat.cat_name}</td>
+  <td>
+    ${
+      cat.cat_status === "1"
+        ? '<span class="badge bg-success">Activo</span>'
+        : '<span class="badge bg-secondary">Inactivo</span>'
     }
+  </td>
+  <td class="text-end">
+    <button class="btn btn-sm btn-warning btn-editar"
+      data-id="${cat.cat_id}"
+      data-nombre="${cat.cat_name}"
+      data-estado="${cat.cat_status}"
+      data-bs-toggle="modal"
+      data-bs-target="#modalEditarCategoria">
+      ✏ Editar
+    </button>
+    <button class="btn btn-sm btn-danger btn-eliminar" data-id="${
+      cat.cat_id
+    }">🗑 Eliminar</button>
+  </td>
+</tr>
+
+        `;
+        tbody.insertAdjacentHTML("beforeend", row);
+      });
+    } else {
+      tbody.innerHTML = `<tr><td colspan="3" class="text-center">No hay categorías</td></tr>`;
+    }
+  } catch (error) {
+    console.error("Error cargando categorías:", error);
+  }
 });
 
 // Crear categoría
 const formCrear = document.querySelector("#modalCategoria form");
 
 formCrear.addEventListener("submit", async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    const nombre = document.querySelector("#nombreCat").value;
+  const nombre = document.querySelector("#nombreCat").value;
 
-    try {
-        const response = await fetch("http://localhost:8000/category/create", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ name: nombre })
-        });
+  try {
+    const response = await fetch("http://localhost:8000/category/create", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: nombre }),
+    });
 
-        const result = await response.json();
+    const result = await response.json();
 
-        if (result.success) {
-            Swal.fire({
-                icon: "success",
-                title: "¡Categoría creada!",
-                text: `Se agregó la categoría "${nombre}" correctamente.`,
-                confirmButtonColor: "#3085d6"
-            }).then(() => location.reload());
-        } else {
-            Swal.fire({
-                icon: "error",
-                title: "Error",
-                text: result.message
-            });
-        }
-    } catch (error) {
-        Swal.fire({
-            icon: "error",
-            title: "Error en la petición",
-            text: "No se pudo conectar con el servidor."
-        });
+    if (result.success) {
+      Swal.fire({
+        title: "¡Categoría creada!",
+        text: `Se creó la categoría "${nombre}" correctamente.`,
+        icon: "success",
+        timer: 1500,
+        showConfirmButton: false,
+      }).then(() => location.reload());
+    } else {
+      Swal.fire({
+        title: "Error",
+        text: result.message,
+        icon: "error",
+      });
     }
+  } catch (error) {
+    Swal.fire({
+      icon: "error",
+      title: "Error en la petición",
+      text: "No se pudo conectar con el servidor.",
+    });
+  }
 });
 
 // Editar categoría - Llenar el modal con los datos
 document.addEventListener("click", (e) => {
-    if (e.target.classList.contains("btn-editar")) {
-        const id = e.target.getAttribute("data-id");
-        const nombre = e.target.getAttribute("data-nombre");
+  if (e.target.classList.contains("btn-editar")) {
+    const id = e.target.getAttribute("data-id");
+    const name = e.target.getAttribute("data-nombre");
+    const status = e.target.getAttribute("data-estado");
 
-        // Llenar los campos del modal de edición con los IDs correctos
-        document.querySelector("#editCategoriaId").value = id;
-        document.querySelector("#editCategoriaNombre").value = nombre;
+    // Llenar los campos del modal de edición con los IDs correctos
+    document.querySelector("#editCategoriaId").value = id;
+    document.querySelector("#editCategoriaNombre").value = name;
+    document.querySelector("#editCategoriaEstado").value = status;
 
-        console.log("Categoría cargada para editar - ID:", id, "Nombre:", nombre);
-    }
+    console.log("Categoría cargada para editar - ID:", id, "Nombre:", name);
+  }
 });
 
 // Actualizar categoría
 const formEditar = document.querySelector("#modalEditarCategoria form");
 
 formEditar.addEventListener("submit", async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    const id = document.querySelector("#editCategoriaId").value;
-    const nombre = document.querySelector("#editCategoriaNombre").value;
+  const id = document.querySelector("#editCategoriaId").value;
+  const nombre = document.querySelector("#editCategoriaNombre").value;
+  const estado = document.querySelector("#editCategoriaEstado").value;
 
-    try {
-        const response = await fetch(`http://localhost:8000/category/update/${id}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ name: nombre })
-        });
+  try {
+    const response = await fetch(
+      `http://localhost:8000/category/update/${id}`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: nombre, status: estado }),
+      }
+    );
 
-        const result = await response.json();
+    const result = await response.json();
 
-        if (result.success) {
-            Swal.fire({
-                icon: "success",
-                title: "¡Categoría actualizada!",
-                text: `Se actualizó la categoría "${nombre}" correctamente.`,
-                confirmButtonColor: "#3085d6"
-            }).then(() => location.reload());
-        } else {
-            Swal.fire({
-                icon: "error",
-                title: "Error",
-                text: result.message
-            });
-        }
-    } catch (error) {
-        Swal.fire({
-            icon: "error",
-            title: "Error en la petición",
-            text: "No se pudo conectar con el servidor."
-        });
+    if (result.success) {
+      Swal.fire({
+        title: "¡Categoría actualizada!",
+        text: `Se actualizó la categoría a "${nombre}" correctamente.`,
+        icon: "success",
+        timer: 1500,
+        showConfirmButton: false,
+      }).then(() => location.reload());
+    } else {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: result.message,
+      });
     }
+  } catch (error) {
+    Swal.fire({
+      icon: "error",
+      title: "Error en la petición",
+      text: "No se pudo conectar con el servidor.",
+    });
+  }
 });
 
 // Eliminar categoría
 document.addEventListener("click", async (e) => {
-    if (e.target.classList.contains("btn-eliminar")) {
-        const id = e.target.getAttribute("data-id");
+  if (e.target.classList.contains("btn-eliminar")) {
+    const id = e.target.getAttribute("data-id");
 
-        Swal.fire({
-            title: "¿Eliminar categoría?",
-            text: "Esta acción no se puede deshacer.",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonText: "Sí, eliminar",
-            cancelButtonText: "Cancelar",
-            confirmButtonColor: "#d33"
-        }).then(async (result) => {
-            if (result.isConfirmed) {
-                try {
-                    const response = await fetch(`http://localhost:8000/category/update/${id}`, {
-                        method: "PUT"
-                    });
-                    const data = await response.json();
-
-                    if (data.success) {
-                        Swal.fire({
-                            icon: "success",
-                            title: "Eliminado",
-                            text: "La categoría fue eliminada correctamente"
-                        }).then(() => location.reload());
-                    } else {
-                        Swal.fire({
-                            icon: "error",
-                            title: "Error",
-                            text: "No se pudo eliminar la categoría"
-                        });
-                    }
-                } catch (error) {
-                    Swal.fire({
-                        icon: "error",
-                        title: "Error en la petición",
-                        text: "No se pudo conectar con el servidor."
-                    });
-                }
+    Swal.fire({
+      title: "¿Estás seguro?",
+      text: "Esta acción no se puede deshacer.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Sí, eliminar",
+      cancelButtonText: "Cancelar",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const response = await fetch(
+            `http://localhost:8000/category/delete/${id}`,
+            {
+              method: "put",
             }
-        });
-    }
+          );
+          const data = await response.json();
+
+          if (data.success) {
+            Swal.fire({
+              title: "¡Categoría eliminada!",
+              text: "La categoría fue eliminada correctamente.",
+              icon: "success",
+              timer: 1500,
+              showConfirmButton: false,
+            }).then(() => location.reload());
+          } else {
+            Swal.fire({
+              icon: "error",
+              title: "Error",
+              text: "No se pudo eliminar la categoría",
+            });
+          }
+        } catch (error) {
+          Swal.fire({
+            icon: "error",
+            title: "Error en la petición",
+            text: "No se pudo conectar con el servidor.",
+          });
+        }
+      }
+    });
+  }
 });
