@@ -3,6 +3,9 @@ from fastapi.responses import JSONResponse
 from models.user.user_entity import RegisterModel, UpdateUserModel, AdminUpdateUserModel
 from services.usuario_service import ValidateU
 import re
+import secrets
+import string
+import hashlib
 
 val = ValidateU()
 
@@ -298,6 +301,13 @@ class Usuario:
             
             
             
+    def generar_password(longitud=10):
+        # Genera una contraseña aleatoria segura
+        caracteres = string.ascii_letters + string.digits + string.punctuation
+        password = ''.join(secrets.choice(caracteres) for i in range(longitud))
+        return password
+            
+            
     def admin_register_user(self, data: AdminUpdateUserModel):
         # Validation
         if not isinstance(data.user_cc, int) or data.user_cc <= 0:
@@ -315,6 +325,7 @@ class Usuario:
         if data.user_status not in [0, 1]:
             return JSONResponse(content={"success": False, "message": "Estado de usuario inválido"}, status_code=400)
 
+        print(f"Datos recibidos para registro por admin: {data}")
         # Check if user exists
         resultado_usuario = val.verificar_usuario_existe(data.user_cc)
         if resultado_usuario["existe"]:
@@ -323,16 +334,23 @@ class Usuario:
                 "message": f"No se puede registrar. El usuario con el CC {data.user_cc} ya existe"
             }, status_code=400)
             
-        # Use provided password or generate default if not provided
-        password = data.password if data.password else "123456"  # Default password for admin-created users
+        print("Verificación de existencia pasada, procediendo a insertar.")
+            
+        # generar contraseña
+        password = data.password if data.password else Usuario.generar_password()
+        
+        # Hashear la contraseña antes de almacenarla
+        hashep_password = hashlib.sha256(password.encode()).hexdigest()
               
         query = """
-                INSERT INTO usuarios (user_cc, user_type, user_name, user_phone, user_mail, user_status) 
-                VALUES (%s, %s, %s, %s, %s, %s)
+                INSERT INTO usuarios (user_cc, user_type, user_name, user_phone, user_mail, user_password, user_status) 
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
             """
             
         try:
-            execute_query(query, (data.user_cc, data.user_type, data.username, data.phone, data.email, password, data.user_status), commit=True)
+            execute_query(query, (data.user_cc, data.user_type, data.username, data.phone, data.email, hashep_password, data.user_status), commit=True)
+            
+            print("Usuario registrado exitosamente por el administrador.")
             return JSONResponse(content={
                 "success": True,
                 "message": "Usuario registrado exitosamente por el administrador"

@@ -38,6 +38,7 @@
             <tr>
               <th>#</th>
               <th>Nombre</th>
+              <th>Estado</th>
               <th class="text-end">Acciones</th>
             </tr>
           </thead>
@@ -51,6 +52,7 @@
     </div>
   </main>
 
+  <!-- Modal de agregar -->
   <div class="modal fade" id="modalCategoria" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -71,26 +73,43 @@
     </div>
   </div>
 
+
+  <!-- Modal de editar -->
+  <!-- Modal Editar Categoría -->
   <div class="modal fade" id="modalEditarCategoria" tabindex="-1">
     <div class="modal-dialog">
       <div class="modal-content">
-        <div class="modal-header bg-warning">
-          <h5 class="modal-title">Editar Categoría</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body">
-          <form>
+        <form id="formEditarCategoria">
+          <div class="modal-header">
+            <h5 class="modal-title">Editar Categoría</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+
+          <div class="modal-body">
             <input type="hidden" id="editCategoriaId">
+
             <div class="mb-3">
               <label for="editCategoriaNombre" class="form-label">Nombre</label>
-              <input type="text" class="form-control" id="editCategoriaNombre">
+              <input type="text" class="form-control" id="editCategoriaNombre" required>
             </div>
-            <button type="submit" class="btn btn-primary w-100">Actualizar</button>
-          </form>
-        </div>
+
+            <div class="mb-3">
+              <label for="editCategoriaEstado" class="form-label">Estado</label>
+              <select id="editCategoriaEstado" class="form-select">
+                <option value="1">Activo</option>
+                <option value="0">Inactivo</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-primary">Guardar cambios</button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
+
 
   <footer class="bg-dark text-white text-center p-3">
     &copy; 2025 Mi Tienda | Panel de Administración

@@ -17,6 +17,11 @@ functions:
       - httpApi:
           path: /login/sign_in
           method: post
+
+# ===================================
+#   Modulo 1 - Gestión de usuarios
+# ===================================
+
   user:
     handler: handler.handler
     events:
@@ -41,6 +46,12 @@ functions:
       - httpApi:
           path: /user/update
           method: put
+
+
+# ====================================
+#   Modulo 2 - Gestión de cagegorías
+# ====================================
+
   category:
     handler: handler.handler
     events:
@@ -53,6 +64,14 @@ functions:
       - httpApi:
           path: /category/update/{id}
           method: put
+      - httpApi:
+          path: /category/delete/{id}
+          method: put
+
+# ===================================
+#   Modulo 3 - Gestión de productos
+# ===================================
+
   product:
     handler: handler.handler
     events:
@@ -71,6 +90,11 @@ functions:
       - httpApi:
           path: /product/delete/{id}
           method: put
+  
+# ====================================
+#   Modulo 4 - Carrito de Compras
+# ====================================
+  
   Carrito:
     handler: handler.handler
     events:
