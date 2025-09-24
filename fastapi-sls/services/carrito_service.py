@@ -1,5 +1,6 @@
 from db import execute_query
 from services.usuario_service import ValidateU
+from datetime import datetime
 
 val = ValidateU()
 def verificar_carrito_activo(user_cc: int):
@@ -157,10 +158,6 @@ def obtener_carritos_user(user_cc: int):
             "message": "❌ Error al obtener los carritos"
         }
 
-
-# ======================== FUNCIONES PARA ADMIN =============================
-
-
 def obtener_carrito_usuario(user_cc: int):
     
     query = """
@@ -187,6 +184,79 @@ def obtener_carrito_usuario(user_cc: int):
             return {
                 "success": False,
                 "message": f"⚠️ El usuario {user_cc} no tiene productos en el carrito"
+            }
+
+        # Datos generales del carrito (primer registro)
+        user_name = result[0][0]        
+        car_id = result[0][1]           
+        fecha_creacion = result[0][2]   
+        estado = result[0][3]           
+
+        # Lista de productos
+        productos = [
+            {
+                "nombre_producto": row[4],  
+                "cantidad": row[5],         
+                "precio_unitario": f"${row[6]:,.0f}".replace(",", "."),
+                "subtotal": f"${row[7]:,.0f}".replace(",", ".")
+            }
+            for row in result
+]
+
+        # Total a pagar
+        total_pagar = sum(row[7] for row in result)
+
+        return {
+            "success": True,
+            "usuario": user_name,
+            "carrito": {
+                "car_id": car_id,
+                "fecha_creacion": str(fecha_creacion),
+                "estado": estado
+            },
+            "productos": productos,
+            "total_pagar": f"${total_pagar:,.0f}".replace(",", ".")
+        }
+
+    except Exception as e:
+        print(f"Error al obtener carrito: {e}")
+        return {
+            "success": False,
+            "message": "❌ Error al obtener los productos del carrito"
+        }
+
+
+
+
+# ======================== FUNCIONES PARA ADMIN =============================
+
+
+def obtener_carrito_user_admin(car_id: int):
+    
+    query = """
+        SELECT 
+            u.user_name,
+            c.car_id,
+            c.fecha_creacion,
+            c.estado,
+            p.product_name AS nombre_producto,
+            cd.detalle_cantidad AS cantidad,
+            p.product_price AS precio_unitario,
+            (cd.detalle_cantidad * p.product_price) AS subtotal
+        FROM carrito c
+        INNER JOIN usuarios u ON u.user_cc = c.user_cc
+        INNER JOIN carrito_detalle cd ON cd.car_id = c.car_id
+        INNER JOIN productos p ON cd.product_id = p.product_id
+        WHERE c.car_id = %s
+    """
+
+    try:
+        result = execute_query(query, (car_id,), fetchall=True)
+
+        if not result:
+            return {
+                "success": False,
+                "message": f"⚠️ El carrito {car_id} no tiene productos"
             }
 
         # Datos generales del carrito (primer registro)
@@ -383,3 +453,71 @@ def finalizar_compra(car_id: int):
 
     return {"success": True, "message": f"✅ Carrito {car_id} finalizado correctamente"}
 
+
+from datetime import datetime
+from db import execute_query
+
+# 📌 Avanzar al siguiente estado en orden lineal
+def avanzar_estado_carrito(car_id: int, usuario: str = "admin"):
+  
+    # Obtener estado actual
+    fila = execute_query(
+        "SELECT estado FROM carrito WHERE car_id = %s",
+        (car_id,),
+        fetchone=True
+    )
+    if not fila:
+        return {"success": False, "message": "Carrito no encontrado"}
+
+    estado_actual = fila[0]
+
+    # Si ya está entregado o cancelado no avanza
+    if estado_actual >= 4:
+        return {"success": False, "message": "El carrito ya no puede avanzar"}
+
+    nuevo_estado = estado_actual + 1
+
+    # Actualizar estado en carrito
+    execute_query(
+        "UPDATE carrito SET estado = %s WHERE car_id = %s",
+        (nuevo_estado, car_id),
+        commit=True
+    )
+
+    # Insertar en historial
+    execute_query(
+        """
+        INSERT INTO carrito_estados (car_id, estado, comentario, fecha_actualizacion, actualizado_por)
+        VALUES (%s, %s, %s, %s, %s)
+        """,
+        (car_id, nuevo_estado, f"Avanzó de {estado_actual} a {nuevo_estado}",
+         datetime.now(), usuario),
+        commit=True
+    )
+
+    return {"success": True, "message": f"Estado actualizado a {nuevo_estado}"}
+
+
+# 📌 Cancelar el pedido en cualquier momento
+def cancelar_carrito(car_id: int, usuario: str = "admin"):
+    """
+    Cancela el carrito (estado 5) y guarda registro en historial.
+    """
+    # Actualizar estado en carrito
+    execute_query(
+        "UPDATE carrito SET estado = 5 WHERE car_id = %s",
+        (car_id,),
+        commit=True
+    )
+
+    # Insertar en historial
+    execute_query(
+        """
+        INSERT INTO carrito_estados (car_id, estado, comentario, fecha_actualizacion, actualizado_por)
+        VALUES (%s, %s, %s, %s, %s)
+        """,
+        (car_id, 5, "Cancelado por admin", datetime.now(), usuario),
+        commit=True
+    )
+
+    return {"success": True, "message": "Carrito cancelado"}

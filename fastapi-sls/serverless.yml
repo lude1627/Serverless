@@ -107,6 +107,9 @@ functions:
       - httpApi:
           path: /carro/dcarrito/{car_id}                   #ver detalles por carrito (usuario)
           method: get
-
-
-          
+      - httpApi:
+          path: /carro/{car_id}/next                   #avanzar estado del carrito (usuario)
+          method: put
+      - httpApi:
+          path: /carro/{car_id}/cancelar               #cancelar carrito (usuario)
+          method: put

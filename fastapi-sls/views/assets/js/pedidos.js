@@ -2,207 +2,182 @@ const API_BASE = "http://localhost:8000";
 
 document.addEventListener("DOMContentLoaded", cargarCarritos);
 
-// 📌 CARGAR LISTA DE CARRITOS
+// ---------------------------------------------------
+//  Cargar lista de carritos
+// ---------------------------------------------------
 async function cargarCarritos() {
   try {
-    const response = await fetch(`${API_BASE}/carro/view/all`);
-    const result = await response.json();
-
+    const r = await fetch(`${API_BASE}/carro/view/all`);
+    const data = await r.json();
     const tbody = document.querySelector("#tablaCarritos tbody");
     tbody.innerHTML = "";
 
-    if (result.success && result.data.length > 0) {
-      result.data.forEach((carrito) => {
-        const estadoBadge =
-          carrito.estado == 1
-            ? '<span class="badge bg-success"><i class="fas fa-lock-open"></i> Abierto</span>'
-            : '<span class="badge bg-secondary"><i class="fas fa-lock"></i> Cerrado</span>';
-
+    if (data.success && data.data.length) {
+      data.data.forEach(c => {
+        const badge = estadoBadge(c.estado);
         const tr = document.createElement("tr");
         tr.innerHTML = `
-          <td>${carrito.car_id}</td>
-          <td>${carrito.user_name} <br>
-              <small class="text-muted">${carrito.user_cc}</small>
-          </td>
-          <td>${carrito.fecha_creacion}</td>
-          <td>${estadoBadge}</td>
+          <td>${c.car_id}</td>
+          <td>${c.user_name}<br><small class="text-muted">${c.user_cc}</small></td>
+          <td>${c.fecha_creacion}</td>
+          <td>${badge}</td>
           <td class="text-end">
-            <button class="btn btn-primary btn-sm" onclick="verDetalleCarrito(${carrito.user_cc})">
+            <button class="btn btn-primary btn-sm" onclick="verDetalleCarrito(${c.car_id})">
               <i class="fas fa-eye"></i> Ver Detalle
             </button>
-          </td>
-        `;
+          </td>`;
         tbody.appendChild(tr);
       });
     } else {
-      tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted">⚠️ No hay carritos registrados</td></tr>`;
+      tbody.innerHTML =
+        `<tr><td colspan="5" class="text-center text-muted">⚠️ No hay carritos</td></tr>`;
     }
-  } catch (error) {
-    console.error("Error cargando carritos:", error);
-    Swal.fire("❌ Error", "No se pudieron cargar los carritos", "error");
+  } catch (e) {
+    console.error(e);
+    Swal.fire("Error", "No se pudieron cargar los carritos", "error");
   }
 }
 
-// 📌 VER DETALLE DE UN CARRITO + HISTORIAL
-async function verDetalleCarrito(user_cc) {
+// ---------------------------------------------------
+//  Badge de estado
+// ---------------------------------------------------
+function estadoBadge(estado) {
+  const map = {
+    0: "Abierto",
+    1: "Pagado",
+    2: "En Proceso",
+    3: "Enviado",
+    4: "Entregado",
+    5: "Cancelado"
+  };
+  const color =
+    estado === 5 ? "danger" :
+    estado === 4 ? "success" :
+    "secondary";
+  return `<span class="badge bg-${color}">${map[estado] || "?"}</span>`;
+}
+
+// ---------------------------------------------------
+//  Ver detalle de un carrito
+// ---------------------------------------------------
+async function verDetalleCarrito(id) {
   try {
-    const response = await fetch(`${API_BASE}/carro/admin/${user_cc}`);
-    const data = await response.json();
+    const r = await fetch(`${API_BASE}/carro/admin/${id}`);
+    const d = await r.json();
+    if (!d.success) return Swal.fire("Error", "No se pudo cargar el detalle", "error");
 
-    if (!data.success) {
-      Swal.fire(
-        "❌ Error",
-        "No se pudo cargar el detalle del carrito",
-        "error"
-      );
-      return;
-    }
+    document.getElementById("detalleCarritoID").textContent = d.carrito.car_id;
+    document.getElementById("detalleUsuario").textContent   = d.usuario;
+    document.getElementById("detalleFecha").textContent     = d.carrito.fecha_creacion;
+    document.getElementById("detalleEstado").innerHTML      = estadoBadge(d.carrito.estado);
 
-    // Llenar info principal
-    document.getElementById("detalleCarritoID").textContent =
-      data.carrito.car_id;
-    document.getElementById("detalleUsuario").textContent = data.usuario;
-    document.getElementById("detalleFecha").textContent =
-      data.carrito.fecha_creacion;
-    document.getElementById("detalleEstado").innerHTML =
-      data.carrito.estado == 1
-        ? '<span class="badge bg-success"><i class="fas fa-lock-open"></i> Abierto</span>'
-        : '<span class="badge bg-secondary"><i class="fas fa-lock"></i> Cerrado</span>';
+    const tbody = document.getElementById("detalleProductos");
+    tbody.innerHTML = d.productos.map(p => `
+      <tr>
+        <td>${p.nombre_producto}</td>
+        <td>${p.cantidad}</td>
+        <td>$${p.precio_unitario.toLocaleString()}</td>
+        <td>$${p.subtotal.toLocaleString()}</td>
+      </tr>`).join("");
+    document.getElementById("detalleTotal").textContent =
+      `$${d.total_pagar.toLocaleString()}`;
 
-    // Llenar productos
-    let productosHTML = "";
-    data.productos.forEach((prod) => {
-      productosHTML += `
-        <tr>
-          <td>${prod.nombre_producto}</td>
-          <td>${prod.cantidad}</td>
-          <td>$${prod.precio_unitario.toLocaleString()}</td>
-          <td>$${prod.subtotal.toLocaleString()}</td>
-        </tr>`;
-    });
+    await cargarHistorialEstados(id);
 
-    document.getElementById("detalleProductos").innerHTML = productosHTML;
-    document.getElementById(
-      "detalleTotal"
-    ).textContent = `$${data.total_pagar.toLocaleString()}`;
-    // Cargar historial de estados
-    await cargarHistorialEstados((car_id = data.carrito.car_id));
+    // Guardar ID en los botones de acción
+    document.getElementById("btnNext").dataset.id = id;
+    document.getElementById("btnCancel").dataset.id = id;
 
-    // Guardar carritoId en el formulario
-    const form = document.getElementById("formActualizarEstado");
-    form.dataset.carritoId = user_cc;
-    form.reset();
-
-    // Mostrar modal
-    const modal = new bootstrap.Modal(
-      document.getElementById("modalDetalleCarrito")
-    );
-    modal.show();
-  } catch (error) {
-    console.error(error);
-    Swal.fire(
-      "❌ Error",
-      "Ocurrió un problema al obtener el detalle del carrito",
-      "error"
-    );
+    new bootstrap.Modal(document.getElementById("modalDetalleCarrito")).show();
+  } catch (e) {
+    console.error(e);
+    Swal.fire("Error", "Ocurrió un problema al obtener el detalle", "error");
   }
 }
 
-// 📌 CARGAR HISTORIAL DE ESTADOS
-async function cargarHistorialEstados(car_id) {
-  const ulHistorial = document.getElementById("historialEstados");
-  ulHistorial.innerHTML = `<li class="list-group-item text-muted text-center">Cargando...</li>`;
-
+// ---------------------------------------------------
+//  Cargar historial de estados
+// ---------------------------------------------------
+async function cargarHistorialEstados(id) {
+  const ul = document.getElementById("historialEstados");
+  ul.innerHTML =
+    "<li class='list-group-item text-center text-muted'>Cargando...</li>";
   try {
-    const response = await fetch(`${API_BASE}/carro/${car_id}/historial`);
-    const result = await response.json();
-
-    if (result.success && result.data.length > 0) {
-      ulHistorial.innerHTML = "";
-      result.data.forEach((estado) => {
-        const li = document.createElement("li");
-        li.classList.add("list-group-item");
-        li.innerHTML = `
-          <strong>${estado.fecha}</strong> - 
-          <span class="badge bg-info">${mapEstadoTexto(estado.estado)}</span>
-          <br><small>${estado.comentario || "Sin comentario"}</small>
-        `;
-        ulHistorial.appendChild(li);
-      });
+    const r = await fetch(`${API_BASE}/carro/${id}/historial`);
+    const d = await r.json();
+    if (d.success && d.data.length) {
+      ul.innerHTML = d.data
+        .map(e => `
+          <li class="list-group-item">
+            <strong>${e.fecha}</strong> -
+            <span class="badge bg-info">${estadoBadge(e.estado)}</span>
+            <br><small>${e.comentario || "Sin comentario"}</small>
+          </li>`)
+        .join("");
     } else {
-      ulHistorial.innerHTML = `<li class="list-group-item text-center text-muted">No hay historial</li>`;
+      ul.innerHTML =
+        "<li class='list-group-item text-center text-muted'>Sin historial</li>";
     }
-  } catch (error) {
-    console.error("Error cargando historial:", error);
-    ulHistorial.innerHTML = `<li class="list-group-item text-center text-danger">Error al cargar historial</li>`;
+  } catch (e) {
+    console.error(e);
+    ul.innerHTML =
+      "<li class='list-group-item text-center text-danger'>Error al cargar</li>";
   }
 }
 
-// 📌 MAPEO DE ESTADOS
-function mapEstadoTexto(estado) {
-  switch (estado) {
-    case 1:
-      return "Pendiente";
-    case 2:
-      return "Procesando";
-    case 3:
-      return "Enviado";
-    case 4:
-      return "Entregado";
-    case 5:
-      return "Cancelado";
-    default:
-      return "Desconocido";
-  }
-}
-
-// 📌 ABRIR MODAL ACTUALIZAR ESTADO
-function abrirModalActualizarEstado(car_id) {
-  const form = document.getElementById("formActualizarEstado");
-  form.dataset.carritoId = car_id;
-}
-
-// 📌 ACTUALIZAR ESTADO DEL CARRITO
-
-async function actualizarEstadoCarrito() {
- 
-    
-  if (!car_id || isNaN(estado)) {
-    Swal.fire("❌ Error", "Datos inválidos para actualizar estado", "error");
-    return;
-  }
+// ---------------------------------------------------
+//  Avanzar al siguiente estado
+// ---------------------------------------------------
+async function siguienteEstado(carId) {
   try {
-    const response = await fetch(`${API_BASE}/carro/${car_id}/estado`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ estado, comentario }),
-    });
-    const result = await response.json();
-    
-    if (result.success) {   
-      Swal.fire("✅ Éxito", "Estado actualizado correctamente", "success");
+    const resp = await fetch(`${API_BASE}/carro/${carId}/next`, { method: "PUT" });
+    const data = await resp.json();
+
+    if (data.success) {
+      Swal.fire("✅ Éxito", data.message, "success");
       cargarCarritos();
-      verDetalleCarrito(car_id);
-      const modalElement = document.getElementById("modalDetalleCarrito");
-      const modalInstance = bootstrap.Modal.getInstance(modalElement);
-      modalInstance.hide();
+      await cargarHistorialEstados(carId);
+    } else {
+      Swal.fire("Aviso", data.message, "warning");
     }
-    else {
-      Swal.fire("❌ Error", result.message || "No se pudo actualizar el estado", "error");
-    }
-  }
-  catch (error) {
-    console.error("Error actualizando estado:", error);
-    Swal.fire("❌ Error", "Ocurrió un problema al actualizar el estado", "error");
+  } catch (err) {
+    console.error(err);
+    Swal.fire("Error", "No se pudo avanzar el estado", "error");
   }
 }
 
-// 📌 EVENTO SUBMIT FORM ACTUALIZAR ESTADO
-document
-  .getElementById("formActualizarEstado")
-  .addEventListener("submit", actualizarEstadoCarrito);
+// ---------------------------------------------------
+//  Cancelar carrito
+// ---------------------------------------------------
+async function cancelarPedido(carId) {
+  if (!confirm("¿Seguro que deseas cancelar este pedido?")) return;
 
+  try {
+    const resp = await fetch(`${API_BASE}/carro/${carId}/cancelar`, { method: "PUT" });
+    const data = await resp.json();
 
+    if (data.success) {
+      Swal.fire("🚫 Pedido cancelado", "", "success");
+      cargarCarritos();
+      await cargarHistorialEstados(carId);
+    } else {
+      Swal.fire("Aviso", data.message, "warning");
+    }
+  } catch (err) {
+    console.error(err);
+    Swal.fire("Error", "No se pudo cancelar el pedido", "error");
+  }
+}
 
+// ---------------------------------------------------
+//  Listeners de botones del modal
+// ---------------------------------------------------
+document.getElementById("btnNext").addEventListener("click", e => {
+  const id = e.currentTarget.dataset.id;
+  if (id) siguienteEstado(id);
+});
 
-
+document.getElementById("btnCancel").addEventListener("click", e => {
+  const id = e.currentTarget.dataset.id;
+  if (id) cancelarPedido(id);
+});
