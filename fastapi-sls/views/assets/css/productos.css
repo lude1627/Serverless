@@ -1,114 +1,58 @@
-
+/* TITULO */
 #titulo {
   position: relative;
-  top: 0;
-  left: 0;
-  width: 100%;
-  max-width: 100%;
-  height: auto;
+  top: -1rem;
   display: flex;
   justify-content: center;
   align-items: center;
   text-align: center;
-  margin: 2rem auto;        
+  margin: 2rem auto;
   padding: 0 1rem;
 }
 
+/* CONTENEDOR PRNCIPAL */
 main.container {
-  position: relative;
-  top: 0;                   
   display: flex;
-  flex: 1;
-  animation: fadeIn 0.5s ease-in-out;
-  overflow-x: hidden;
-  width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
-  margin-top: 1rem;         
+  flex-direction: row;
+  align-items: center;
+
+  position: relative;
+  top: -5rem;
+
+  flex-wrap: wrap;
+  flex-grow: initial;
+  
+  width: 99% !important;
+  max-width: 100% !important;
+
+  animation: fadeIn 1s ease-in-out;
 }
 
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px);}
-  to   { opacity: 1; transform: translateY(0); }
-}
-/* CONTENEDOR */
-#productosGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 25px;
-  justify-content: center;
-  padding: 20px;
-  max-width: 1200px;
-  margin: 0 auto;
-  box-sizing: border-box;
-}
-
-/* TARJETA CUADRADA */
+/* ESTILO DE LAS TARJETAS */
 .card {
-  width: 100%;
-  max-width: 300px;       /* ancho máximo */
-  aspect-ratio: 1 / 1;    /* 🔑 mantiene la tarjeta cuadrada */
   border: 1px solid #000;
   border-radius: 10px;
-  background: #ffffffae;
-  padding: 15px;
-  box-sizing: border-box;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  text-align: center;
-
-  /* quita estiramientos heredados */
-  height: auto !important;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+  margin: 1rem !important;
+  padding: 1rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
-
+/*ANIMACION AL PASAR EL CURSOR POR LA CARTA*/
+.card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
 
 .card:hover {
-  transform: scale(1.03);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  transform: translateY(-8px) scale(1.03) rotate3d(1, 0, 0, 1deg);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.25);
+  z-index: 10;
 }
 
-/* ---------- TEXTOS ---------- */
-.card-title {
-  font-size: 1rem;
-  margin-bottom: 0.4rem;
+/* ANIMACION DE APARICION */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-.card-text.desc {
-  font-size: 0.8rem;
-}
 
-.card-text.price {
-  font-size: 1rem;
-  font-weight: bold;
-  color: #28a745;
-}
-
-/* ---------- BOTÓN ---------- */
-.add-to-cart-btn {
-  border-radius: 6px;
-  font-size: 0.85rem;
-  padding: 6px;
-  font-weight: bold;
-  transition: background-color 0.2s ease;
-  width: 100%;
-}
-
-.add-to-cart-btn:hover {
-  background-color: #0a58ca;
-}
-
-/* ---------- RESPONSIVE EXTRA ---------- */
-@media (max-width: 576px) {
-  #titulo {
-    top: 2rem;
-    font-size: 1.4rem;
-    padding: 0 0.5rem;
-  }
-  .card {
-    height: auto !important;
-  }
-}

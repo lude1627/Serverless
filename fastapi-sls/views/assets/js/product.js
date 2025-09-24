@@ -5,8 +5,6 @@ if (!userCc) {
     window.location.href = "/views/login/login.html";
 }
 
-
-
 document.addEventListener("DOMContentLoaded", async () => {
     const container = document.querySelector("main.container");
     const template = document.getElementById("product-template");
@@ -27,15 +25,12 @@ document.addEventListener("DOMContentLoaded", async () => {
             result.data.forEach(producto => {
                
                 const clone = template.content.cloneNode(true);
-
               
                 clone.querySelector(".card-title").textContent = producto.nombre;
                 clone.querySelector(".desc").textContent = producto.descripcion;
                 clone.querySelector(".cant").textContent = producto.cantidad;
                 clone.querySelector(".price").textContent = producto.precio;
                 clone.querySelector(".cat").textContent = `Categoría: ${producto.categoria}`;
-
-
                 
                 clone.querySelector(".add-to-cart-btn").addEventListener("click", async () => {
                     try {
@@ -59,7 +54,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                                 icon: "success",
                                 title: "Producto agregado",
                                 text: `${producto.nombre} fue agregado al carrito`,
-                                timer: 1500,
+                                timer: 500,
                                 showConfirmButton: false
                             });
                         } else {
@@ -68,9 +63,11 @@ document.addEventListener("DOMContentLoaded", async () => {
                     } catch (error) {
                         console.error("Error agregando al carrito:", error);
                         Swal.fire({
-                            icon: "error",
-                            title: "Error",
-                            text: "No se pudo agregar el producto al carrito"
+                            icon: "info",
+                            title: "ups...",
+                            text: "En este momento este producto no esta disponible",
+                            timer: 2000,
+                            showConfirmButton: false
                         });
                     }
                    
