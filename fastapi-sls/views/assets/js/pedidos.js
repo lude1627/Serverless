@@ -47,7 +47,7 @@ async function cargarCarritos() {
 
 
 function estadoBadge1(estado) {
-  // Forzar a número por si llega como string
+ 
   estado = Number(estado);
 
   const map = {
@@ -132,7 +132,7 @@ async function cargarHistorialEstados(id) {
         .map(e => `
           <li class="list-group-item">
             <strong>${e.fecha}</strong> -
-            <span class="badge bg-info">${estadoBadge(e.estado)}</span>
+            <span class="badge ">${estadoBadge(e.estado)}</span>
             <br><small>${e.comentario || "Sin comentario"}</small>
           </li>`)
         .join("");

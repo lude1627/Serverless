@@ -4,7 +4,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         window.location.href = "/views/login/login.html";
         return;
     }
-    
 
     const API_BASE = "http://localhost:8000";
     const list = document.getElementById("pedidosList");
@@ -25,35 +24,18 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         // Generar las filas de todos los carritos
         const filas = data.data.map(c => {
-            const estadoTexto = estadoBadge(c.estado);
+            const estadoActivo = c.estado === "1";
+            const estadoTexto  = estadoActivo ? "Activo" : "Inactivo";
+            const estadoClase  = estadoActivo ? "bg-primary" : "bg-danger";
 
             return `
                 <tr>
                     <td>${c.user_name}</td>
                     <td>${c.fecha_creacion}</td>
-                    <td>${estadoTexto}</td>
+                    <td><span class="badge ${estadoClase} px-3 py-2">${estadoTexto}</span></td>
                     <td>${c.total}</td>
                 </tr>`;
         }).join("");
-
-   
-        function estadoBadge(estado) {
-        
-        estado = Number(estado);
-
-        const map = {
-            0: { text: "Abierto",    color: "secondary" }, // gris
-            1: { text: "Pagado",     color: "primary"   }, // azul
-            2: { text: "En Proceso", color: "warning"   }, // amarillo
-            3: { text: "Enviado",    color: "info"      }, // celeste
-            4: { text: "Entregado",  color: "success"   }, // verde
-            5: { text: "Cancelado",  color: "danger"    }  // rojo
-        };
-
-        const item = map[estado] || { text: "?", color: "dark" };
-
-        return `<span class="badge bg-${item.color}">${item.text}</span>`;
-        }
 
         list.innerHTML = `
             <li class="list-group-item p-0">
@@ -75,20 +57,10 @@ document.addEventListener("DOMContentLoaded", async () => {
             </li>
         `;
     } catch (err) {
-        // console.error("Error cargando carritos:", err);
+        console.error("Error cargando carritos:", err);
         list.innerHTML = `
-            <li class="list-group-item text-center text-danger"><strong>
-                Esta informacion no esta disponible en este momento.
-            </strong></li>`;
-
-        Swal.fire({
-            title: "🚨 Error de conexión",
-            text: "No se pudo establecer conexión. Intenta más tarde.",
-            icon: "error",
-            showConfirmButton: false,
-            timer: 3500,
-            timerProgressBar: true,
-            
-        });     
+            <li class="list-group-item text-center text-danger">
+                Error de conexión con el servidor.
+            </li>`;
     }
 });

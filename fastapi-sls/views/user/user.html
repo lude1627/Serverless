@@ -92,6 +92,53 @@
                 </div>
             </div>
         </main>
+         <!-- Modal Detalle Carrito -->
+  <div class="modal fade" id="modalDetalleCarrito" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title"><i class="fas fa-shopping-cart"></i> Detalle del Carrito</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p><strong>Usuario:</strong> <span id="detalleUsuario"></span></p>
+          <p><strong>ID Carrito:</strong> <span id="detalleCarritoID"></span></p>
+          <p><strong>Fecha:</strong> <span id="detalleFecha"></span></p>
+          <p><strong>Estado:</strong> <span id="detalleEstado"></span></p>
+
+          <table class="table table-bordered">
+            <thead class="table-light">
+              <tr>
+                <th>Producto</th>
+                <th>Cantidad</th>
+                <th>Precio Unitario</th>
+                <th>Subtotal</th>
+              </tr>
+            </thead>
+            <tbody id="detalleProductos"></tbody>
+          </table>
+
+          <h5 class="text-end">Total: <span id="detalleTotal" class="fw-bold text-success"></span></h5>
+
+          <hr>
+          <h5><i class="fas fa-clock"></i> Historial de Estados</h5>
+          <ul id="historialEstados" class="list-group mb-3">
+            <li class="list-group-item text-muted text-center">Cargando historial...</li>
+          </ul>
+
+          <!-- Botones de acción lineal -->
+          <div class="d-grid gap-2">
+            <button id="btnNext" class="btn btn-primary">
+              <i class="fas fa-step-forward"></i> Siguiente estado
+            </button>
+            <button id="btnCancel" class="btn btn-danger">
+              <i class="fas fa-ban"></i> Cancelar pedido
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
     </div>
 
     <footer class="bg-dark text-white text-center p-3">

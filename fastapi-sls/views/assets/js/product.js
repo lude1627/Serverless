@@ -46,9 +46,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         clone.querySelector(
           ".cant"
         ).textContent = `Stock: ${producto.cantidad}`;
-        clone.querySelector(".price").textContent = `$${Number(
-          producto.precio
-        ).toLocaleString()}`;
+        clone.querySelector(".price").textContent = `${
+          producto.precio}`;
         clone.querySelector(
           ".cat"
         ).textContent = `Categoría: ${producto.categoria}`;
