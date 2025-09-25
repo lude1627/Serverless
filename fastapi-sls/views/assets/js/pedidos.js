@@ -14,7 +14,7 @@ async function cargarCarritos() {
 
     if (data.success && data.data.length) {
       data.data.forEach(c => {
-        const badge = estadoBadge(c.estado);
+        const badge = estadoBadge1(c.estado);
         const tr = document.createElement("tr");
         tr.innerHTML = `
           <td>${c.car_id}</td>
@@ -38,23 +38,39 @@ async function cargarCarritos() {
   }
 }
 
+
+
+function estadoBadge1(estado) {
+  // Forzar a número por si llega como string
+  estado = Number(estado);
+
+  const map = {
+    0: { text: "Inactivo",    color: "danger" }, 
+    1: { text: "Activo",  color: "success"    }  
+  };
+  const item = map[estado] || { text: "?", color: "dark" };
+
+  return `<span class="badge bg-${item.color}">${item.text}</span>`;
+}
 // ---------------------------------------------------
 //  Badge de estado
 // ---------------------------------------------------
 function estadoBadge(estado) {
+  // Forzar a número por si llega como string
+  estado = Number(estado);
+
   const map = {
-    0: "Abierto",
-    1: "Pagado",
-    2: "En Proceso",
-    3: "Enviado",
-    4: "Entregado",
-    5: "Cancelado"
+    0: { text: "Abierto",    color: "secondary" }, // gris
+    1: { text: "Pagado",     color: "primary"   }, // azul
+    2: { text: "En Proceso", color: "warning"   }, // amarillo
+    3: { text: "Enviado",    color: "info"      }, // celeste
+    4: { text: "Entregado",  color: "success"   }, // verde
+    5: { text: "Cancelado",  color: "danger"    }  // rojo
   };
-  const color =
-    estado === 5 ? "danger" :
-    estado === 4 ? "success" :
-    "secondary";
-  return `<span class="badge bg-${color}">${map[estado] || "?"}</span>`;
+
+  const item = map[estado] || { text: "?", color: "dark" };
+
+  return `<span class="badge bg-${item.color}">${item.text}</span>`;
 }
 
 // ---------------------------------------------------
@@ -69,7 +85,7 @@ async function verDetalleCarrito(id) {
     document.getElementById("detalleCarritoID").textContent = d.carrito.car_id;
     document.getElementById("detalleUsuario").textContent   = d.usuario;
     document.getElementById("detalleFecha").textContent     = d.carrito.fecha_creacion;
-    document.getElementById("detalleEstado").innerHTML      = estadoBadge(d.carrito.estado);
+    document.getElementById("detalleEstado").innerHTML      = estadoBadge1(d.carrito.estado);
 
     const tbody = document.getElementById("detalleProductos");
     tbody.innerHTML = d.productos.map(p => `
@@ -142,7 +158,7 @@ async function siguienteEstado(carId) {
     }
   } catch (err) {
     console.error(err);
-    Swal.fire("Error", "No se pudo avanzar el estado", "error");
+    Swal.fire("Error", "El producto ya ha sido entregado o cancelado", "error");
   }
 }
 
@@ -150,7 +166,7 @@ async function siguienteEstado(carId) {
 //  Cancelar carrito
 // ---------------------------------------------------
 async function cancelarPedido(carId) {
-  if (!confirm("¿Seguro que deseas cancelar este pedido?")) return;
+ 
 
   try {
     const resp = await fetch(`${API_BASE}/carro/${carId}/cancelar`, { method: "PUT" });

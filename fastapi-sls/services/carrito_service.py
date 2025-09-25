@@ -1,6 +1,7 @@
 from db import execute_query
 from services.usuario_service import ValidateU
 from datetime import datetime
+from typing import Any, Dict
 
 val = ValidateU()
 def verificar_carrito_activo(user_cc: int):
@@ -314,42 +315,15 @@ def agregar_estado_carrito(car_id:int, estado:int, comentario:str, actualizado_p
                 "success": False,
                 "message": f"❌ Carrito con ID {car_id} no encontrado"
             }
-
-        # 2️⃣ Verificar si ya existe un estado para el carrito
-        query_check_estado = """
-            SELECT id 
-            FROM carrito_estados 
-            WHERE car_id = %s
-            ORDER BY fecha_actualizacion DESC 
-            LIMIT 1
-        """
-        estado_existente = execute_query(query_check_estado, (car_id,), fetchone=True)
-
-        if estado_existente:
-            # 3️⃣ Actualizar el estado existente
-            query_update = """
-                UPDATE carrito_estados
-                SET estado = %s, comentario = %s, actualizado_por = %s, fecha_actualizacion = NOW()
-                WHERE id = %s
-            """
-            params = (estado, comentario, actualizado_por, estado_existente[0])
-            execute_query(query_update, params, commit=True)
-
-            return {
-                "success": True,
-                "message": f"🔄 Estado del carrito {car_id} actualizado correctamente"
-            }
-
-        else:
             # 4️⃣ Insertar un nuevo estado
-            query_insert = """
+        query_insert = """
                 INSERT INTO carrito_estados (car_id, estado, comentario, actualizado_por, fecha_actualizacion)
                 VALUES (%s, %s, %s, %s, NOW())
             """
-            params = (car_id, estado, comentario, actualizado_por)
-            execute_query(query_insert, params, commit=True)
+        params = (car_id, estado, comentario, actualizado_por)
+        execute_query(query_insert, params, commit=True)
 
-            return {
+        return {
                 "success": True,
                 "message": f"✅ Estado del carrito {car_id} agregado correctamente"
             }
@@ -443,72 +417,87 @@ def finalizar_compra(car_id: int):
     # carrito es una tupla: (car_id, estado)
     if carrito[1] == 0:
         return {"success": False, "message": "⚠️ Este carrito ya fue cerrado"}
-
-    query_update = """
+    
+    
+    query_2 = """
         UPDATE carrito
         SET estado = 0
         WHERE car_id = %s
     """
-    execute_query(query_update, (car_id,))
+    execute_query(query_2, (car_id,),commit=True)
+
+    query_update = """
+         INSERT INTO carrito_estados (car_id, estado, comentario, actualizado_por, fecha_actualizacion)
+                VALUES (%s, %s, %s, %s, NOW())
+    """
+    execute_query(query_update, (car_id, 1, "Carrito pagado", "admin"), commit=True)
+
+   
 
     return {"success": True, "message": f"✅ Carrito {car_id} finalizado correctamente"}
 
 
-from datetime import datetime
-from db import execute_query
+def avanzar_estado_carrito(car_id: int, usuario: str = "admin") -> Dict[str, Any]:
+   
 
-# 📌 Avanzar al siguiente estado en orden lineal
-def avanzar_estado_carrito(car_id: int, usuario: str = "admin"):
-  
-    # Obtener estado actual
+    # 1️⃣ Obtener el último estado registrado del historial de ese carrito
     fila = execute_query(
-        "SELECT estado FROM carrito WHERE car_id = %s",
+        """
+        SELECT estado
+        FROM carrito_estados
+        WHERE car_id = %s
+        ORDER BY fecha_actualizacion DESC, id DESC
+        LIMIT 1
+        """,
         (car_id,),
         fetchone=True
     )
+
     if not fila:
-        return {"success": False, "message": "Carrito no encontrado"}
+        return {"success": False, "message": "Carrito no encontrado o sin historial"}
 
-    estado_actual = fila[0]
+    try:
+        estado_actual = int(fila[0])
+    except (TypeError, ValueError):
+        return {"success": False, "message": "Estado actual inválido"}
 
-    # Si ya está entregado o cancelado no avanza
+    # 2️⃣ Determinar el nuevo estado
     if estado_actual >= 4:
-        return {"success": False, "message": "El carrito ya no puede avanzar"}
+        return {"success": False, "message": "El producto ya ha sido entregado o cancelado"}
 
-    nuevo_estado = estado_actual + 1
+    nuevo_estado = estado_actual + 1  # avanzar uno
 
-    # Actualizar estado en carrito
-    execute_query(
-        "UPDATE carrito SET estado = %s WHERE car_id = %s",
-        (nuevo_estado, car_id),
-        commit=True
-    )
-
-    # Insertar en historial
+    # 3️⃣ Insertar el nuevo estado en el historial
     execute_query(
         """
         INSERT INTO carrito_estados (car_id, estado, comentario, fecha_actualizacion, actualizado_por)
         VALUES (%s, %s, %s, %s, %s)
         """,
-        (car_id, nuevo_estado, f"Avanzó de {estado_actual} a {nuevo_estado}",
-         datetime.now(), usuario),
+        (
+            car_id,
+            nuevo_estado,
+            f"Avanzó de {estado_actual} a {nuevo_estado}",
+            datetime.now(),
+            usuario,
+        ),
         commit=True
     )
 
     return {"success": True, "message": f"Estado actualizado a {nuevo_estado}"}
 
-
 # 📌 Cancelar el pedido en cualquier momento
 def cancelar_carrito(car_id: int, usuario: str = "admin"):
-    """
-    Cancela el carrito (estado 5) y guarda registro en historial.
-    """
+   
     # Actualizar estado en carrito
-    execute_query(
-        "UPDATE carrito SET estado = 5 WHERE car_id = %s",
-        (car_id,),
-        commit=True
-    )
+    cancelar = execute_query(
+    "UPDATE carrito SET estado = 5 WHERE car_id = %s",
+    (car_id,),
+    commit=True
+)
+#validar si el carrito ya esta cancelado
+    if not cancelar:
+        return {"success": False, "message": "El carrito ya está cancelado o no existe"}
+
 
     # Insertar en historial
     execute_query(
