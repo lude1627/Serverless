@@ -41,7 +41,15 @@ document.addEventListener("DOMContentLoaded", async () => {
       tbody.innerHTML = `<tr><td colspan="3" class="text-center">No hay categorías</td></tr>`;
     }
   } catch (error) {
-    console.error("Error cargando categorías:", error);
+    Swal.fire({
+      title: "🚨 Error de conexión",
+      text: "No se pudo establecer conexión. Intenta más tarde.",
+      icon: "error",
+      showConfirmButton: false,
+      timer: 3500,
+      timerProgressBar: true,
+    });
+    // console.error("Error al cargar categorías:", error);
   }
 });
 
@@ -72,9 +80,12 @@ formCrear.addEventListener("submit", async (e) => {
       }).then(() => location.reload());
     } else {
       Swal.fire({
-        title: "Error",
-        text: result.message,
         icon: "error",
+        title: "Error",
+        text: "No se pudo crear la categoría",
+        timer: 2000,
+        showConfirmButton: false,
+        timerProgressBar: true,
       });
     }
   } catch (error) {

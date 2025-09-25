@@ -40,11 +40,14 @@ async function cargarProductos() {
       tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted">No hay productos registrados</td></tr>`;
     }
   } catch (error) {
-    console.error("Error cargando productos:", error);
+    // console.error("Error cargando productos:", error);
     Swal.fire({
+      title: "🚨 Error de conexión",
+      text: "No se pudo establecer conexión. Intenta más tarde.",
       icon: "error",
-      title: "❌ Error",
-      text: "No se pudieron cargar los productos",
+      showConfirmButton: false,
+      timer: 3500,
+      timerProgressBar: true,
     });
   }
 }
@@ -57,7 +60,7 @@ async function cargarCategoriasSelect(selectId, selectedValue = null) {
 
     const select = document.getElementById(selectId);
     if (!select) {
-      console.error(`❌ No se encontró el select con id: ${selectId}`);
+      Swal.fire("❌ Error", "El select de categorías no fue encontrado", "error");
       return;
     }
 
@@ -94,13 +97,21 @@ async function cargarCategoriasSelect(selectId, selectedValue = null) {
         '<option value="" disabled>No hay categorías disponibles</option>';
     }
   } catch (error) {
-    console.error("Error cargando categorías:", error);
+    Swal.fire({
+      title: "🚨 Error de conexión",
+      text: "No se pudo establecer conexión. Intenta más tarde.",
+      icon: "error",
+      showConfirmButton: false,
+      timer: 3500,
+      timerProgressBar: true,
+    });
+    // console.error("Error cargando categorías:", error);
+    // Mostrar mensaje de error en el select
     const select = document.getElementById(selectId);
     if (select) {
       select.innerHTML =
         '<option value="" disabled>Error cargando categorías</option>';
     }
-    Swal.fire("❌ Error", "No se pudieron cargar las categorías", "error");
   }
 }
 
@@ -180,12 +191,12 @@ document
         );
       }
     } catch (error) {
-      console.error("Error agregando producto:", error);
-      Swal.fire(
-        "❌ Error",
-        "No se pudo conectar al servidor. Verifica que el backend esté ejecutándose.",
-        "error"
-      );
+      Swal.fire({
+        title: "❌ Error",
+        text: "No se pudo conectar al servidor",
+        icon: "error"
+    });
+      // console.error("Error creando producto:", error);
     }
   });
 
@@ -325,7 +336,7 @@ async function eliminarProducto(id) {
           title: "✅ Éxito",
           text: "Producto eliminado correctamente",
           icon: "success",
-          timer: 1000,
+          timer: 100,
           timerProgressBar: true,
           showConfirmButton: false,
         }).then(() => location.reload());

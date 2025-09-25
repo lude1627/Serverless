@@ -57,10 +57,20 @@ document.addEventListener("DOMContentLoaded", async () => {
             </li>
         `;
     } catch (err) {
-        console.error("Error cargando carritos:", err);
+        // console.error("Error cargando carritos:", err);
         list.innerHTML = `
-            <li class="list-group-item text-center text-danger">
-                Error de conexión con el servidor.
-            </li>`;
+            <li class="list-group-item text-center text-danger"><strong>
+                Esta informacion no esta disponible en este momento.
+            </strong></li>`;
+
+        Swal.fire({
+            title: "🚨 Error de conexión",
+            text: "No se pudo establecer conexión. Intenta más tarde.",
+            icon: "error",
+            showConfirmButton: false,
+            timer: 3500,
+            timerProgressBar: true,
+            
+        });     
     }
 });
