@@ -4,6 +4,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         window.location.href = "/views/login/login.html";
         return;
     }
+    
 
     const API_BASE = "http://localhost:8000";
     const list = document.getElementById("pedidosList");
@@ -24,18 +25,35 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         // Generar las filas de todos los carritos
         const filas = data.data.map(c => {
-            const estadoActivo = c.estado === "1";
-            const estadoTexto  = estadoActivo ? "Activo" : "Inactivo";
-            const estadoClase  = estadoActivo ? "bg-primary" : "bg-danger";
+            const estadoTexto = estadoBadge(c.estado);
 
             return `
                 <tr>
                     <td>${c.user_name}</td>
                     <td>${c.fecha_creacion}</td>
-                    <td><span class="badge ${estadoClase} px-3 py-2">${estadoTexto}</span></td>
+                    <td>${estadoTexto}</td>
                     <td>${c.total}</td>
                 </tr>`;
         }).join("");
+
+   
+        function estadoBadge(estado) {
+        
+        estado = Number(estado);
+
+        const map = {
+            0: { text: "Abierto",    color: "secondary" }, // gris
+            1: { text: "Pagado",     color: "primary"   }, // azul
+            2: { text: "En Proceso", color: "warning"   }, // amarillo
+            3: { text: "Enviado",    color: "info"      }, // celeste
+            4: { text: "Entregado",  color: "success"   }, // verde
+            5: { text: "Cancelado",  color: "danger"    }  // rojo
+        };
+
+        const item = map[estado] || { text: "?", color: "dark" };
+
+        return `<span class="badge bg-${item.color}">${item.text}</span>`;
+        }
 
         list.innerHTML = `
             <li class="list-group-item p-0">

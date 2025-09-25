@@ -118,14 +118,15 @@ def obtener_carritos_user(user_cc: int):
             u.user_cc,
             u.user_name,
             c.fecha_creacion,
-            c.estado,
+            ce.estado,
             SUM(cd.detalle_cantidad * p.product_price) AS total
         FROM carrito c
         INNER JOIN usuarios u ON c.user_cc = u.user_cc
         LEFT JOIN carrito_detalle cd ON c.car_id = cd.car_id
         LEFT JOIN productos p ON cd.product_id = p.product_id
+        LEFT JOIN carrito_estados ce ON c.car_id = ce.car_id
         WHERE u.user_cc = %s
-        GROUP BY c.car_id, u.user_cc, u.user_name, c.fecha_creacion, c.estado
+        GROUP BY c.car_id, u.user_cc, u.user_name, c.fecha_creacion, ce.estado
         ORDER BY c.fecha_creacion DESC 
     """
     try:
