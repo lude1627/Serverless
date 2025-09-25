@@ -2,92 +2,143 @@ const API_BASE = "http://localhost:8000";
 
 const userCc = sessionStorage.getItem("user_cc");
 if (!userCc) {
-    window.location.href = "/views/login/login.html";
+  window.location.href = "/views/login/login.html";
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-    const container = document.querySelector("main.container");
-    const template = document.getElementById("product-template");
+  const grid = document.getElementById("productosGrid");
+  const template = document.getElementById("product-template");
 
-    if (!container || !template) return;
+  if (!grid || !template) return;
 
-    try {
-        const response = await fetch(`${API_BASE}/product/view/data`, {
-            method: "GET",
-            headers: { "Content-Type": "application/json" }
-        });
+  // 👉 Mostrar skeletons iniciales
+  mostrarSkeletons(grid);
 
-        const result = await response.json();
+  // 👉 Controlador para timeout
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 8000); // ⏱️ 8 segundos
 
-        if (result.success && Array.isArray(result.data) && result.data.length > 0) {
-            const fragment = document.createDocumentFragment();
+  try {
+    const response = await fetch(`${API_BASE}/product/view/data`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+      signal: controller.signal,
+    });
 
-            result.data.forEach(producto => {
-               
-                const clone = template.content.cloneNode(true);
-              
-                clone.querySelector(".card-title").textContent = producto.nombre;
-                clone.querySelector(".desc").textContent = producto.descripcion;
-                clone.querySelector(".cant").textContent = producto.cantidad;
-                clone.querySelector(".price").textContent = producto.precio;
-                clone.querySelector(".cat").textContent = `Categoría: ${producto.categoria}`;
-                
-                clone.querySelector(".add-to-cart-btn").addEventListener("click", async () => {
-                    try {
-                        
-                        const carritoData = {
-                            user_cc: parseInt(userCc),    
-                            product_id: producto.id,      
-                            car_cantidad: 1                   
-                        };
+    clearTimeout(timeoutId); // cancelar timeout si respondió
+    const result = await response.json();
 
-                        const resp = await fetch(`${API_BASE}/carro/agregar`, {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify(carritoData)
-                        });
+    // Limpiar skeletons antes de mostrar productos reales
+    grid.innerHTML = "";
 
-                        const data = await resp.json();
+    if (
+      result.success &&
+      Array.isArray(result.data) &&
+      result.data.length > 0
+    ) {
+      const fragment = document.createDocumentFragment();
 
-                        if (resp.ok && data.success) { 
-                            Swal.fire({
-                                icon: "success",
-                                title: "Producto agregado",
-                                text: `${producto.nombre} fue agregado al carrito`,
-                                timer: 500,
-                                showConfirmButton: false
-                            });
-                        } else {
-                            throw new Error(data.message || "Error al agregar al carrito");
-                        }
-                    } catch (error) {
-                        console.error("Error agregando al carrito:", error);
-                        Swal.fire({
-                            icon: "info",
-                            title: "ups...",
-                            text: "En este momento este producto no esta disponible",
-                            timer: 2000,
-                            showConfirmButton: false
-                        });
-                    }
-                   
+      result.data.forEach((producto) => {
+        const clone = template.content.cloneNode(true);
 
+        clone.querySelector(".card-title").textContent = producto.nombre;
+        clone.querySelector(".desc").textContent = producto.descripcion;
+        clone.querySelector(
+          ".cant"
+        ).textContent = `Stock: ${producto.cantidad}`;
+        clone.querySelector(".price").textContent = `$${Number(
+          producto.precio
+        ).toLocaleString()}`;
+        clone.querySelector(
+          ".cat"
+        ).textContent = `Categoría: ${producto.categoria}`;
+
+        // 👉 Botón "Agregar al carrito"
+        clone
+          .querySelector(".add-to-cart-btn")
+          .addEventListener("click", async () => {
+            try {
+              const carritoData = {
+                user_cc: parseInt(userCc),
+                product_id: producto.id,
+                car_cantidad: 1,
+              };
+
+              const resp = await fetch(`${API_BASE}/carro/agregar`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(carritoData),
+              });
+
+              const data = await resp.json();
+
+              if (resp.ok && data.success) {
+                Swal.fire({
+                  icon: "success",
+                  title: "Producto agregado",
+                  text: `${producto.nombre} fue agregado al carrito`,
+                  timer: 1000,
+                  showConfirmButton: false,
                 });
+              } else {
+                throw new Error(data.message || "Error al agregar al carrito");
+              }
+            } catch (error) {
+              console.error("Error agregando al carrito:", error);
+              Swal.fire({
+                icon: "info",
+                title: "Ups...",
+                text: "En este momento este producto no está disponible",
+                timer: 2000,
+                showConfirmButton: false,
+              });
+            }
+          });
 
-                fragment.appendChild(clone);
-            });
+        fragment.appendChild(clone);
+      });
 
-            container.appendChild(fragment);
-        } else {
-            container.innerHTML += `<p class="text-center">No hay productos disponibles.</p>`;
-        }
-    } catch (error) {
-        console.error("Error al cargar productos:", error);
-        container.innerHTML += `<p class="text-center text-danger">Error de conexión con el servidor.</p>`;
+      grid.appendChild(fragment);
+    } else {
+      grid.innerHTML = `<p class="text-center">No hay productos disponibles.</p>`;
     }
+  } catch (error) {
+    clearTimeout(timeoutId); // evitar fugas de memoria
+
+    // console.error("Error al cargar productos:", error);
+    // Mensaje de error con SweetAlert
+    Swal.fire({
+      title: "🚨 Error de conexión",
+      text: "No se pudo establecer conexión. Intenta más tarde.",
+      icon: "error",
+      showConfirmButton: false,
+      timer: 3500,
+      timerProgressBar: true,
+    });
+  }
 });
 
 document.getElementById("logoutBtn").addEventListener("click", () => {
-    sessionStorage.clear();
-    window.location.href = "/views/login/login.html";
+  sessionStorage.clear();
+  window.location.href = "/views/login/login.html";
 });
+
+// ===== Skeleton Loader =====
+function mostrarSkeletons(grid) {
+  grid.innerHTML = `
+      ${Array(12)
+        .fill()
+        .map(
+          () => `
+        <div class="col-sm-6 col-md-4 col-lg-3">
+          <div class="card h-100 shadow-sm p-3">
+            <div class="skeleton skeleton-card"></div>
+            <div class="skeleton skeleton-text" style="width: 80%"></div>
+            <div class="skeleton skeleton-text" style="width: 60%"></div>
+          </div>
+        </div>
+      `
+        )
+        .join("")}
+    `;
+}

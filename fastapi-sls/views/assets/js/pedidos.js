@@ -33,8 +33,14 @@ async function cargarCarritos() {
         `<tr><td colspan="5" class="text-center text-muted">⚠️ No hay carritos</td></tr>`;
     }
   } catch (e) {
-    console.error(e);
-    Swal.fire("Error", "No se pudieron cargar los carritos", "error");
+    Swal.fire({
+      title: "🚨 Error de conexión",
+      text: "No se pudo establecer conexión. Intenta más tarde.",
+      icon: "error",
+      showConfirmButton: false,
+      timer: 3500,
+      timerProgressBar: true,
+    });
   }
 }
 

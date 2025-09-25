@@ -64,7 +64,14 @@ async function cargarUsuarios() {
       renderUsuarios([]);
     }
   } catch (error) {
-    console.error("Error cargando usuarios:", error);
+    Swal.fire({
+      title: "🚨 Error de conexión",
+      text: "No se pudo establecer conexión. Intenta más tarde.",
+      icon: "error",
+      showConfirmButton: false,
+      timer: 3500,
+      timerProgressBar: true,
+    })
     usuariosGlobal = [];
     renderUsuarios([]);
   }
