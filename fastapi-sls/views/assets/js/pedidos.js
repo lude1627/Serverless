@@ -51,8 +51,8 @@ function estadoBadge1(estado) {
   estado = Number(estado);
 
   const map = {
-    0: { text: "Inactivo",    color: "danger" }, 
-    1: { text: "Activo",  color: "success"    }  
+    0: { text: "Cerrado",    color: "danger" }, 
+    1: { text: "Abierto",  color: "success"    }  
   };
   const item = map[estado] || { text: "?", color: "dark" };
 
@@ -66,7 +66,7 @@ function estadoBadge(estado) {
   estado = Number(estado);
 
   const map = {
-    0: { text: "Abierto",    color: "secondary" }, // gris
+   
     1: { text: "Pagado",     color: "primary"   }, // azul
     2: { text: "En Proceso", color: "warning"   }, // amarillo
     3: { text: "Enviado",    color: "info"      }, // celeste
@@ -98,8 +98,8 @@ async function verDetalleCarrito(id) {
       <tr>
         <td>${p.nombre_producto}</td>
         <td>${p.cantidad}</td>
-        <td>$${p.precio_unitario.toLocaleString()}</td>
-        <td>$${p.subtotal.toLocaleString()}</td>
+        <td>${p.precio_unitario.toLocaleString()}</td>
+        <td>${p.subtotal.toLocaleString()}</td>
       </tr>`).join("");
     document.getElementById("detalleTotal").textContent =
       `$${d.total_pagar.toLocaleString()}`;

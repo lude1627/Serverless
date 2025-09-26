@@ -4,7 +4,8 @@ from services.usuario_service import ValidateU
 from services.producto_service import verificar_producto_existe, verificar_cantidad
 from services.carrito_service import (
     verificar_carrito_activo,
-    eliminar_producto
+    eliminar_producto,
+   
 )
 val = ValidateU()
 from db import execute_query
@@ -42,6 +43,7 @@ class CarritoClass:
                 precio_unitario = resultado_producto["producto"]["product_price"]
                 
                 
+         
                 # insertar producto directamente aquí (antes estaba en el service)
                 query = """
                     INSERT INTO carrito_detalle (car_id, product_id, detalle_cantidad, precio_unitario)
@@ -50,18 +52,17 @@ class CarritoClass:
                 params = (car_id, carrito.product_id, carrito.car_cantidad, precio_unitario)
                 execute_query(query, params, commit=True, return_id=True)
 
-                
                 return {
-                    "success": True,
-                    "message": f"✅ Producto {carrito.product_id} agregado al carrito {car_id}",
-                }
+                        "success": True,
+                        "message": f"✅ Producto {carrito.product_id} agregado al carrito {car_id}",
+                    }
+                
 
-                   
             except Exception as e:
                 return {
-                    "success": False,
-                    "message": f"❌ Error al agregar producto: {e}"
-                }
+                        "success": False,
+                        "message": f"❌ Error al agregar producto: {e}"
+                    }
         
                 
         def eliminar_producto(self, user_cc: int, detalle_id: int):

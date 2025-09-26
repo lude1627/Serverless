@@ -1,3 +1,4 @@
+// JS: Mostrar lista de pedidos y modal de detalle SOLO LECTURA
 document.addEventListener("DOMContentLoaded", async () => {
     const userCc = sessionStorage.getItem("user_cc");
     if (!userCc) {
@@ -13,7 +14,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         const resp = await fetch(`${API_BASE}/carro/view/all/${userCc}`);
         const data = await resp.json();
 
-        // Ahora la respuesta tiene { success: true, data: [ ... ] }
         if (!data.success || !Array.isArray(data.data) || data.data.length === 0) {
             list.innerHTML = `
                 <li class="list-group-item text-center text-muted">
@@ -22,11 +22,11 @@ document.addEventListener("DOMContentLoaded", async () => {
             return;
         }
 
-        // Generar las filas de todos los carritos
+        // Generar filas con botón "Ver Detalle"
         const filas = data.data.map(c => {
             const estadoActivo = c.estado === "1";
-            const estadoTexto  = estadoActivo ? "Activo" : "Inactivo";
-            const estadoClase  = estadoActivo ? "bg-primary" : "bg-danger";
+            const estadoTexto  = estadoActivo ? "Abierto" : "Cerrado";
+            const estadoClase  = estadoActivo ? "bg-success" : "bg-danger";
 
             return `
                 <tr>
@@ -34,6 +34,12 @@ document.addEventListener("DOMContentLoaded", async () => {
                     <td>${c.fecha_creacion}</td>
                     <td><span class="badge ${estadoClase} px-3 py-2">${estadoTexto}</span></td>
                     <td>${c.total}</td>
+                    <td>
+                      <button class="btn btn-outline-primary btn-sm"
+                              onclick="verDetalleSoloLectura(${c.car_id})">
+                        Ver Detalle
+                      </button>
+                    </td>
                 </tr>`;
         }).join("");
 
@@ -47,6 +53,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                                 <th>Fecha de Creación</th>
                                 <th>Estado</th>
                                 <th>Total</th>
+                                <th>Detalle</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -54,8 +61,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                         </tbody>
                     </table>
                 </div>
-            </li>
-        `;
+            </li>`;
     } catch (err) {
         console.error("Error cargando carritos:", err);
         list.innerHTML = `
@@ -64,3 +70,83 @@ document.addEventListener("DOMContentLoaded", async () => {
             </li>`;
     }
 });
+function estadoBadge(estado) {
+  // Forzar a número por si llega como string
+  estado = Number(estado);
+
+  const map = {
+   
+    1: { text: "Pagado",     color: "primary"   }, // azul
+    2: { text: "En Proceso", color: "warning"   }, // amarillo
+    3: { text: "Enviado",    color: "info"      }, // celeste
+    4: { text: "Entregado",  color: "success"   }, // verde
+    5: { text: "Cancelado",  color: "danger"    }  // rojo
+  };
+
+  const item = map[estado] || { text: "?", color: "dark" };
+
+  return `<span class="badge bg-${item.color}">${item.text}</span>`;
+}
+
+
+// ---- Función para abrir el modal y mostrar datos en solo lectura ----
+async function verDetalleSoloLectura(carId) {
+    const API_BASE = "http://localhost:8000";
+
+    try {
+        // Obtener detalle del carrito
+        const r = await fetch(`${API_BASE}/carro/admin/${carId}`);
+        const d = await r.json();
+        if (!d.success) {
+            Swal.fire("Error", "No se pudo cargar el detalle", "error");
+            return;
+        }
+
+        // Llenar campos del modal
+        document.getElementById("detalleCarritoID").textContent = d.carrito.car_id;
+        document.getElementById("detalleUsuario").textContent   = d.usuario;
+        document.getElementById("detalleFecha").textContent     = d.carrito.fecha_creacion;
+        document.getElementById("detalleEstado").innerHTML      = d.carrito.estado == 1
+            ? '<span class="badge bg-primary">Activo</span>'
+            : '<span class="badge bg-danger">Inactivo</span>';
+
+        const tbody = document.getElementById("detalleProductos");
+        tbody.innerHTML = d.productos.map(p => `
+            <tr>
+                <td>${p.nombre_producto}</td>
+                <td>${p.cantidad}</td>
+                <td>$${p.precio_unitario}</td>
+                <td>$${p.subtotal}</td>
+            </tr>`).join("");
+
+        document.getElementById("detalleTotal").textContent =
+            `$${d.total_pagar}`;
+
+        // Historial de estados
+        const ul = document.getElementById("historialEstados");
+        ul.innerHTML = "<li class='list-group-item text-center text-muted'>Cargando...</li>";
+
+        const h = await fetch(`${API_BASE}/carro/${carId}/historial`);
+        const hist = await h.json();
+
+        if (hist.success && hist.data.length) {
+            ul.innerHTML = hist.data.map(e => `
+                <li class="list-group-item">
+                    <strong>${e.fecha}</strong> -
+                    <span class="badge">${estadoBadge(e.estado)}</span>
+                    <br><small>${e.comentario || "Sin comentario"}</small>
+                </li>`).join("");
+        } else {
+            ul.innerHTML = "<li class='list-group-item text-center text-muted'>Sin historial</li>";
+        }
+
+        // Mostrar modal
+        const modalEl = document.getElementById("modalDetalleCarrito");
+        const modal   = new bootstrap.Modal(modalEl, {backdrop: false});
+        modal.show();
+
+    } catch (err) {
+        console.error(err);
+        Swal.fire("Error", "Ocurrió un problema al obtener el detalle", "error");
+    }
+}

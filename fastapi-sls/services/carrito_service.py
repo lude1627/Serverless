@@ -47,7 +47,7 @@ def verificar_carrito_activo(user_cc: int):
         """
         car_id = execute_query(query, (user_cc,), fetchone=True)
         
-        print(car_id)
+        print(car_id)      
         return {
             "success": True,
             "message": f"🛒 Carrito creado para el usuario {user_cc}",
@@ -61,6 +61,8 @@ def verificar_carrito_activo(user_cc: int):
             "success": False,
             "message": f"❌ Error al verificar/crear carrito: {str(e)}"
         }
+
+
 
 
 def obtener_todos_carritos():
