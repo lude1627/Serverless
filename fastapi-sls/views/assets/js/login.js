@@ -1,4 +1,4 @@
-const API_BASE = "http://localhost:8000";
+
 
 document.addEventListener("DOMContentLoaded", () => {
   const loginForm = document.getElementById("loginForm");
@@ -14,10 +14,10 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     try {
-      const response = await fetch('${API_BASE}/login/sign_in', {
-        method: "POST",  
+      const response = await fetch("http://localhost:8000/login/sign_in", {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data), 
+        body: JSON.stringify(data),
       });
 
       const result = await response.json();
