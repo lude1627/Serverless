@@ -294,10 +294,9 @@ class Usuario:
             }, status_code=200)
             
         except Exception as e:
-            print(f"Error en admin_update_user: {e}")
             return JSONResponse(content={
                 "success": False, 
-                "message": f"Error al actualizar usuario: {str(e)}"
+                "message": f"Estos datos estan siendo usados en otros modulo."
             }, status_code=500)
             
             

@@ -80,5 +80,29 @@ main.container {
 }
 
 
+.no-products {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  flex-grow: initial;
+  align-items: center;
+  justify-content: center;
+  height: 60vh; /* Ocupa la mayor parte de la pantalla */
+  text-align: center;
+  color: #555;
+  font-size: 1.2rem;
+}
+
+.no-products img {
+  animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+
+
 
 

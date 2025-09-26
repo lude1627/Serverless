@@ -11,7 +11,7 @@ async function cargarCarritos() {
     tbody.innerHTML = "";
 
     if (data.success && data.data.length) {
-      data.data.forEach(c => {
+      data.data.forEach((c) => {
         const badge = estadoBadge1(c.estado);
         const tr = document.createElement("tr");
         tr.innerHTML = `
@@ -27,8 +27,7 @@ async function cargarCarritos() {
         tbody.appendChild(tr);
       });
     } else {
-      tbody.innerHTML =
-        `<tr><td colspan="5" class="text-center text-muted">⚠️ No hay carritos</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted">⚠️ No hay carritos</td></tr>`;
     }
   } catch (e) {
     Swal.fire({
@@ -42,15 +41,12 @@ async function cargarCarritos() {
   }
 }
 
-
-
 function estadoBadge1(estado) {
- 
   estado = Number(estado);
 
   const map = {
-    0: { text: "Cerrado",    color: "danger" }, 
-    1: { text: "Abierto",  color: "success"    }  
+    0: { text: "Cerrado", color: "danger" },
+    1: { text: "Abierto", color: "success" },
   };
   const item = map[estado] || { text: "?", color: "dark" };
 
@@ -63,11 +59,11 @@ function estadoBadge(estado) {
 
   const map = {
    
-    1: { text: "Pagado",     color: "primary"   }, 
-    2: { text: "En Proceso", color: "warning"   }, 
+    1: { text: "Pagado",     color: "primary"   },
+    2: { text: "En Proceso", color: "warning"   },
     3: { text: "Enviado",    color: "info"      },
     4: { text: "Entregado",  color: "success"   },
-    5: { text: "Cancelado",  color: "danger"    }  
+    5: { text: "Cancelado",  color: "danger"    }
   };
 
   const item = map[estado] || { text: "?", color: "dark" };
@@ -80,23 +76,39 @@ async function verDetalleCarrito(id) {
   try {
     const r = await fetch(`${API_BASE}/carro/admin/${id}`);
     const d = await r.json();
-    if (!d.success) return Swal.fire("Error", "No se pudo cargar el detalle", "error");
+    if (!d.success)
+      return Swal.fire({
+        title: "Aviso",
+        icon: "warning",
+        text: d.message,
+        timer: 3000,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
 
     document.getElementById("detalleCarritoID").textContent = d.carrito.car_id;
-    document.getElementById("detalleUsuario").textContent   = d.usuario;
-    document.getElementById("detalleFecha").textContent     = d.carrito.fecha_creacion;
-    document.getElementById("detalleEstado").innerHTML      = estadoBadge1(d.carrito.estado);
+    document.getElementById("detalleUsuario").textContent = d.usuario;
+    document.getElementById("detalleFecha").textContent =
+      d.carrito.fecha_creacion;
+    document.getElementById("detalleEstado").innerHTML = estadoBadge1(
+      d.carrito.estado
+    );
 
     const tbody = document.getElementById("detalleProductos");
-    tbody.innerHTML = d.productos.map(p => `
+    tbody.innerHTML = d.productos
+      .map(
+        (p) => `
       <tr>
         <td>${p.nombre_producto}</td>
         <td>${p.cantidad}</td>
         <td>${p.precio_unitario.toLocaleString()}</td>
         <td>${p.subtotal.toLocaleString()}</td>
-      </tr>`).join("");
-    document.getElementById("detalleTotal").textContent =
-      `$${d.total_pagar.toLocaleString()}`;
+      </tr>`
+      )
+      .join("");
+    document.getElementById(
+      "detalleTotal"
+    ).textContent = `$${d.total_pagar.toLocaleString()}`;
 
     await cargarHistorialEstados(id);
 
@@ -120,12 +132,14 @@ async function cargarHistorialEstados(id) {
     const d = await r.json();
     if (d.success && d.data.length) {
       ul.innerHTML = d.data
-        .map(e => `
+        .map(
+          (e) => `
           <li class="list-group-item">
             <strong>${e.fecha}</strong> -
             <span class="badge ">${estadoBadge(e.estado)}</span>
             <br><small>${e.comentario || "Sin comentario"}</small>
-          </li>`)
+          </li>`
+        )
         .join("");
     } else {
       ul.innerHTML =
@@ -141,15 +155,31 @@ async function cargarHistorialEstados(id) {
 
 async function siguienteEstado(carId) {
   try {
-    const resp = await fetch(`${API_BASE}/carro/${carId}/next`, { method: "PUT" });
+    const resp = await fetch(`${API_BASE}/carro/${carId}/next`, {
+      method: "PUT",
+    });
     const data = await resp.json();
 
     if (data.success) {
-      Swal.fire("✅ Éxito", data.message, "success");
+      Swal.fire({
+        text: data.message,
+        title: "✅ Éxito",
+        icon: "success",
+        timer: 3500,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
       cargarCarritos();
       await cargarHistorialEstados(carId);
     } else {
-      Swal.fire("Aviso", data.message, "warning");
+      Swal.fire({
+        text: data.message,
+        icon: "warning",
+        title: "Aviso",
+        timer: 3000,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
     }
   } catch (err) {
     console.error(err);
@@ -159,10 +189,10 @@ async function siguienteEstado(carId) {
 
 
 async function cancelarPedido(carId) {
- 
-
   try {
-    const resp = await fetch(`${API_BASE}/carro/${carId}/cancelar`, { method: "PUT" });
+    const resp = await fetch(`${API_BASE}/carro/${carId}/cancelar`, {
+      method: "PUT",
+    });
     const data = await resp.json();
 
     if (data.success) {
@@ -178,13 +208,15 @@ async function cancelarPedido(carId) {
   }
 }
 
-
+// ---------------------------------------------------
+//  Listeners de botones del modal
+// ---------------------------------------------------
 document.getElementById("btnNext").addEventListener("click", e => {
   const id = e.currentTarget.dataset.id;
   if (id) siguienteEstado(id);
 });
 
-document.getElementById("btnCancel").addEventListener("click", e => {
+document.getElementById("btnCancel").addEventListener("click", (e) => {
   const id = e.currentTarget.dataset.id;
   if (id) cancelarPedido(id);
 });
