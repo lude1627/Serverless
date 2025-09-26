@@ -10,14 +10,15 @@
  }
 
  footer {
-     position: relativa;
+     position: absolute; 
+     position: relative; 
      bottom: 0;
      width: 100%;
      background: #343a40;
      color: white;
      text-align: center;
      padding: 1rem;
-     margin-top: 2rem;
+     margin-top: 2rem !important;
      box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
      z-index: 100;
 
