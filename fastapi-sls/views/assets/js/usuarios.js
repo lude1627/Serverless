@@ -93,7 +93,7 @@ function renderUsuarios(lista) {
     const roleBadge =
       usuario.user_type == 1
         ? '<span class="badge bg-primary"><i class="fas fa-user-shield"></i> Admin</span>'
-        : '<span class="badge bg-success"><i class="fas fa-user"></i> Cliente</span>';
+        : '<span class="badge bg-secondary"><i class="fas fa-user"></i> Cliente</span>';
 
     const statusBadge =
       usuario.status == 1
