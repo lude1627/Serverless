@@ -341,9 +341,12 @@ document
         cargarUsuarios();
       } else {
         Swal.fire({
-          icon: "error",
-          title: "❌ Error",
+          icon: "warning",
+          title: "¡No se pudo completar la accion!",
           text: result.message || "No se pudo actualizar el usuario",
+          timer: 3500,
+          timerProgressBar: true,
+          showConfirmButton: false,
         });
       }
 

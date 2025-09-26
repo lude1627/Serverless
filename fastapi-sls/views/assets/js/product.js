@@ -94,8 +94,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       });
 
       grid.appendChild(fragment);
-    } else {
-      grid.innerHTML = `<p class="text-center">No hay productos disponibles.</p>`;
     }
   } catch (error) {
     clearTimeout(timeoutId); 

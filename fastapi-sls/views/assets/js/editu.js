@@ -61,11 +61,14 @@ async function cargarDatosUsuario(cc) {
         
     });
     } else {
-      Swal.fire(
-        "⚠️ Error",
-        "No se pudo cargar la información del usuario",
-        "error"
-      );
+      Swal.fire({
+        title: "Aviso",
+        text: "No se pudo cargar la información del usuario",
+        icon: "error",
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+      });
     }
   }
 }
