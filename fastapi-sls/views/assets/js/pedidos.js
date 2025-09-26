@@ -132,11 +132,7 @@ async function cargarHistorialEstados(id) {
         .map(e => `
           <li class="list-group-item">
             <strong>${e.fecha}</strong> -
-<<<<<<< HEAD
             <span class="badge ">${estadoBadge(e.estado)}</span>
-=======
-            <span class="badge text-dark">${estadoBadge(e.estado)}</span>
->>>>>>> 4193d70 (U)
             <br><small>${e.comentario || "Sin comentario"}</small>
           </li>`)
         .join("");

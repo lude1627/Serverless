@@ -67,19 +67,14 @@ def verificar_carrito_activo(user_cc: int):
 
 def obtener_todos_carritos():
     query = """
-        SELECT 
-            c.car_id,
-            u.user_cc,
-            u.user_name,
-            c.fecha_creacion,
-            c.estado,
-            SUM(cd.detalle_cantidad * p.product_price) AS total
+        SELECT c.car_id, u.user_cc, u.user_name, c.fecha_creacion, c.estado, 
+               SUM(cd.detalle_cantidad * p.product_price) AS total
         FROM carrito c
         INNER JOIN usuarios u ON c.user_cc = u.user_cc
         LEFT JOIN carrito_detalle cd ON c.car_id = cd.car_id
         LEFT JOIN productos p ON cd.product_id = p.product_id
         GROUP BY c.car_id, u.user_cc, u.user_name, c.fecha_creacion, c.estado
-        ORDER BY c.fecha_creacion DESC
+        ORDER BY c.car_id ASC
     """
     try:
         carritos = execute_query(query, fetchall=True)

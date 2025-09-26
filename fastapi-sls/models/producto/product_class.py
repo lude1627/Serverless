@@ -38,11 +38,12 @@ class Productos:
     def all_products(self):
       
         query = """
-            SELECT p.Product_id, p.product_name, p.product_description,  
-                   p.product_cant, p.Product_price, c.Cat_name 
-            FROM productos p 
-            INNER JOIN categorias c ON p.cat_id = c.cat_id and p.product_status = '1'
-            ORDER BY p.product_name
+            SELECT p.Product_id, p.product_name, p.product_description, p.product_cant, p.Product_price, c.Cat_name
+            FROM productos p
+            INNER JOIN categorias c
+                    ON p.cat_id = c.cat_id
+            WHERE p.product_status = '1'
+            ORDER BY p.product_id ASC;
         """
         try:
             products = execute_query(query, fetchall=True)

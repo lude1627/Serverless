@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", function () {
 // 📌 CARGAR PRODUCTOS
 async function cargarProductos() {
   try {
-    const response = await fetch(`${API_BASE}/product/view/data`);
+    const response = await fetch(`${API_BASE}/product/view/data`)
     const result = await response.json();
 
     const tbody = document.querySelector("#tablaProductos tbody");
