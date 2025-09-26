@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const template = list.querySelector(".template");
   const finalizarBtn = document.getElementById("finalizarBtn");
 
-  let carritoActivoId = null; // ✅ guardar id del carrito activo
+  let carritoActivoId = null; 
 
   const formatoCOP = new Intl.NumberFormat("es-CO", {
     style: "currency",
@@ -39,7 +39,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
       }
 
-      // ✅ guardar id de carrito activo
+   
       carritoActivoId = carritoData.carrito.car_id;
 
       const resp = await fetch(`${API_BASE}/carro/dcarrito/${carritoActivoId}`);
@@ -84,7 +84,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       actualizarResumen(subtotalTotal);
     } catch (err) {
-      // console.error("Error cargando detalle:", err);
+      
       Swal.fire({
         title: "🚨 Error de conexión",
         text: "No se pudo establecer conexión. Intenta más tarde.",
@@ -165,7 +165,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           text: "La compra se ha completado correctamente.",
           confirmButtonColor: "#198754",
         }).then(() => {
-          cargarDetalle(); // limpiar vista
+          cargarDetalle(); 
         });
       } else {
         Swal.fire({

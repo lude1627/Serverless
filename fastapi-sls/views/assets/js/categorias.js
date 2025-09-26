@@ -49,11 +49,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       timer: 3500,
       timerProgressBar: true,
     });
-    // console.error("Error al cargar categorías:", error);
+
   }
 });
 
-// Crear categoría
 const formCrear = document.querySelector("#modalCategoria form");
 
 formCrear.addEventListener("submit", async (e) => {
@@ -97,14 +96,12 @@ formCrear.addEventListener("submit", async (e) => {
   }
 });
 
-// Editar categoría - Llenar el modal con los datos
 document.addEventListener("click", (e) => {
   if (e.target.classList.contains("btn-editar")) {
     const id = e.target.getAttribute("data-id");
     const name = e.target.getAttribute("data-nombre");
     const status = e.target.getAttribute("data-estado");
 
-    // Llenar los campos del modal de edición con los IDs correctos
     document.querySelector("#editCategoriaId").value = id;
     document.querySelector("#editCategoriaNombre").value = name;
     document.querySelector("#editCategoriaEstado").value = status;
@@ -113,7 +110,7 @@ document.addEventListener("click", (e) => {
   }
 });
 
-// Actualizar categoría
+
 const formEditar = document.querySelector("#modalEditarCategoria form");
 
 formEditar.addEventListener("submit", async (e) => {
@@ -159,7 +156,6 @@ formEditar.addEventListener("submit", async (e) => {
   }
 });
 
-// Eliminar categoría
 document.addEventListener("click", async (e) => {
   if (e.target.classList.contains("btn-eliminar")) {
     const id = e.target.getAttribute("data-id");

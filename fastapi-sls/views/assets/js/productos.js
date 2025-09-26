@@ -5,7 +5,6 @@ document.addEventListener("DOMContentLoaded", function () {
   cargarCategoriasSelect("addCategory_id");
 });
 
-// 📌 CARGAR PRODUCTOS
 async function cargarProductos() {
   try {
     const response = await fetch(`${API_BASE}/product/view/data`)
@@ -40,7 +39,6 @@ async function cargarProductos() {
       tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted">No hay productos registrados</td></tr>`;
     }
   } catch (error) {
-    // console.error("Error cargando productos:", error);
     Swal.fire({
       title: "🚨 Error de conexión",
       text: "No se pudo establecer conexión. Intenta más tarde.",
@@ -52,7 +50,6 @@ async function cargarProductos() {
   }
 }
 
-// 📌 CARGAR CATEGORÍAS EN SELECT
 async function cargarCategoriasSelect(selectId, selectedValue = null) {
   try {
     const response = await fetch(`${API_BASE}/category/view/data`);
@@ -64,7 +61,6 @@ async function cargarCategoriasSelect(selectId, selectedValue = null) {
       return;
     }
 
-    // Limpiar opciones anteriores y mostrar carga
     select.innerHTML =
       '<option value="" disabled selected>Cargando categorías...</option>';
 
@@ -73,7 +69,6 @@ async function cargarCategoriasSelect(selectId, selectedValue = null) {
       Array.isArray(result.data) &&
       result.data.length > 0
     ) {
-      // Limpiar y agregar opción por defecto
       select.innerHTML = "";
       const optionDefault = document.createElement("option");
       optionDefault.value = "";
@@ -82,7 +77,6 @@ async function cargarCategoriasSelect(selectId, selectedValue = null) {
       optionDefault.selected = !selectedValue;
       select.appendChild(optionDefault);
 
-      // Iterar sobre el array de categorías
       result.data.forEach((cat) => {
         const option = document.createElement("option");
         option.value = cat.cat_id;
@@ -105,8 +99,6 @@ async function cargarCategoriasSelect(selectId, selectedValue = null) {
       timer: 3500,
       timerProgressBar: true,
     });
-    // console.error("Error cargando categorías:", error);
-    // Mostrar mensaje de error en el select
     const select = document.getElementById(selectId);
     if (select) {
       select.innerHTML =
@@ -121,7 +113,6 @@ document
     cargarCategoriasSelect("addCategory_id");
   });
 
-// 📌 CREAR PRODUCTO
 document
   .getElementById("formAgregarProducto")
   .addEventListener("submit", async (e) => {
@@ -196,11 +187,9 @@ document
         text: "No se pudo conectar al servidor",
         icon: "error"
     });
-      // console.error("Error creando producto:", error);
     }
   });
 
-// 📌 ABRIR MODAL EDITAR
 async function abrirModalEditar(id) {
   try {
     const response = await fetch(`${API_BASE}/product/get_product/${id}`);
@@ -210,7 +199,6 @@ async function abrirModalEditar(id) {
       throw new Error("Producto no encontrado");
     }
 
-    // Llenar inputs del modal editar
     document.getElementById("editProductoId").value = producto.product_id;
     document.getElementById("editProductoIdVisible").value =
       producto.product_id;
@@ -232,13 +220,11 @@ async function abrirModalEditar(id) {
   }
 }
 
-// 📌 EDITAR PRODUCTO
 document
   .getElementById("formEditarProducto")
   .addEventListener("submit", async function (e) {
     e.preventDefault();
 
-    // 🔎 1. Obtener valores y validar antes de enviar
     const id = document.getElementById("editProductoId").value;
     const name = document.getElementById("editName").value.trim();
     const description = document.getElementById("editDescription").value.trim();
@@ -312,7 +298,6 @@ document
     }
   });
 
-// 📌 ELIMINAR PRODUCTO
 async function eliminarProducto(id) {
   Swal.fire({
     title: "¿Estás seguro?",

@@ -1,5 +1,3 @@
-// 📄 /views/assets/js/login.js
-
 document.addEventListener("DOMContentLoaded", () => {
     const registerForm = document.getElementById("formRegistro");
 

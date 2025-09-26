@@ -2,9 +2,7 @@ const API_BASE = "http://localhost:8000";
 
 document.addEventListener("DOMContentLoaded", cargarCarritos);
 
-// ---------------------------------------------------
-//  Cargar lista de carritos
-// ---------------------------------------------------
+
 async function cargarCarritos() {
   try {
     const r = await fetch(`${API_BASE}/carro/view/all`);
@@ -58,20 +56,18 @@ function estadoBadge1(estado) {
 
   return `<span class="badge bg-${item.color}">${item.text}</span>`;
 }
-// ---------------------------------------------------
-//  Badge de estado
-// ---------------------------------------------------
+
 function estadoBadge(estado) {
-  // Forzar a número por si llega como string
+  
   estado = Number(estado);
 
   const map = {
    
-    1: { text: "Pagado",     color: "primary"   }, // azul
-    2: { text: "En Proceso", color: "warning"   }, // amarillo
-    3: { text: "Enviado",    color: "info"      }, // celeste
-    4: { text: "Entregado",  color: "success"   }, // verde
-    5: { text: "Cancelado",  color: "danger"    }  // rojo
+    1: { text: "Pagado",     color: "primary"   }, 
+    2: { text: "En Proceso", color: "warning"   }, 
+    3: { text: "Enviado",    color: "info"      },
+    4: { text: "Entregado",  color: "success"   },
+    5: { text: "Cancelado",  color: "danger"    }  
   };
 
   const item = map[estado] || { text: "?", color: "dark" };
@@ -79,9 +75,7 @@ function estadoBadge(estado) {
   return `<span class="badge bg-${item.color}">${item.text}</span>`;
 }
 
-// ---------------------------------------------------
-//  Ver detalle de un carrito
-// ---------------------------------------------------
+
 async function verDetalleCarrito(id) {
   try {
     const r = await fetch(`${API_BASE}/carro/admin/${id}`);
@@ -106,7 +100,7 @@ async function verDetalleCarrito(id) {
 
     await cargarHistorialEstados(id);
 
-    // Guardar ID en los botones de acción
+    
     document.getElementById("btnNext").dataset.id = id;
     document.getElementById("btnCancel").dataset.id = id;
 
@@ -117,9 +111,6 @@ async function verDetalleCarrito(id) {
   }
 }
 
-// ---------------------------------------------------
-//  Cargar historial de estados
-// ---------------------------------------------------
 async function cargarHistorialEstados(id) {
   const ul = document.getElementById("historialEstados");
   ul.innerHTML =
@@ -147,9 +138,7 @@ async function cargarHistorialEstados(id) {
   }
 }
 
-// ---------------------------------------------------
-//  Avanzar al siguiente estado
-// ---------------------------------------------------
+
 async function siguienteEstado(carId) {
   try {
     const resp = await fetch(`${API_BASE}/carro/${carId}/next`, { method: "PUT" });
@@ -168,9 +157,7 @@ async function siguienteEstado(carId) {
   }
 }
 
-// ---------------------------------------------------
-//  Cancelar carrito
-// ---------------------------------------------------
+
 async function cancelarPedido(carId) {
  
 
@@ -191,9 +178,7 @@ async function cancelarPedido(carId) {
   }
 }
 
-// ---------------------------------------------------
-//  Listeners de botones del modal
-// ---------------------------------------------------
+
 document.getElementById("btnNext").addEventListener("click", e => {
   const id = e.currentTarget.dataset.id;
   if (id) siguienteEstado(id);

@@ -11,12 +11,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   if (!grid || !template) return;
 
-  // 👉 Mostrar skeletons iniciales
   mostrarSkeletons(grid);
 
-  // 👉 Controlador para timeout
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 8000); // ⏱️ 8 segundos
+  const timeoutId = setTimeout(() => controller.abort(), 8000);
 
   try {
     const response = await fetch(`${API_BASE}/product/view/data`, {
@@ -25,10 +23,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       signal: controller.signal,
     });
 
-    clearTimeout(timeoutId); // cancelar timeout si respondió
+    clearTimeout(timeoutId); 
     const result = await response.json();
 
-    // Limpiar skeletons antes de mostrar productos reales
     grid.innerHTML = "";
 
     if (
@@ -52,7 +49,6 @@ document.addEventListener("DOMContentLoaded", async () => {
           ".cat"
         ).textContent = `Categoría: ${producto.categoria}`;
 
-        // 👉 Botón "Agregar al carrito"
         clone
           .querySelector(".add-to-cart-btn")
           .addEventListener("click", async () => {
@@ -102,10 +98,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       grid.innerHTML = `<p class="text-center">No hay productos disponibles.</p>`;
     }
   } catch (error) {
-    clearTimeout(timeoutId); // evitar fugas de memoria
-
-    // console.error("Error al cargar productos:", error);
-    // Mensaje de error con SweetAlert
+    clearTimeout(timeoutId); 
     Swal.fire({
       title: "🚨 Error de conexión",
       text: "No se pudo establecer conexión. Intenta más tarde.",
@@ -122,7 +115,6 @@ document.getElementById("logoutBtn").addEventListener("click", () => {
   window.location.href = "/views/login/login.html";
 });
 
-// ===== Skeleton Loader =====
 function mostrarSkeletons(grid) {
   grid.innerHTML = `
       ${Array(12)

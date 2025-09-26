@@ -1,4 +1,4 @@
-// 📄 /views/assets/js/login.js
+const API_BASE = "http://localhost:8000";
 
 document.addEventListener("DOMContentLoaded", () => {
   const loginForm = document.getElementById("loginForm");
@@ -14,10 +14,10 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     try {
-      const response = await fetch("http://localhost:8000/login/sign_in", {
-        method: "POST",
+      const response = await fetch('${API_BASE}/login/sign_in', {
+        method: "POST",  
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify(data), 
       });
 
       const result = await response.json();
@@ -32,7 +32,7 @@ document.addEventListener("DOMContentLoaded", () => {
           timer: 2000,
           timerProgressBar: true,
         }).then(() => {
-          // Redirigir según tipo de usuario
+
 
           if (result.user_type === 1) {
             window.location.href = "/views/admin/admin_usuarios.html";
@@ -51,7 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       }
     } catch (error) {
-      // console.error("Error en la conexión:", error);
+  
       Swal.fire({
         title: "🚨 Error de conexión",
         text: "No se pudo establecer conexión. Intenta más tarde.",

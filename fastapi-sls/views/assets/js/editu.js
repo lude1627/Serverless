@@ -27,7 +27,6 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-// 📌 Cargar datos de usuario
 async function cargarDatosUsuario(cc) {
   try {
     const resp = await fetch(`${API_BASE}/user/view/${cc}`, {
@@ -48,10 +47,10 @@ async function cargarDatosUsuario(cc) {
       throw new Error("Usuario no encontrado en la base de datos");
     }
   } catch (error) {
-    // console.error("Error obteniendo usuario:", error);
+
 
     if (error.name === "TypeError") {
-      // Esto ocurre cuando no hay conexión con el servidor
+
       Swal.fire({
         title: "🚨 Error de conexión",
         text: "No se pudo establecer conexión. Intenta más tarde.",
@@ -71,7 +70,7 @@ async function cargarDatosUsuario(cc) {
   }
 }
 
-// 📌 Actualizar datos de usuario
+
 async function actualizarUsuario() {
   const usuarioActualizado = {
     user_cc: Number(userCcInput.value.trim()),
@@ -108,7 +107,7 @@ async function actualizarUsuario() {
       });
     }
   } catch (error) {
-    // console.error("Error actualizando:", error);
+   
 
     if (error.name === "TypeError") {
       Swal.fire({

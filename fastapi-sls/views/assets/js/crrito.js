@@ -1,4 +1,3 @@
-// JS: Mostrar lista de pedidos y modal de detalle SOLO LECTURA
 document.addEventListener("DOMContentLoaded", async () => {
     const userCc = sessionStorage.getItem("user_cc");
     if (!userCc) {
@@ -22,7 +21,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             return;
         }
 
-        // Generar filas con botón "Ver Detalle"
+       
         const filas = data.data.map(c => {
             const estadoActivo = c.estado === "1";
             const estadoTexto  = estadoActivo ? "Abierto" : "Cerrado";
@@ -71,16 +70,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 });
 function estadoBadge(estado) {
-  // Forzar a número por si llega como string
+  
   estado = Number(estado);
 
   const map = {
    
-    1: { text: "Pagado",     color: "primary"   }, // azul
-    2: { text: "En Proceso", color: "warning"   }, // amarillo
-    3: { text: "Enviado",    color: "info"      }, // celeste
-    4: { text: "Entregado",  color: "success"   }, // verde
-    5: { text: "Cancelado",  color: "danger"    }  // rojo
+    1: { text: "Pagado",     color: "primary"   }, 
+    2: { text: "En Proceso", color: "warning"   }, 
+    3: { text: "Enviado",    color: "info"      }, 
+    4: { text: "Entregado",  color: "success"   }, 
+    5: { text: "Cancelado",  color: "danger"    }  
   };
 
   const item = map[estado] || { text: "?", color: "dark" };
@@ -89,12 +88,11 @@ function estadoBadge(estado) {
 }
 
 
-// ---- Función para abrir el modal y mostrar datos en solo lectura ----
 async function verDetalleSoloLectura(carId) {
     const API_BASE = "http://localhost:8000";
 
     try {
-        // Obtener detalle del carrito
+     
         const r = await fetch(`${API_BASE}/carro/admin/${carId}`);
         const d = await r.json();
         if (!d.success) {
@@ -102,7 +100,7 @@ async function verDetalleSoloLectura(carId) {
             return;
         }
 
-        // Llenar campos del modal
+        
         document.getElementById("detalleCarritoID").textContent = d.carrito.car_id;
         document.getElementById("detalleUsuario").textContent   = d.usuario;
         document.getElementById("detalleFecha").textContent     = d.carrito.fecha_creacion;
@@ -122,7 +120,7 @@ async function verDetalleSoloLectura(carId) {
         document.getElementById("detalleTotal").textContent =
             `$${d.total_pagar}`;
 
-        // Historial de estados
+    
         const ul = document.getElementById("historialEstados");
         ul.innerHTML = "<li class='list-group-item text-center text-muted'>Cargando...</li>";
 
@@ -140,7 +138,7 @@ async function verDetalleSoloLectura(carId) {
             ul.innerHTML = "<li class='list-group-item text-center text-muted'>Sin historial</li>";
         }
 
-        // Mostrar modal
+       
         const modalEl = document.getElementById("modalDetalleCarrito");
         const modal   = new bootstrap.Modal(modalEl, {backdrop: false});
         modal.show();

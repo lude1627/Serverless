@@ -1,10 +1,8 @@
-modalUsuario; // aquí guardaremos todos los usuarios
+modalUsuario; 
 let usuariosGlobal = [];
 
-// API_BASE esté definido
 const API_BASE = "http://localhost:8000";
 
-// Cargar opciones de selección
 document.addEventListener("DOMContentLoaded", function () {
   const addModal = document.getElementById("modalUsuario");
   if (addModal) {
@@ -14,12 +12,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
 async function cargarSelectsEditarUsuario() {
   try {
-    // Ejemplo: cargar tipo de usuario
     const responseTipos = await fetch("http://localhost:8000/user-types");
     const tipos = await responseTipos.json();
 
     const selectTipo = document.getElementById("editTipoUsuario");
-    selectTipo.innerHTML = ""; // limpiar opciones
+    selectTipo.innerHTML = ""; 
 
     tipos.data.forEach(tipo => {
       const option = document.createElement("option");
@@ -27,8 +24,6 @@ async function cargarSelectsEditarUsuario() {
       option.textContent = tipo.nombre;
       selectTipo.appendChild(option);
     });
-
-    // Ejemplo: cargar estados
     const estados = [
       { value: 1, text: "Activo" },
       { value: 0, text: "Inactivo" }
@@ -48,9 +43,6 @@ async function cargarSelectsEditarUsuario() {
     console.error("Error cargando selects:", error);
   }
 }
-
-
-// ✅ Cargar usuarios (única función)
 async function cargarUsuarios() {
   try {
     const response = await fetch(`${API_BASE}/user/view/all`);
@@ -77,7 +69,6 @@ async function cargarUsuarios() {
   }
 }
 
-// ✅ Renderizar usuarios
 function renderUsuarios(lista) {
   const tbody = document.querySelector("#tablaUsuarios tbody");
   if (!tbody) {
@@ -129,7 +120,6 @@ function renderUsuarios(lista) {
   });
 }
 
-// ✅ Filtro por rol
 document.getElementById("filtroRol").addEventListener("change", (e) => {
   const filtro = e.target.value;
   let filtrados = usuariosGlobal;
@@ -144,10 +134,7 @@ document.getElementById("filtroRol").addEventListener("change", (e) => {
   renderUsuarios(filtrados);
 });
 
-// ✅ Cargar usuarios al iniciar
 document.addEventListener("DOMContentLoaded", cargarUsuarios);
-
-// Registrar usuario panel admin
 document
   .getElementById("formAgregarUsuario")
   .addEventListener("submit", async (e) => {
@@ -161,8 +148,6 @@ document
       user_type: parseInt(document.getElementById("adduser_type").value),
       user_status: parseInt(document.getElementById("adduser_status").value),
     };
-
-    // Validaciones
     if (isNaN(data.user_cc) || data.user_cc <= 0) {
       Swal.fire(
         "⚠️ Error",
@@ -204,7 +189,7 @@ document
       });
 
       const result = await response.json();
-      console.log(result); // Para depuración
+      console.log(result); 
 
       if (result.success) {
         Swal.fire({
@@ -215,17 +200,11 @@ document
           timerProgressBar: true,
           showConfirmButton: false,
         });
-
-        // ✅ Limpiar el formulario
         document.getElementById("formAgregarUsuario").reset();
-
-        // Cierra modal de forma segura
         const modal = bootstrap.Modal.getInstance(
           document.getElementById("modalUsuario")
         );
         if (modal) modal.hide();
-
-        // Recarga usuarios
         cargarUsuarios();
       } else {
         Swal.fire(
@@ -234,8 +213,6 @@ document
           "error"
         );
       }
-
-      // Cierra modal de forma segura
       const modal = bootstrap.Modal.getInstance(
         document.getElementById("modalUsuario")
       );
@@ -249,8 +226,6 @@ document
       );
     }
   });
-
-// Modal editar
 async function abrirModalEditar(user_id) {
   try {
     const response = await fetch(`${API_BASE}/user/view/admin/${user_id}`);
@@ -293,9 +268,6 @@ async function abrirModalEditar(user_id) {
     Swal.fire("Error", "No se pudo cargar el usuario", "error");
   }
 }
-
-
-// formulario de usuario (editar)
 document
   .getElementById("formEditarUsuario")
   .addEventListener("submit", async function (e) {
@@ -375,7 +347,6 @@ document
         });
       }
 
-      // Cierra modal de forma segura
       const modal = bootstrap.Modal.getInstance(
         document.getElementById("modalEditarUsuario")
       );
@@ -390,7 +361,6 @@ document
     }
   });
 
-// Cargar opciones de selección para agregar
 async function cargarSelectsAgregarUsuario() {
   try {
     const userTypeSelect = document.getElementById("adduser_type");
@@ -415,7 +385,6 @@ async function cargarSelectsAgregarUsuario() {
   }
 }
 
-// 📌 ELIMINAR USUARIO
 async function eliminarUsuario(user_cc) {
   const confirmacion = await Swal.fire({
     title: "¿Estás seguro?",

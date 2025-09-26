@@ -19,32 +19,30 @@ class CarritoClass:
                 if not resultado_usuario["success"]:
                     return resultado_usuario
                 car_id = None
-                
-                # validar carrito
+        
                 resultado_carrito = verificar_carrito_activo(carrito.user_cc)
                 if not resultado_carrito["success"]:
                     return resultado_carrito
                 
                 car_id = resultado_carrito["car_id"]
                 
-                # validar producto
+              
                 resultado_producto = verificar_producto_existe(carrito.product_id)
                 if not resultado_producto["success"]:
                     return resultado_producto
                 
           
-                # validar cantidad
+        
                 resultado_cantidad = verificar_cantidad(carrito.product_id, carrito.car_cantidad)
                 if not resultado_cantidad["success"]:
                     return resultado_cantidad
                 
                 
-                # obtener precio del producto
+        
                 precio_unitario = resultado_producto["producto"]["product_price"]
                 
                 
-         
-                # insertar producto directamente aquí (antes estaba en el service)
+      
                 query = """
                     INSERT INTO carrito_detalle (car_id, product_id, detalle_cantidad, precio_unitario)
                     VALUES (%s, %s, %s, %s)
