@@ -108,7 +108,7 @@ async function verDetalleCarrito(id) {
       .join("");
     document.getElementById(
       "detalleTotal"
-    ).textContent = `$${d.total_pagar.toLocaleString()}`;
+    ).textContent = `${d.total_pagar.toLocaleString()}`;
 
     await cargarHistorialEstados(id);
 
