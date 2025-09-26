@@ -113,12 +113,12 @@ async function verDetalleSoloLectura(carId) {
             <tr>
                 <td>${p.nombre_producto}</td>
                 <td>${p.cantidad}</td>
-                <td>$${p.precio_unitario}</td>
-                <td>$${p.subtotal}</td>
+                <td>${p.precio_unitario}</td>
+                <td>${p.subtotal}</td>
             </tr>`).join("");
 
         document.getElementById("detalleTotal").textContent =
-            `$${d.total_pagar}`;
+            `${d.total_pagar}`;
 
     
         const ul = document.getElementById("historialEstados");
