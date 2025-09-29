@@ -11,9 +11,7 @@ class Updatecantidad(BaseModel):
     
 class EstadoUpdate(BaseModel):
     car_id: int
-    estado: int 
-    comentario: str | None = None
-    actualizado_por: str
+    
     
 
 class EliminarProducto(BaseModel):

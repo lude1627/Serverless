@@ -89,7 +89,7 @@ function estadoBadge(estado) {
 
 
 async function verDetalleSoloLectura(carId) {
-    const API_BASE = "http://localhost:8000";
+    
 
     try {
      

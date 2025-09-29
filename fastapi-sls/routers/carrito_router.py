@@ -6,7 +6,6 @@ from services.carrito_service import (
     obtener_carrito_usuario, 
     finalizar_compra, 
     obtener_todos_carritos,
-    agregar_estado_carrito,
     obtener_historial_carrito,
     obtener_carritos_user,
     obtener_carrito_user_admin,
@@ -75,14 +74,8 @@ def obtener_carrito(car_id: int):
     return obtener_carrito_user_admin(car_id)
 
 
-# Agregar estado a un carrito (admin)
-@carrito_router.put("/{car_id}/estado")
-def agregar_estado(car_id: int, data: EstadoUpdate):
-    return agregar_estado_carrito(car_id, data)
-
-
 # Obtener historial de estados de un carrito (admin)
-@carrito_router.get("/{car_id}/historial")
+@carrito_router.get("/{car_id}/historial") 
 def historial_carrito(car_id: int):
     return obtener_historial_carrito(car_id)
 

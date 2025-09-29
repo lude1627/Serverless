@@ -105,9 +105,6 @@ functions:
           path: /carro/actualizar/{detalle_id}/{car_id}    #actualizar cantidad de un producto en el carrito (usuario)
           method: put
       - httpApi:
-          path: /carro/{car_id}/estado                     #agregar estado a un carrito (admin)
-          method: put
-      - httpApi:
           path: /carro/view/all                            #listar todos los carritos (admin)
           method: get
       - httpApi:

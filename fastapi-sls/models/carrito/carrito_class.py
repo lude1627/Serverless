@@ -24,6 +24,8 @@ class CarritoClass:
                 if not resultado_carrito["success"]:
                     return resultado_carrito
                 
+                
+                
                 car_id = resultado_carrito["car_id"]
                 
               
@@ -44,7 +46,7 @@ class CarritoClass:
                 
       
                 query = """
-                    INSERT INTO carrito_detalle (car_id, product_id, detalle_cantidad, precio_unitario)
+                    INSERT INTO carrito_detalle (car_id, product_id,cd_cant , cd_unit_price)
                     VALUES (%s, %s, %s, %s)
                 """
                 params = (car_id, carrito.product_id, carrito.car_cantidad, precio_unitario)
@@ -91,8 +93,8 @@ class CarritoClass:
         def actualizar_producto(self, detalle_id: int,car_id:int,up:Updatecantidad):
             query = """
                 UPDATE carrito_detalle
-                SET detalle_cantidad = %s
-                WHERE detalle_id = %s and car_id = %s
+                SET cd_cant = %s
+                WHERE cd_id = %s and car_id = %s
             """
             try:
                 rows = execute_query(query, (up.detalle_cantidad,detalle_id,car_id ), commit=True)
@@ -117,17 +119,17 @@ class CarritoClass:
         def ver_detalles_por_carrito(self, car_id: int):
             query = """
                 SELECT 
-                    d.detalle_id,
+                    d.cd_id,
                     d.car_id,
                     d.product_id,
-                    d.detalle_cantidad,
-                    d.precio_unitario,
+                    d.cd_cant,
+                    d.cd_unit_price,
                     p.product_name AS nombre_producto
                 FROM carrito_detalle d
                 JOIN productos p ON p.product_id = d.product_id
-                JOIN carrito c   ON c.car_id = d.car_id      -- unión con carrito
+                JOIN carrito c   ON c.car_id = d.car_id     
                 WHERE d.car_id = %s
-                AND c.estado = '1'                        -- solo carritos activos
+                AND c.estado = '1'                       
             """
             try:
                 filas = execute_query(query, (car_id,), fetchall=True)
@@ -137,11 +139,11 @@ class CarritoClass:
                 detalles = []
                 for r in filas:
                     detalles.append({
-                        "detalle_id": r[0],
+                        "cd_id": r[0],
                         "car_id": r[1],
                         "product_id": r[2],
-                        "detalle_cantidad": r[3],
-                        "precio_unitario": float(r[4]),
+                        "cd_cant": r[3],
+                        "cd_unit_price": float(r[4]),
                         "nombre_producto": r[5]
                     })
 
