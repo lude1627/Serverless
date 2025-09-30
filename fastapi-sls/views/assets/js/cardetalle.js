@@ -58,21 +58,21 @@ document.addEventListener("DOMContentLoaded", async () => {
         const clone = template.cloneNode(true);
         clone.classList.remove("template", "d-none");
 
-        const precioNum = parseFloat(item.precio_unitario);
-        const subtotalItem = item.detalle_cantidad * precioNum;
+        const precioNum = parseFloat(item.cd_unit_price);
+        const subtotalItem = item.cd_cant * precioNum;
 
         clone.querySelector(".nombre").textContent =
           item.nombre_producto || `Producto ${item.product_id}`;
         clone.querySelector(
-          ".precio-unitario"
+          ".cd_unit_price"
         ).textContent = `Precio: ${formatoCOP.format(precioNum)}`;
-        clone.querySelector(".cantidad").value = item.detalle_cantidad;
+        clone.querySelector(".cantidad").value = item.cd_cant;
         clone.querySelector(".cantidad").dataset.price = precioNum;
-        clone.querySelector(".cantidad").dataset.detalleId = item.detalle_id;
+        clone.querySelector(".cantidad").dataset.detalleId = item.cd_id;
         clone.querySelector(".cantidad").dataset.carId = item.car_id;
-        clone.querySelector(".guardar").dataset.detalleId = item.detalle_id;
+        clone.querySelector(".guardar").dataset.detalleId = item.cd_id;
         clone.querySelector(".guardar").dataset.carId = item.car_id;
-        clone.querySelector(".eliminar").dataset.id = item.detalle_id;
+        clone.querySelector(".eliminar").dataset.id = item.cd_id;
         clone.querySelector(".eliminar").dataset.carid = item.car_id;
 
         clone.querySelector(".subtotal").textContent =

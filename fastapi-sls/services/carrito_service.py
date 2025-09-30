@@ -33,7 +33,7 @@ def verificar_carrito_activo(user_cc: int) -> Dict[str, Any]:
             return {
                 "success": True,
                 "message": "✅ Carrito activo encontrado",
-                "car_id": carrito[0]
+                "car_id": carrito[0]  # <-- aquí ya es int
             }
 
         # 3️⃣ Obtener fase inicial
@@ -53,38 +53,44 @@ def verificar_carrito_activo(user_cc: int) -> Dict[str, Any]:
             VALUES (%s, %s, NOW(), '1')
             """,
             (user_cc, cf_fase_ini),
-            commit=True,          
+            commit=True,
             return_id=True
         )
-        query="select car_id from carrito where user_cc = %s "
-        car_id = execute_query(query, (user_cc,), fetchone=True)
 
-        # 5️⃣ Insertar en historial con el ID ya confirmado
+        # Recuperar último carrito creado para ese usuario
+        carrito_row = execute_query(
+            "SELECT car_id FROM carrito WHERE user_cc = %s ORDER BY car_id DESC LIMIT 1",
+            (user_cc,),
+            fetchone=True
+        )
+        if not carrito_row:
+            return {"success": False, "message": "❌ No se pudo obtener el carrito recién creado"}
+
+        car_id = carrito_row[0]
+
+        # 5️⃣ Insertar en historial
         execute_query(
             """
             INSERT INTO carrito_historial
                 (car_id, ch_update_date, ch_updated_by, cf_name, cf_comment)
             VALUES (%s, NOW(), %s, %s, %s)
             """,
-            (car_id, "system", cf_name_ini, cf_comment_ini,),
-            commit=True)
-        
-        
-        
+            (car_id, "ADMIN", cf_name_ini, cf_comment_ini),
+            commit=True
+        )
 
         return {
             "success": True,
             "message": f"🛒 Carrito creado para el usuario {user_cc}",
-            "car_id": car_id
+            "car_id": car_id  # <-- ya como int
         }
-    
-     
 
     except Exception as e:
         return {
             "success": False,
             "message": f"❌ Error al verificar/crear carrito: {e}"
         }
+
 
 
 
@@ -324,17 +330,14 @@ def obtener_historial_carrito(car_id: int):
     try:
         query = """
            SELECT
-                       
                         ch.car_id,
-                         f.cf_name AS estado,
-                        f.cf_comment AS comentario, 
+                        ch.cf_name AS estado,
+                        ch.cf_comment AS comentario, 
                         ch.ch_update_date AS fecha,
-                        ch.ch_updated_by AS actualizado_por ,
+                        ch.ch_updated_by AS actualizado_por
                         FROM carrito_historial AS ch
                         JOIN carrito AS c
                             ON ch.car_id = c.car_id
-                        JOIN cf AS f
-                            ON c.cf_id = f.cf_id;
                             where c.car_id = %s
                             order by ch.ch_update_date ASC
 
@@ -350,10 +353,10 @@ def obtener_historial_carrito(car_id: int):
         lista_historial = []
         for row in historial:
             lista_historial.append({
-                "estado": row[0],
-                "comentario": row[1],
-                "fecha": str(row[2]),           # ✅ ahora es la fecha correcta
-                "actualizado_por": row[3]       # ✅ ahora es el usuario correcto
+                "estado": row[1],
+                "comentario": row[2],
+                "fecha": str(row[3]),           
+                "actualizado_por": row[4]     
             })
 
         return {
@@ -413,10 +416,10 @@ def finalizar_compra(car_id: int):
     if carrito[1] == 0:
         return {"success": False, "message": "⚠️ Este carrito ya fue cerrado"}
     
-#probar ahora
+
     query_2 = """
         UPDATE carrito
-        SET car_state ='0' and cf_fase = '1'
+        SET car_state ='0', cf_fase = '1'
         WHERE car_id = %s
     """
     execute_query(query_2, (car_id,),commit=True)
@@ -425,7 +428,7 @@ def finalizar_compra(car_id: int):
     fase = execute_query(query_fase, fetchone=True) 
     
     query_update = """
-         INSERT INTO carrito_historial (car_id, cf_name, cf_comment, ch_update_date, ch_update_by)
+         INSERT INTO carrito_historial (car_id, cf_name, cf_comment, ch_update_date, ch_updated_by)
                 VALUES (%s, %s, %s, NOW(), "ADMIN")
     """
     execute_query(query_update, (car_id, fase[0], fase[1]), commit=True)
@@ -435,9 +438,6 @@ def finalizar_compra(car_id: int):
     return {"success": True, "message": f"✅ Carrito {car_id} finalizado correctamente"}
 
 
-def avanzar_estado_carrito(car_id: int, usuario: str = "ADMIN") -> Dict[str, Any]:
-   from datetime import datetime
-from typing import Dict, Any
 
 def avanzar_estado_carrito(car_id: int, usuario: str = "ADMIN") -> Dict[str, Any]:
     try:

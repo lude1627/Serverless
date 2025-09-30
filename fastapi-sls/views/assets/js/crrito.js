@@ -20,18 +20,17 @@ document.addEventListener("DOMContentLoaded", async () => {
                 </li>`;
             return;
         }
-
+    
        
         const filas = data.data.map(c => {
-            const estadoActivo = c.estado === "1";
-            const estadoTexto  = estadoActivo ? "Abierto" : "Cerrado";
-            const estadoClase  = estadoActivo ? "bg-success" : "bg-danger";
+            
+         
 
             return `
                 <tr>
                     <td>${c.user_name}</td>
-                    <td>${c.fecha_creacion}</td>
-                    <td><span class="badge ${estadoClase} px-3 py-2">${estadoTexto}</span></td>
+                    <td>${c.car_creation_date}</td>
+                    <td>${estadoBadge1(c.car_state)}</td>
                     <td>${c.total}</td>
                     <td>
                       <button class="btn btn-outline-primary btn-sm"
@@ -69,24 +68,19 @@ document.addEventListener("DOMContentLoaded", async () => {
             </li>`;
     }
 });
-function estadoBadge(estado) {
-  
-  estado = Number(estado);
 
-  const map = {
-   
-    1: { text: "Pagado",     color: "primary"   }, 
-    2: { text: "En Proceso", color: "warning"   }, 
-    3: { text: "Enviado",    color: "info"      }, 
-    4: { text: "Entregado",  color: "success"   }, 
-    5: { text: "Cancelado",  color: "danger"    }  
-  };
 
-  const item = map[estado] || { text: "?", color: "dark" };
+function estadoBadge1(estado) {
+    estado = Number(estado);
 
-  return `<span class="badge bg-${item.color}">${item.text}</span>`;
-}
+    const map = {
+    0: { text: "Cerrado", color: "danger" },
+    1: { text: "Abierto", color: "success" },
+    };
+    const item = map[estado] || { text: "?", color: "dark" };
 
+return `<span class="badge bg-${item.color}">${item.text}</span>`;
+}        
 
 async function verDetalleSoloLectura(carId) {
     
@@ -103,11 +97,10 @@ async function verDetalleSoloLectura(carId) {
         
         document.getElementById("detalleCarritoID").textContent = d.carrito.car_id;
         document.getElementById("detalleUsuario").textContent   = d.usuario;
-        document.getElementById("detalleFecha").textContent     = d.carrito.fecha_creacion;
-        document.getElementById("detalleEstado").innerHTML      = d.carrito.estado == 1
-            ? '<span class="badge bg-primary">Activo</span>'
-            : '<span class="badge bg-danger">Inactivo</span>';
-
+        document.getElementById("detalleFecha").textContent     = d.carrito.car_creation_date;
+        document.getElementById("detalleEstado").innerHTML = estadoBadge1(
+      d.carrito.car_state
+    );
         const tbody = document.getElementById("detalleProductos");
         tbody.innerHTML = d.productos.map(p => `
             <tr>
@@ -131,7 +124,7 @@ async function verDetalleSoloLectura(carId) {
             ul.innerHTML = hist.data.map(e => `
                 <li class="list-group-item">
                     <strong>${e.fecha}</strong> -
-                    <span class="badge">${estadoBadge(e.estado)}</span>
+                    <span class="badge" style="color: black;">${e.estado}</span>
                     <br><small>${e.comentario || "Sin comentario"}</small>
                 </li>`).join("");
         } else {

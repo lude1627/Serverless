@@ -2,7 +2,6 @@ const API_BASE = "http://localhost:8000";
 
 document.addEventListener("DOMContentLoaded", cargarCarritos);
 
-
 async function cargarCarritos() {
   try {
     const r = await fetch(`${API_BASE}/carro/view/all`);
@@ -12,12 +11,12 @@ async function cargarCarritos() {
 
     if (data.success && data.data.length) {
       data.data.forEach((c) => {
-        const badge = estadoBadge1(c.estado);
+        const badge = estadoBadge1(c.car_state);
         const tr = document.createElement("tr");
         tr.innerHTML = `
           <td>${c.car_id}</td>
           <td>${c.user_name}<br><small class="text-muted">${c.user_cc}</small></td>
-          <td>${c.fecha_creacion}</td>
+          <td>${c.car_creation_date}</td>
           <td>${badge}</td>
           <td class="text-end">
             <button class="btn btn-primary btn-sm" onclick="verDetalleCarrito(${c.car_id})">
@@ -53,25 +52,6 @@ function estadoBadge1(estado) {
   return `<span class="badge bg-${item.color}">${item.text}</span>`;
 }
 
-function estadoBadge(estado) {
-  
-  estado = Number(estado);
-
-  const map = {
-   
-    1: { text: "Pagado",     color: "primary"   },
-    2: { text: "En Proceso", color: "warning"   },
-    3: { text: "Enviado",    color: "info"      },
-    4: { text: "Entregado",  color: "success"   },
-    5: { text: "Cancelado",  color: "danger"    }
-  };
-
-  const item = map[estado] || { text: "?", color: "dark" };
-
-  return `<span class="badge bg-${item.color}">${item.text}</span>`;
-}
-
-
 async function verDetalleCarrito(id) {
   try {
     const r = await fetch(`${API_BASE}/carro/admin/${id}`);
@@ -89,9 +69,9 @@ async function verDetalleCarrito(id) {
     document.getElementById("detalleCarritoID").textContent = d.carrito.car_id;
     document.getElementById("detalleUsuario").textContent = d.usuario;
     document.getElementById("detalleFecha").textContent =
-      d.carrito.fecha_creacion;
+      d.carrito.car_creation_date;
     document.getElementById("detalleEstado").innerHTML = estadoBadge1(
-      d.carrito.estado
+      d.carrito.car_state
     );
 
     const tbody = document.getElementById("detalleProductos");
@@ -110,11 +90,14 @@ async function verDetalleCarrito(id) {
       "detalleTotal"
     ).textContent = `${d.total_pagar.toLocaleString()}`;
 
+    // 🔹 Validación de botones dependerá del historial
     await cargarHistorialEstados(id);
 
-    
-    document.getElementById("btnNext").dataset.id = id;
-    document.getElementById("btnCancel").dataset.id = id;
+    const btnNext = document.getElementById("btnNext");
+    const btnCancel = document.getElementById("btnCancel");
+
+    btnNext.dataset.id = id;
+    btnCancel.dataset.id = id;
 
     new bootstrap.Modal(document.getElementById("modalDetalleCarrito")).show();
   } catch (e) {
@@ -130,28 +113,47 @@ async function cargarHistorialEstados(id) {
   try {
     const r = await fetch(`${API_BASE}/carro/${id}/historial`);
     const d = await r.json();
+
+    const btnNext = document.getElementById("btnNext");
+    const btnCancel = document.getElementById("btnCancel");
+
     if (d.success && d.data.length) {
       ul.innerHTML = d.data
         .map(
           (e) => `
           <li class="list-group-item">
             <strong>${e.fecha}</strong> -
-            <span class="badge ">${estadoBadge(e.estado)}</span>
+            <span class="badge" style="color: black;">${e.estado}</span>
             <br><small>${e.comentario || "Sin comentario"}</small>
           </li>`
         )
         .join("");
+
+      // Tomamos el último estado del historial
+      const ultimoEstado = d.data[d.data.length - 1].estado;
+
+      // 🔹 Validación: si el estado <= 0 ocultamos botones
+      if (Number(ultimoEstado) > 0) {
+        btnNext.style.display = "inline-block";
+        btnCancel.style.display = "inline-block";
+      } else {
+        btnNext.style.display = "none";
+        btnCancel.style.display = "none";
+      }
     } else {
       ul.innerHTML =
         "<li class='list-group-item text-center text-muted'>Sin historial</li>";
+
+      // Sin historial → ocultar botones
+      btnNext.style.display = "none";
+      btnCancel.style.display = "none";
     }
-  } catch (e) {
-    console.error(e);
+  } catch (err) {
+    console.error(err);
     ul.innerHTML =
       "<li class='list-group-item text-center text-danger'>Error al cargar</li>";
   }
 }
-
 
 async function siguienteEstado(carId) {
   try {
@@ -187,7 +189,6 @@ async function siguienteEstado(carId) {
   }
 }
 
-
 async function cancelarPedido(carId) {
   try {
     const resp = await fetch(`${API_BASE}/carro/${carId}/cancelar`, {
@@ -211,7 +212,7 @@ async function cancelarPedido(carId) {
 // ---------------------------------------------------
 //  Listeners de botones del modal
 // ---------------------------------------------------
-document.getElementById("btnNext").addEventListener("click", e => {
+document.getElementById("btnNext").addEventListener("click", (e) => {
   const id = e.currentTarget.dataset.id;
   if (id) siguienteEstado(id);
 });

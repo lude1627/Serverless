@@ -129,7 +129,7 @@ class CarritoClass:
                 JOIN productos p ON p.product_id = d.product_id
                 JOIN carrito c   ON c.car_id = d.car_id     
                 WHERE d.car_id = %s
-                AND c.estado = '1'                       
+                AND c.car_state = '1'                       
             """
             try:
                 filas = execute_query(query, (car_id,), fetchall=True)
