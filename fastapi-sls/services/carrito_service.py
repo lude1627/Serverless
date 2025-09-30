@@ -523,8 +523,8 @@ def cancelar_carrito(car_id: int, usuario: str = "admin"):
         if not fila:
             return {"success": False, "message": "Carrito no encontrado"}
 
-        if fila[0] == "Cancelado":
-            return {"success": False, "message": "El carrito ya está cancelado"}
+        if fila[0] == "Cancelado" or fila[0 =="Entregado"]:
+            return {"success": False, "message": "El carrito ya ah sido cancelado o Entregado"}
 
         # 2️⃣ Obtener info de la fase 'Cancelado'
         cancel_info = execute_query(

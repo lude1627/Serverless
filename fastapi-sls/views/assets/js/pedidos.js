@@ -136,10 +136,7 @@ async function cargarHistorialEstados(id) {
       if (Number(ultimoEstado) > 0) {
         btnNext.style.display = "inline-block";
         btnCancel.style.display = "inline-block";
-      } else {
-        btnNext.style.display = "none";
-        btnCancel.style.display = "none";
-      }
+      } 
     } else {
       ul.innerHTML =
         "<li class='list-group-item text-center text-muted'>Sin historial</li>";
