@@ -164,16 +164,13 @@ document
           timer: 1000,
           timerProgressBar: true,
           showConfirmButton: false,
-        }).then(() => {
-          const modal = bootstrap.Modal.getInstance(
-            document.getElementById("modalProducto")
-          );
-          modal.hide();
-
-          document.getElementById("formAgregarProducto").reset();
-
-          location.reload();
         });
+        document.getElementById("formAgregarProducto").reset();
+        const modal = bootstrap.Modal.getInstance(
+          document.getElementById("modalProducto")
+        );
+        if (modal) modal.hide();
+        cargarProductos();
       } else {
         Swal.fire(
           "⚠️ Error",
@@ -181,6 +178,10 @@ document
           "error"
         );
       }
+      const modal = bootstrap.Modal.getInstance(
+        document.getElementById("modalProducto")
+      );
+      if (modal) modal.hide();
     } catch (error) {
       Swal.fire({
         title: "❌ Error",

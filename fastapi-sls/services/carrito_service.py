@@ -331,8 +331,8 @@ def obtener_historial_carrito(car_id: int):
         query = """
            SELECT
                         ch.car_id,
-                        ch.cf_name AS estado,
-                        ch.cf_comment AS comentario, 
+                         f.cf_name AS estado,
+                        f.cf_comment AS comentario, 
                         ch.ch_update_date AS fecha,
                         ch.ch_updated_by AS actualizado_por
                         FROM carrito_historial AS ch
