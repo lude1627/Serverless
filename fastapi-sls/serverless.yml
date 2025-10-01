@@ -132,5 +132,5 @@ functions:
           path: /carro/{car_id}/next                   #avanzar estado del carrito (usuario)
           method: put
       - httpApi:
-          path: /carro/{car_id}/cancelar               #cancelar carrito (usuario)
+          path: /carro/{car_id}/cancelar               #cancelar carrito (usuario) 123
           method: put
