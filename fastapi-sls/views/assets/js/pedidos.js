@@ -12,12 +12,14 @@ async function cargarCarritos() {
     if (data.success && data.data.length) {
       data.data.forEach((c) => {
         const badge = estadoBadge1(c.car_state);
+        const badge1 = fases(c.cf_fase);
         const tr = document.createElement("tr");
         tr.innerHTML = `
           <td>${c.car_id}</td>
           <td>${c.user_name}<br><small class="text-muted">${c.user_cc}</small></td>
           <td>${c.car_creation_date}</td>
           <td>${badge}</td>
+          <td>${badge1}</td>
           <td class="text-end">
             <button class="btn btn-primary btn-sm" onclick="verDetalleCarrito(${c.car_id})">
               <i class="fas fa-eye"></i> Ver Detalle
@@ -52,6 +54,23 @@ function estadoBadge1(estado) {
   return `<span class="badge bg-${item.color}">${item.text}</span>`;
 }
 
+function fases(estado) {
+  estado = Number(estado);
+
+   const map = {
+    0: { text: "Abierto", color: "secondary" },   
+    1: { text: "Pagado", color: "success" },      
+    2: { text: "En Proceso", color: "warning" },  
+    3: { text: "Enviado", color: "info" },        
+    4: { text: "Entregado", color: "primary" },
+    5: { text: "Cancelado", color: "danger" } 
+  };
+
+  const item = map[estado] || { text: "?", color: "dark" };
+
+  return `<span class="badge bg-${item.color}">${item.text}</span>`;
+}
+
 async function verDetalleCarrito(id) {
   try {
     const r = await fetch(`${API_BASE}/carro/admin/${id}`);
@@ -68,11 +87,8 @@ async function verDetalleCarrito(id) {
 
     document.getElementById("detalleCarritoID").textContent = d.carrito.car_id;
     document.getElementById("detalleUsuario").textContent = d.usuario;
-    document.getElementById("detalleFecha").textContent =
-      d.carrito.car_creation_date;
-    document.getElementById("detalleEstado").innerHTML = estadoBadge1(
-      d.carrito.car_state
-    );
+    document.getElementById("detalleFecha").textContent = d.carrito.car_creation_date;
+    document.getElementById("detalleEstado").innerHTML = estadoBadge1(d.carrito.car_state);
 
     const tbody = document.getElementById("detalleProductos");
     tbody.innerHTML = d.productos

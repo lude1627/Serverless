@@ -96,17 +96,28 @@ def verificar_carrito_activo(user_cc: int) -> Dict[str, Any]:
 
 def obtener_todos_carritos():
     query = """
-        SELECT c.car_id, u.user_cc, u.user_name, c.car_creation_date, c.car_state, 
-               SUM(cd.cd_cant * p.product_price) AS total
+        SELECT 
+            c.car_id,
+            c.cf_fase,
+            u.user_cc, 
+            u.user_name, 
+            c.car_creation_date, 
+            c.car_state, 
+            cf.cf_name AS fase, 
+            SUM(cd.cd_cant * p.product_price) AS total
         FROM carrito c
         INNER JOIN usuarios u ON c.user_cc = u.user_cc
         LEFT JOIN carrito_detalle cd ON c.car_id = cd.car_id
         LEFT JOIN productos p ON cd.product_id = p.product_id
-        GROUP BY c.car_id, u.user_cc, u.user_name, c.car_creation_date, c.car_state
+        LEFT JOIN carrito_fase cf ON c.cf_fase = cf.cf_fase
+        GROUP BY 
+            c.car_id, u.user_cc, u.user_name, c.car_creation_date, c.car_state, cf.cf_name
         ORDER BY c.car_id ASC
     """
     try:
+        
         carritos = execute_query(query, fetchall=True)
+        
         if not carritos:
             return {
                 "success": False,
@@ -117,11 +128,13 @@ def obtener_todos_carritos():
         for row in carritos:
             lista_carritos.append({
                 "car_id": row[0],
-                "user_cc": row[1],
-                "user_name": row[2],
-                "car_creation_date": row[3].strftime("%Y-%m-%d"),
-                "car_state": row[4],
-                "total": f"${row[5]:,.0f}".replace(",", ".") if row[5] is not None else "$0"
+                "cf_fase": row[1],
+                "user_cc": row[2],
+                "user_name": row[3],
+                "car_creation_date": row[4].strftime("%Y-%m-%d"),
+                "car_state": row[5],
+                "fase": row[6],
+                "total": f"${row[7]:,.0f}".replace(",", ".") if row[7] is not None else "$0"
             })
 
         return {
@@ -329,17 +342,13 @@ def obtener_carrito_user_admin(car_id: int):
 def obtener_historial_carrito(car_id: int):
     try:
         query = """
-           SELECT
-                        ch.car_id,
-                         f.cf_name AS estado,
-                        f.cf_comment AS comentario, 
-                        ch.ch_update_date AS fecha,
-                        ch.ch_updated_by AS actualizado_por
-                        FROM carrito_historial AS ch
-                        JOIN carrito AS c
-                            ON ch.car_id = c.car_id
-                            where c.car_id = %s
-                            order by ch.ch_update_date ASC
+            SELECT 
+                ch.car_id, ch.cf_name AS estado, ch.cf_comment AS comentario, ch.ch_update_date AS fecha, ch.ch_updated_by AS actualizado_por
+            FROM carrito_historial AS ch
+            JOIN carrito AS c
+            ON ch.car_id = c.car_id
+            WHERE c.car_id = %s
+            order by ch.ch_update_date ASC
 
         """
         historial = execute_query(query, (car_id,), fetchall=True)
